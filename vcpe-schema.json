@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Envio",
+  "type": "object",
+  "required": ["NumEnvio"],
+  "properties": {
+    "NumEnvio": { "type": "string" },
+    "TipoRespuesta": {
+      "type": "integer",
+      "enum": [1, 2, 3],
+      "description": "1=Completa, 2=Media, 3=Reducida"
+    },
+    "EstablecimientosVenta": {
+      "type": "object",
+      "properties": {
+        "EstablecimientoVenta": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/EstablecimientoVenta" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "EstablecimientoVenta": {
+      "type": "object",
+      "required": ["NumIdentificacionEstablec", "Ventas"],
+      "properties": {
+        "NumIdentificacionEstablec": { "type": "string" },
+        "Ventas": {
+          "type": "object",
+          "properties": {
+            "VentasUnidadProductiva": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/VentasUnidadProductiva" }
+            }
+          }
+        }
+      }
+    },
+    "VentasUnidadProductiva": {
+      "type": "object",
+      "properties": {
+        "DatosUnidadProductiva": {
+          "type": "object",
+          "oneOf": [
+            { "$ref": "#/$defs/Buque" },
+            { "$ref": "#/$defs/Granja" },
+            { "$ref": "#/$defs/PersonaFisJur" }
+          ]
+        },
+        "Especies": {
+          "type": "object",
+          "properties": {
+            "Especie": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/Especie" }
+            }
+          }
+        }
+      }
+    },
+    "Buque": {
+      "type": "object",
+      "required": ["MetodoProduccion", "CodigoBuque", "FechaRegresoPuerto"],
+      "properties": {
+        "MetodoProduccion": { "type": "integer", "enum": [1, 4] },
+        "CodigoBuque": { "type": "string", "maxLength": 12 },
+        "PuertoAL5": { "type": "string", "pattern": "^[A-Za-z]{2}[A-Za-z0-9]{3}$" },
+        "Armador": { "type": "string", "maxLength": 100 },
+        "Capitan": { "type": "string", "maxLength": 60 },
+        "FechaRegresoPuerto": { "type": "string", "format": "date-time" },
+        "CodMarea": { "type": "string", "maxLength": 50 }
+      }
+    },
+    "Granja": {
+      "type": "object",
+      "required": ["MetodoProduccion", "CodigoREGA", "FechaProduccion"],
+      "properties": {
+        "MetodoProduccion": { "type": "integer", "enum": [2] },
+        "CodigoREGA": { "type": "string", "maxLength": 14 },
+        "LugarDescarga": { "type": "string", "maxLength": 250 },
+        "FechaProduccion": { "type": "string", "format": "date-time" }
+      }
+    },
+    "PersonaFisJur": {
+      "type": "object",
+      "required": ["MetodoProduccion", "NIFPersona", "FechaDescarga"],
+      "properties": {
+        "MetodoProduccion": { "type": "integer", "enum": [1, 3, 4] },
+        "NIFPersona": { "type": "string", "maxLength": 17 },
+        "LugarDescarga": { "type": "string", "maxLength": 250 },
+        "FechaDescarga": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Especie": {
+      "type": "object",
+      "required": ["NumDocVenta", "EspecieAL3", "FechaVenta", "Lote", "TipoCifNifVendedor", "NIFVendedor", "NombreVendedor", "DireccionVendedor"],
+      "properties": {
+        "NumDocVenta": { "type": "string", "maxLength": 21 },
+        "EspecieAL3": { "type": "string", "pattern": "^[A-Za-z]{3}$" },
+        "FechasCaptura": {
+          "type": "object",
+          "properties": {
+            "FechaCaptura": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "FechaCapturaIni": { "type": "string", "format": "date-time" },
+                  "FechaCapturaFin": { "type": "string", "format": "date-time" }
+                }
+              }
+            }
+          }
+        },
+        "Zona": { "type": "string", "maxLength": 50 },
+        "ZonaGeografica": { "type": "string", "maxLength": 50 },
+        "CCAA": { "type": "integer" },
+        "PaisAL3": { "type": "string", "pattern": "^[A-Za-z]{3}$" },
+        "MasaAgua": { "type": "string", "maxLength": 100 },
+        "ArteAL3": { "type": "string", "maxLength": 3 },
+        "OtroArte": { "type": "string", "maxLength": 100 },
+        "CodEspecieConservacion": { "type": "string", "maxLength": 3 },
+        "CodEspeciePresentacion": { "type": "string", "maxLength": 5 },
+        "PresentacionOTH": { "type": "string", "maxLength": 50 },
+        "IdPresentacionOTH": { "type": "integer" },
+        "CodEspecieFrescura": { "type": "string", "maxLength": 2 },
+        "CodEspecieCalibre": { "type": "string", "maxLength": 15 },
+        "FechaVenta": { "type": "string", "format": "date-time" },
+        "Lote": { "type": "string", "maxLength": 50 },
+        "CodContratoAlim": { "type": "string", "maxLength": 50 },
+        "NumDocTransporte": { "type": "string" },
+        "NumDeclaracionRecog": { "type": "string", "maxLength": 21 },
+        "CertificadoDeOrigen": { "type": "boolean" },
+        "TipoCifNifVendedor": { "type": "integer", "enum": [1, 2, 3, 5] },
+        "NIFVendedor": { "type": "string", "maxLength": 17 },
+        "NombreVendedor": { "type": "string", "maxLength": 100 },
+        "DireccionVendedor": { "type": "string", "maxLength": 100 },
+        "NIFComprador": { "type": "string", "maxLength": 17 },
+        "IdTipoNifCifComprador": { "type": "integer", "enum": [1, 2, 3, 5] },
+        "PaisComprador": { "type": "string", "pattern": "^[A-Za-z]{3}$" },
+        "NombreComprador": { "type": "string", "maxLength": 100 },
+        "DireccionComprador": { "type": "string", "maxLength": 100 },
+        "Precio": { "type": "number" },
+        "CodMoneda": { "type": "string", "pattern": "^[A-Za-z]{3}$", "default": "EUR" },
+        "Cantidad": { "type": "number" },
+        "NumEjemplares": { "type": "integer" },
+        "NumCajas": { "type": "integer" },
+        "EsTallaReglamentaria": { "type": "boolean" },
+        "TipoRetirada": { "type": "integer", "enum": [1, 2, 3, 4, 5, 6] },
+        "CodDestinoRetirado": { "type": "string" },
+        "LugarAlmacenamiento": { "type": "string", "maxLength": 100 },
+        "Observaciones": { "type": "string" },
+        "NumActaInspeccion": { "type": "string", "maxLength": 20 }
+      }
+    }
+  }
+}

@@ -1,0 +1,102 @@
+services:
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: vcpe_redis
+    command: redis-server --appendonly yes # COMENTEM TEMPORALMENT PER FER PROVA INICIAL: redis-server --requirepass ${REDIS_PASSWORD:-changeme_redis} --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - vcpe_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"] # COMENTEM TEMPORALMENT PER FER PROVA INICIAL: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    #security_opt:
+     # - no-new-privileges:true
+    #cap_drop:
+     # - ALL
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vcpe_api
+    command: gunicorn vcpe_api.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 60
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/mediafiles
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - vcpe_network
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vcpe_celery_worker
+    command: celery -A vcpe_api worker --loglevel=info --concurrency=4
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - redis
+     #- db
+    networks:
+      - vcpe_network
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  celery_beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vcpe_celery_beat
+    command: celery -A vcpe_api beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - redis
+     #- db
+    networks:
+      - vcpe_network
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+volumes:
+  postgres_data:
+  redis_data:
+  static_volume:
+  media_volume:
+
+networks:
+  vcpe_network:
+    driver: bridge

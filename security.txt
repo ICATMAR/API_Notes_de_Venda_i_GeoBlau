@@ -1,0 +1,15 @@
+Contact: mailto:security@icatmar.cat
+Contact: https://icatmar.cat/security
+Preferred-Languages: ca, es, en
+Canonical: https://api.icatmar.cat/.well-known/security.txt
+Encryption: https://api.icatmar.cat/pgp-key.txt
+Acknowledgments: https://icatmar.cat/security/hall-of-fame
+Policy: https://icatmar.cat/security/disclosure-policy
+Hiring: https://icatmar.cat/careers
+
+# Política de divulgació responsable de vulnerabilitats
+# Si descobreixes una vulnerabilitat de seguretat, si us plau:
+# 1. NO la facis pública abans de contactar amb nosaltres
+# 2. Envia'ns un correu a security@icatmar.cat amb els detalls
+# 3. Espera la nostra resposta (resposta en menys de 48h)
+# 4. Col·labora amb nosaltres per verificar i solucionar el problema
