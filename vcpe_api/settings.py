@@ -27,6 +27,9 @@ DEBUG = env('DJANGO_DEBUG')
 
 ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS')
 
+# Model d'usuari personalitzat
+AUTH_USER_MODEL = 'authentication.APIUser'
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -99,7 +102,16 @@ DATABASES = {
         'CONN_MAX_AGE': 600,
         'OPTIONS': {
             'sslmode': 'require' if not DEBUG else 'prefer',
+            'options': '-c search_path=api_dev'
         }
+    }
+}
+
+# Cache configuration (usar Redis en comptes de LocMem)
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': env('REDIS_URL', default='redis://redis:6379/0'),
     }
 }
 
@@ -216,7 +228,7 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 
-# Logging configuration (auditoria completa)
+# Logging configuration (només consola, sense fitxers)
 LOG_LEVEL = env('LOG_LEVEL', default='INFO')
 LOGGING = {
     'version': 1,
@@ -226,60 +238,32 @@ LOGGING = {
             'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
             'style': '{',
         },
-        'json': {
-            '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
-            'format': '%(asctime)s %(levelname)s %(name)s %(message)s'
-        },
-    },
-    'filters': {
-        'request_id': {
-            '()': 'log_request_id.filters.RequestIDFilter'
-        },
     },
     'handlers': {
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
-            'filters': ['request_id'],
-        },
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': env('LOG_FILE', default='/var/log/vcpe_api/api.log'),
-            'maxBytes': 1024 * 1024 * 100,  # 100 MB
-            'backupCount': 10,
-            'formatter': 'json',
-            'filters': ['request_id'],
-        },
-        'security_file': {
-            'level': 'WARNING',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': env('LOG_FILE', default='/var/log/vcpe_api/security.log'),
-            'maxBytes': 1024 * 1024 * 50,  # 50 MB
-            'backupCount': 20,
-            'formatter': 'json',
-            'filters': ['request_id'],
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console'],
             'level': LOG_LEVEL,
             'propagate': False,
         },
         'django.security': {
-            'handlers': ['security_file'],
+            'handlers': ['console'],
             'level': 'WARNING',
             'propagate': False,
         },
         'sales_notes': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': False,
         },
         'audit': {
-            'handlers': ['file', 'security_file'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': False,
         },
