@@ -27,9 +27,6 @@ DEBUG = env('DJANGO_DEBUG')
 
 ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS')
 
-# Model d'usuari personalitzat
-AUTH_USER_MODEL = 'authentication.APIUser'
-
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -102,10 +99,12 @@ DATABASES = {
         'CONN_MAX_AGE': 600,
         'OPTIONS': {
             'sslmode': 'require' if not DEBUG else 'prefer',
-            'options': '-c search_path=api_dev'
+            'options': '-c search_path=api_dev,public'
         }
     }
 }
+
+DATABASE_ROUTERS = ['vcpe_api.db_router.SchemaRouter']
 
 # Cache configuration (usar Redis en comptes de LocMem)
 CACHES = {
@@ -162,6 +161,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',

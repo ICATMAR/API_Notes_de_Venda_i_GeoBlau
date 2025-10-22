@@ -1,17 +1,26 @@
 """
 Models per gestió d'usuaris i autenticació de l'API
 """
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import User
 from django.db import models
 from django.core.validators import RegexValidator
 import uuid
 
 
-class APIUser(AbstractUser):
+class APIUser(models.Model):
     """
-    Usuari personalitzat per l'API amb camps addicionals de seguretat
+    Perfil d'usuari per l'API
+    Relacionat amb auth_user de public però amb dades específiques de l'API
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    
+    # Relació amb l'usuari de Django (a public.auth_user)
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='api_profile',
+        help_text="Usuari del sistema (auth_user de public)"
+    )
     
     # Informació organització
     organizacion = models.CharField(
@@ -37,7 +46,7 @@ class APIUser(AbstractUser):
         ]
     )
     
-    # Seguretat i control d'accés
+    # Seguretat i control d'accés API
     is_api_active = models.BooleanField(
         default=True,
         help_text="Indica si l'usuari pot accedir a l'API"
@@ -62,14 +71,14 @@ class APIUser(AbstractUser):
         help_text="Màxim de peticions per hora"
     )
     
-    # IPs permeses (whitelist)
+    # Restriccions d'accés
     allowed_ips = models.JSONField(
         default=list,
         blank=True,
         help_text="Llista d'IPs permeses (buit = totes)"
     )
     
-    # Auditoria
+    # Tracking de seguretat
     last_login_ip = models.GenericIPAddressField(null=True, blank=True)
     failed_login_attempts = models.IntegerField(default=0)
     account_locked_until = models.DateTimeField(null=True, blank=True)
@@ -83,79 +92,92 @@ class APIUser(AbstractUser):
         verbose_name = "Usuari API"
         verbose_name_plural = "Usuaris API"
         indexes = [
+            models.Index(fields=['user']),
             models.Index(fields=['cif_organizacion']),
-            models.Index(fields=['is_api_active', 'is_active']),
+            models.Index(fields=['is_api_active']),
         ]
     
     def __str__(self):
-        return f"{self.username} - {self.organizacion}"
+        return f"{self.user.username} - {self.organizacion}"
     
-    def is_ip_allowed(self, ip_address):
-        """Comprova si una IP està permesa"""
-        if not self.allowed_ips:
-            return True
-        return ip_address in self.allowed_ips
+    @property
+    def is_active(self):
+        """L'usuari està actiu si ho està a Django i a l'API"""
+        return self.user.is_active and self.is_api_active
     
-    def increment_failed_login(self):
-        """Incrementa els intents fallits de login"""
-        self.failed_login_attempts += 1
-        if self.failed_login_attempts >= 5:
+    def can_access_api(self, ip_address=None):
+        """
+        Comprova si l'usuari pot accedir a l'API
+        """
+        # Comprovar si està actiu
+        if not self.is_active:
+            return False
+        
+        # Comprovar si el compte està bloquejat
+        if self.account_locked_until:
             from django.utils import timezone
-            from datetime import timedelta
-            self.account_locked_until = timezone.now() + timedelta(hours=1)
-        self.save()
-    
-    def reset_failed_login(self):
-        """Reseteja els intents fallits després d'un login exitós"""
-        self.failed_login_attempts = 0
-        self.account_locked_until = None
-        self.save()
+            if timezone.now() < self.account_locked_until:
+                return False
+            # Desbloquejar si ja ha passat el temps
+            self.account_locked_until = None
+            self.failed_login_attempts = 0
+            self.save()
+        
+        # Comprovar IP si hi ha restriccions
+        if self.allowed_ips and ip_address:
+            if ip_address not in self.allowed_ips:
+                return False
+        
+        return True
 
 
 class APIAccessLog(models.Model):
     """
-    Log d'accessos a l'API per auditoria
+    Log d'accessos a l'API
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    
+    # Referència a l'usuari (pot ser null si és anònim)
     user = models.ForeignKey(
-        APIUser,
+        User,  # Directament a auth_user de public
         on_delete=models.SET_NULL,
         null=True,
-        related_name='access_logs'
+        related_name='api_access_logs'
     )
     
+    # Informació de la petició
     endpoint = models.CharField(max_length=500)
     method = models.CharField(max_length=10)
-    
     ip_address = models.GenericIPAddressField()
     user_agent = models.TextField(blank=True)
-    
     request_id = models.CharField(max_length=50, db_index=True)
     
+    # Resposta
     status_code = models.IntegerField()
     response_time_ms = models.IntegerField(help_text="Temps de resposta en ms")
     
+    # Seguretat
     request_body_hash = models.CharField(
         max_length=64,
         blank=True,
         help_text="Hash SHA256 del body (per privacitat)"
     )
-    
     error_message = models.TextField(blank=True)
     
+    # Timestamp
     timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
     
     class Meta:
         db_table = 'api_access_log'
-        ordering = ['-timestamp']
         verbose_name = "Log d'accés API"
         verbose_name_plural = "Logs d'accés API"
+        ordering = ['-timestamp']
         indexes = [
             models.Index(fields=['user', 'timestamp']),
             models.Index(fields=['ip_address', 'timestamp']),
             models.Index(fields=['status_code', 'timestamp']),
-            models.Index(fields=['request_id']),
         ]
     
     def __str__(self):
-        return f"{self.method} {self.endpoint} - {self.status_code} ({self.timestamp})"
+        username = self.user.username if self.user else "anonymous"
+        return f"{username} - {self.method} {self.endpoint} - {self.status_code}"

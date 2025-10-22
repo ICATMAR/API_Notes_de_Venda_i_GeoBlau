@@ -193,12 +193,12 @@ class Buque(models.Model):
         db_table = 'buque'
         verbose_name = "Vaixell"
         verbose_name_plural = "Vaixells"
-        constraints = [
-            CheckConstraint(
-                check=Q(unidad_productiva__metodo_produccion__in=[1, 4]),
-                name='buque_metodo_produccion_valido'
-            )
-        ]
+        #constraints = [
+        #    CheckConstraint(
+        #        check=Q(unidad_productiva__metodo_produccion__in=[1, 4]),
+        #        name='buque_metodo_produccion_valido'
+        #    )
+        #]
     
     def __str__(self):
         return f"Vaixell {self.codigo_buque}"
@@ -235,12 +235,12 @@ class Granja(models.Model):
         db_table = 'granja'
         verbose_name = "Granja"
         verbose_name_plural = "Granges"
-        constraints = [
-            CheckConstraint(
-                check=Q(unidad_productiva__metodo_produccion=2),
-                name='granja_metodo_produccion_valido'
-            )
-        ]
+        #constraints = [
+        #    CheckConstraint(
+        #        check=Q(unidad_productiva__metodo_produccion=2),
+        #        name='granja_metodo_produccion_valido'
+        #    )
+        #]
     
     def __str__(self):
         return f"Granja {self.codigo_rega}"
@@ -277,12 +277,12 @@ class PersonaFisicaJuridica(models.Model):
         db_table = 'persona_fisica_juridica'
         verbose_name = "Persona física/jurídica"
         verbose_name_plural = "Persones físiques/jurídiques"
-        constraints = [
-            CheckConstraint(
-                check=Q(unidad_productiva__metodo_produccion__in=[1, 3, 4]),
-                name='persona_metodo_produccion_valido'
-            )
-        ]
+        #constraints = [
+        #    CheckConstraint(
+        #        check=Q(unidad_productiva__metodo_produccion__in=[1, 3, 4]),
+        #        name='persona_metodo_produccion_valido'
+        #    )
+        #]
     
     def __str__(self):
         return f"Persona {self.nif_persona}"
