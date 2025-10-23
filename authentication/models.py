@@ -1,6 +1,7 @@
 """
 Models per gestió d'usuaris i autenticació de l'API
 """
+
 from django.contrib.auth.models import User
 from django.db import models
 from django.core.validators import RegexValidator
@@ -10,7 +11,7 @@ import uuid
 class APIUser(models.Model):
     """
     Perfil d'usuari per l'API
-    Relacionat amb auth_user de public però amb dades específiques de l'API
+    Relacionat amb auth_user de public (esquema compartit)
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     
@@ -109,35 +110,45 @@ class APIUser(models.Model):
         """
         Comprova si l'usuari pot accedir a l'API
         """
-        # Comprovar si està actiu
         if not self.is_active:
             return False
         
-        # Comprovar si el compte està bloquejat
         if self.account_locked_until:
             from django.utils import timezone
             if timezone.now() < self.account_locked_until:
                 return False
-            # Desbloquejar si ja ha passat el temps
             self.account_locked_until = None
             self.failed_login_attempts = 0
             self.save()
         
-        # Comprovar IP si hi ha restriccions
         if self.allowed_ips and ip_address:
             if ip_address not in self.allowed_ips:
                 return False
         
         return True
+    
+    def increment_failed_login(self):
+        """Incrementar intents fallits de login"""
+        self.failed_login_attempts += 1
+        if self.failed_login_attempts >= 5:
+            from django.utils import timezone
+            from datetime import timedelta
+            self.account_locked_until = timezone.now() + timedelta(minutes=30)
+        self.save()
+    
+    def reset_failed_login(self):
+        """Reset després d'un login correcte"""
+        self.failed_login_attempts = 0
+        self.account_locked_until = None
+        self.save()
 
 
 class APIAccessLog(models.Model):
     """
-    Log d'accessos a l'API
+    Log d'accessos a l'API per auditoria
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     
-    # Referència a l'usuari (pot ser null si és anònim)
     user = models.ForeignKey(
         User,  # Directament a auth_user de public
         on_delete=models.SET_NULL,
@@ -145,18 +156,15 @@ class APIAccessLog(models.Model):
         related_name='api_access_logs'
     )
     
-    # Informació de la petició
     endpoint = models.CharField(max_length=500)
     method = models.CharField(max_length=10)
     ip_address = models.GenericIPAddressField()
     user_agent = models.TextField(blank=True)
     request_id = models.CharField(max_length=50, db_index=True)
     
-    # Resposta
     status_code = models.IntegerField()
     response_time_ms = models.IntegerField(help_text="Temps de resposta en ms")
     
-    # Seguretat
     request_body_hash = models.CharField(
         max_length=64,
         blank=True,
@@ -164,7 +172,6 @@ class APIAccessLog(models.Model):
     )
     error_message = models.TextField(blank=True)
     
-    # Timestamp
     timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
     
     class Meta:

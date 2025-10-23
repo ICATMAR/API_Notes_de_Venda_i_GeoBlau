@@ -26,7 +26,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: vcpe_api
-    command: gunicorn vcpe_api.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 60
+    command: python manage.py runserver 0.0.0.0:8000
+    #gunicorn vcpe_api.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 60
     volumes:
       - .:/app
       - static_volume:/app/staticfiles
