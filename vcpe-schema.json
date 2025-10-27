@@ -1,21 +1,36 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Envio",
+  "$id": "https://icatmar.cat/schemas/trz-envio.json",
+  "title": "Esquema TRZ - Traçabilitat de Productes de la Pesca",
+  "description": "Esquema per a l'enviament de dades de traçabilitat segons normativa de primera venda de productes pesquers",
+  "version": "1.0.0",
   "type": "object",
   "required": ["NumEnvio"],
+  "additionalProperties": false,
   "properties": {
-    "NumEnvio": { "type": "string" },
+    "NumEnvio": { 
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50,
+      "pattern": "^[A-Za-z0-9_-]+$",
+      "description": "Identificador únic de l'enviament. Només alfanumèrics, guions i guions baixos"
+    },
     "TipoRespuesta": {
       "type": "integer",
       "enum": [1, 2, 3],
-      "description": "1=Completa, 2=Media, 3=Reducida"
+      "default": 1,
+      "description": "Tipus de resposta: 1=Completa, 2=Mitjana, 3=Reduïda"
     },
     "EstablecimientosVenta": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "EstablecimientoVenta": {
           "type": "array",
-          "items": { "$ref": "#/$defs/EstablecimientoVenta" }
+          "minItems": 1,
+          "maxItems": 100,
+          "items": { "$ref": "#/$defs/EstablecimientoVenta" },
+          "description": "Llista d'establiments de venda"
         }
       }
     }
@@ -24,14 +39,25 @@
     "EstablecimientoVenta": {
       "type": "object",
       "required": ["NumIdentificacionEstablec", "Ventas"],
+      "additionalProperties": false,
       "properties": {
-        "NumIdentificacionEstablec": { "type": "string" },
+        "NumIdentificacionEstablec": { 
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20,
+          "pattern": "^[A-Za-z0-9]+$",
+          "description": "NIF/CIF de l'establiment de venda. Només alfanumèrics"
+        },
         "Ventas": {
           "type": "object",
+          "additionalProperties": false,
           "properties": {
             "VentasUnidadProductiva": {
               "type": "array",
-              "items": { "$ref": "#/$defs/VentasUnidadProductiva" }
+              "minItems": 1,
+              "maxItems": 500,
+              "items": { "$ref": "#/$defs/VentasUnidadProductiva" },
+              "description": "Vendes per unitat productiva"
             }
           }
         }
@@ -39,6 +65,7 @@
     },
     "VentasUnidadProductiva": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "DatosUnidadProductiva": {
           "type": "object",
@@ -46,14 +73,19 @@
             { "$ref": "#/$defs/Buque" },
             { "$ref": "#/$defs/Granja" },
             { "$ref": "#/$defs/PersonaFisJur" }
-          ]
+          ],
+          "description": "Dades de la unitat productiva: pot ser Buque, Granja o PersonaFisJur"
         },
         "Especies": {
           "type": "object",
+          "additionalProperties": false,
           "properties": {
             "Especie": {
               "type": "array",
-              "items": { "$ref": "#/$defs/Especie" }
+              "minItems": 1,
+              "maxItems": 1000,
+              "items": { "$ref": "#/$defs/Especie" },
+              "description": "Llistat d'espècies venudes"
             }
           }
         }
@@ -62,96 +94,397 @@
     "Buque": {
       "type": "object",
       "required": ["MetodoProduccion", "CodigoBuque", "FechaRegresoPuerto"],
+      "additionalProperties": false,
       "properties": {
-        "MetodoProduccion": { "type": "integer", "enum": [1, 4] },
-        "CodigoBuque": { "type": "string", "maxLength": 12 },
-        "PuertoAL5": { "type": "string", "pattern": "^[A-Za-z]{2}[A-Za-z0-9]{3}$" },
-        "Armador": { "type": "string", "maxLength": 100 },
-        "Capitan": { "type": "string", "maxLength": 60 },
-        "FechaRegresoPuerto": { "type": "string", "format": "date-time" },
-        "CodMarea": { "type": "string", "maxLength": 50 }
+        "MetodoProduccion": { 
+          "type": "integer", 
+          "enum": [1, 4],
+          "description": "Mètode de producció per vaixell: 1=Pesca extractiva marina, 4=Pesca en aigües continentals"
+        },
+        "CodigoBuque": { 
+          "type": "string", 
+          "minLength": 1,
+          "maxLength": 12,
+          "pattern": "^[A-Z0-9-]+$",
+          "description": "Codi CFR del vaixell. Format: majúscules, números i guions"
+        },
+        "PuertoAL5": { 
+          "type": "string", 
+          "pattern": "^[A-Z]{2}[A-Z0-9]{3}$",
+          "description": "Codi LOCODE del port (format ISO): 2 lletres país + 3 caràcters port"
+        },
+        "Armador": { 
+          "type": "string", 
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Nom de l'armador"
+        },
+        "Capitan": { 
+          "type": "string",
+          "minLength": 1, 
+          "maxLength": 60,
+          "description": "Nom del capità"
+        },
+        "FechaRegresoPuerto": { 
+          "type": "string", 
+          "format": "date-time",
+          "description": "Data i hora de regres al port. Format ISO 8601: YYYY-MM-DDTHH:mm:ss+00:00"
+        },
+        "CodMarea": { 
+          "type": "string",
+          "minLength": 1, 
+          "maxLength": 50,
+          "pattern": "^[A-Z0-9_-]+$",
+          "description": "Codi de marea"
+        }
       }
     },
     "Granja": {
       "type": "object",
       "required": ["MetodoProduccion", "CodigoREGA", "FechaProduccion"],
+      "additionalProperties": false,
       "properties": {
-        "MetodoProduccion": { "type": "integer", "enum": [2] },
-        "CodigoREGA": { "type": "string", "maxLength": 14 },
-        "LugarDescarga": { "type": "string", "maxLength": 250 },
-        "FechaProduccion": { "type": "string", "format": "date-time" }
+        "MetodoProduccion": { 
+          "type": "integer", 
+          "enum": [2],
+          "description": "Mètode de producció per granja: 2=Aquicultura"
+        },
+        "CodigoREGA": { 
+          "type": "string",
+          "minLength": 1, 
+          "maxLength": 14,
+          "pattern": "^[0-9]{2}\\.[0-9]{8}\\.[A-Z]{2}$",
+          "description": "Registre d'Explotacions Agràries. Format: XX.XXXXXXXX.XX (2 dígits + punt + 8 dígits + punt + 2 majúscules)"
+        },
+        "LugarDescarga": { 
+          "type": "string",
+          "minLength": 1, 
+          "maxLength": 250,
+          "description": "Lloc de descàrrega"
+        },
+        "FechaProduccion": { 
+          "type": "string", 
+          "format": "date-time",
+          "description": "Data i hora de producció. Format ISO 8601"
+        }
       }
     },
     "PersonaFisJur": {
       "type": "object",
       "required": ["MetodoProduccion", "NIFPersona", "FechaDescarga"],
+      "additionalProperties": false,
       "properties": {
-        "MetodoProduccion": { "type": "integer", "enum": [1, 3, 4] },
-        "NIFPersona": { "type": "string", "maxLength": 17 },
-        "LugarDescarga": { "type": "string", "maxLength": 250 },
-        "FechaDescarga": { "type": "string", "format": "date-time" }
+        "MetodoProduccion": { 
+          "type": "integer", 
+          "enum": [1, 3, 4],
+          "description": "Mètode de producció: 1=Pesca extractiva marina, 3=Recol·lecció, 4=Pesca aigües continentals"
+        },
+        "NIFPersona": { 
+          "type": "string",
+          "minLength": 9,
+          "maxLength": 17,
+          "pattern": "^([0-9]{8}[A-Z]|[XYZ][0-9]{7}[A-Z]|[A-Z][0-9]{7}[A-Z0-9])$",
+          "description": "NIF espanyol (8 dígits + lletra), NIE (X/Y/Z + 7 dígits + lletra) o CIF (lletra + 7 dígits + lletra/dígit)"
+        },
+        "LugarDescarga": { 
+          "type": "string",
+          "minLength": 1, 
+          "maxLength": 250,
+          "description": "Lloc de descàrrega"
+        },
+        "FechaDescarga": { 
+          "type": "string", 
+          "format": "date-time",
+          "description": "Data i hora de descàrrega. Format ISO 8601"
+        }
       }
     },
     "Especie": {
       "type": "object",
-      "required": ["NumDocVenta", "EspecieAL3", "FechaVenta", "Lote", "TipoCifNifVendedor", "NIFVendedor", "NombreVendedor", "DireccionVendedor"],
+      "required": [
+        "NumDocVenta", 
+        "EspecieAL3", 
+        "FechaVenta", 
+        "Lote", 
+        "TipoCifNifVendedor", 
+        "NIFVendedor", 
+        "NombreVendedor", 
+        "DireccionVendedor"
+      ],
+      "additionalProperties": false,
       "properties": {
-        "NumDocVenta": { "type": "string", "maxLength": 21 },
-        "EspecieAL3": { "type": "string", "pattern": "^[A-Za-z]{3}$" },
+        "NumDocVenta": { 
+          "type": "string",
+          "minLength": 1, 
+          "maxLength": 21,
+          "pattern": "^[A-Z0-9_/-]+$",
+          "description": "Número de document de venda"
+        },
+        "EspecieAL3": { 
+          "type": "string", 
+          "pattern": "^[A-Z]{3}$",
+          "description": "Codi FAO Alpha-3 de l'espècie (3 majúscules). Ex: COD, HKE, ANE"
+        },
         "FechasCaptura": {
           "type": "object",
+          "additionalProperties": false,
           "properties": {
             "FechaCaptura": {
               "type": "array",
+              "maxItems": 50,
               "items": {
                 "type": "object",
+                "additionalProperties": false,
                 "properties": {
-                  "FechaCapturaIni": { "type": "string", "format": "date-time" },
-                  "FechaCapturaFin": { "type": "string", "format": "date-time" }
+                  "FechaCapturaIni": { 
+                    "type": "string", 
+                    "format": "date-time",
+                    "description": "Data i hora inici captura"
+                  },
+                  "FechaCapturaFin": { 
+                    "type": "string", 
+                    "format": "date-time",
+                    "description": "Data i hora fi captura"
+                  }
                 }
-              }
+              },
+              "description": "Períodes de captura de l'espècie"
             }
           }
         },
-        "Zona": { "type": "string", "maxLength": 50 },
-        "ZonaGeografica": { "type": "string", "maxLength": 50 },
-        "CCAA": { "type": "integer" },
-        "PaisAL3": { "type": "string", "pattern": "^[A-Za-z]{3}$" },
-        "MasaAgua": { "type": "string", "maxLength": 100 },
-        "ArteAL3": { "type": "string", "maxLength": 3 },
-        "OtroArte": { "type": "string", "maxLength": 100 },
-        "CodEspecieConservacion": { "type": "string", "maxLength": 3 },
-        "CodEspeciePresentacion": { "type": "string", "maxLength": 5 },
-        "PresentacionOTH": { "type": "string", "maxLength": 50 },
-        "IdPresentacionOTH": { "type": "integer" },
-        "CodEspecieFrescura": { "type": "string", "maxLength": 2 },
-        "CodEspecieCalibre": { "type": "string", "maxLength": 15 },
-        "FechaVenta": { "type": "string", "format": "date-time" },
-        "Lote": { "type": "string", "maxLength": 50 },
-        "CodContratoAlim": { "type": "string", "maxLength": 50 },
-        "NumDocTransporte": { "type": "string" },
-        "NumDeclaracionRecog": { "type": "string", "maxLength": 21 },
-        "CertificadoDeOrigen": { "type": "boolean" },
-        "TipoCifNifVendedor": { "type": "integer", "enum": [1, 2, 3, 5] },
-        "NIFVendedor": { "type": "string", "maxLength": 17 },
-        "NombreVendedor": { "type": "string", "maxLength": 100 },
-        "DireccionVendedor": { "type": "string", "maxLength": 100 },
-        "NIFComprador": { "type": "string", "maxLength": 17 },
-        "IdTipoNifCifComprador": { "type": "integer", "enum": [1, 2, 3, 5] },
-        "PaisComprador": { "type": "string", "pattern": "^[A-Za-z]{3}$" },
-        "NombreComprador": { "type": "string", "maxLength": 100 },
-        "DireccionComprador": { "type": "string", "maxLength": 100 },
-        "Precio": { "type": "number" },
-        "CodMoneda": { "type": "string", "pattern": "^[A-Za-z]{3}$", "default": "EUR" },
-        "Cantidad": { "type": "number" },
-        "NumEjemplares": { "type": "integer" },
-        "NumCajas": { "type": "integer" },
-        "EsTallaReglamentaria": { "type": "boolean" },
-        "TipoRetirada": { "type": "integer", "enum": [1, 2, 3, 4, 5, 6] },
-        "CodDestinoRetirado": { "type": "string" },
-        "LugarAlmacenamiento": { "type": "string", "maxLength": 100 },
-        "Observaciones": { "type": "string" },
-        "NumActaInspeccion": { "type": "string", "maxLength": 20 }
+        "Zona": { 
+          "type": "string",
+          "minLength": 1, 
+          "maxLength": 50,
+          "description": "Zona de pesca o text descriptiu. Ex: 37.1.1, Aquicultura, 27.8.a"
+        },
+        "ZonaGeografica": { 
+          "type": "string",
+          "minLength": 1, 
+          "maxLength": 50,
+          "description": "Descripció geogràfica de la zona"
+        },
+        "CCAA": { 
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "maximum": 19,
+          "description": "Codi INE de Comunitat Autònoma (1-19). Pot ser null segons l'Excel"
+        },
+        "PaisAL3": { 
+          "type": "string", 
+          "pattern": "^[A-Z]{3}$",
+          "description": "Codi ISO 3166-1 alpha-3 del país. Ex: ESP, FRA, ITA"
+        },
+        "MasaAgua": { 
+          "type": "string",
+          "minLength": 1, 
+          "maxLength": 100,
+          "description": "Massa d'aigua"
+        },
+        "ArteAL3": { 
+          "type": "string",
+          "minLength": 1, 
+          "maxLength": 3,
+          "pattern": "^[A-Z0-9]{1,3}$",
+          "description": "Codi FAO d'art de pesca. Ex: PS (Encerclament), OTB (Arrossegament)"
+        },
+        "OtroArte": { 
+          "type": "string",
+          "minLength": 1, 
+          "maxLength": 100,
+          "description": "Descripció d'un altre art de pesca no estàndard"
+        },
+        "CodEspecieConservacion": { 
+          "type": "string",
+          "minLength": 1, 
+          "maxLength": 3,
+          "pattern": "^[A-Z]{3}$",
+          "description": "Codi de mètode de conservació"
+        },
+        "CodEspeciePresentacion": { 
+          "type": "string",
+          "minLength": 1, 
+          "maxLength": 5,
+          "pattern": "^[A-Z0-9]+$",
+          "description": "Codi de presentació del producte"
+        },
+        "PresentacionOTH": { 
+          "type": "string",
+          "minLength": 1, 
+          "maxLength": 50,
+          "description": "Descripció d'una altra presentació no estàndard"
+        },
+        "IdPresentacionOTH": { 
+          "type": "integer",
+          "minimum": 1,
+          "description": "Identificador numèric de presentació alternativa"
+        },
+        "CodEspecieFrescura": { 
+          "type": "string",
+          "minLength": 1, 
+          "maxLength": 2,
+          "pattern": "^[A-Z0-9]{1,2}$",
+          "description": "Codi de grau de frescor"
+        },
+        "CodEspecieCalibre": { 
+          "type": "string",
+          "minLength": 1, 
+          "maxLength": 15,
+          "description": "Codi de calibre del producte"
+        },
+        "FechaVenta": { 
+          "type": "string", 
+          "format": "date-time",
+          "description": "Data i hora de venda. Format ISO 8601"
+        },
+        "Lote": { 
+          "type": "string",
+          "minLength": 1, 
+          "maxLength": 50,
+          "pattern": "^[A-Z0-9_/-]+$",
+          "description": "Identificador del lot"
+        },
+        "CodContratoAlim": { 
+          "type": "string",
+          "minLength": 1, 
+          "maxLength": 50,
+          "description": "Codi de contracte alimentari"
+        },
+        "NumDocTransporte": { 
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50,
+          "description": "Número de document de transport"
+        },
+        "NumDeclaracionRecog": { 
+          "type": "string",
+          "minLength": 1, 
+          "maxLength": 21,
+          "description": "Número de declaració de recollida"
+        },
+        "CertificadoDeOrigen": { 
+          "type": "boolean",
+          "description": "Indica si té certificat d'origen"
+        },
+        "TipoCifNifVendedor": { 
+          "type": "integer", 
+          "enum": [1, 2, 3, 5],
+          "description": "Tipus identificació venedor: 1=NIF persona física, 2=NIF persona jurídica, 3=NIE, 5=Altre"
+        },
+        "NIFVendedor": { 
+          "type": "string",
+          "minLength": 9,
+          "maxLength": 17,
+          "pattern": "^([0-9]{8}[A-Z]|[XYZ][0-9]{7}[A-Z]|[A-Z][0-9]{7}[A-Z0-9]|[A-Z0-9]{1,17})$",
+          "description": "NIF/NIE/CIF del venedor o identificador alternatiu"
+        },
+        "NombreVendedor": { 
+          "type": "string",
+          "minLength": 1, 
+          "maxLength": 100,
+          "description": "Nom o raó social del venedor"
+        },
+        "DireccionVendedor": { 
+          "type": "string",
+          "minLength": 1, 
+          "maxLength": 100,
+          "description": "Adreça completa del venedor"
+        },
+        "NIFComprador": { 
+          "type": "string",
+          "minLength": 9,
+          "maxLength": 17,
+          "pattern": "^([0-9]{8}[A-Z]|[XYZ][0-9]{7}[A-Z]|[A-Z][0-9]{7}[A-Z0-9]|[A-Z0-9]{1,17})$",
+          "description": "NIF/NIE/CIF del comprador o identificador alternatiu"
+        },
+        "IdTipoNifCifComprador": { 
+          "type": "integer", 
+          "enum": [1, 2, 3, 5],
+          "description": "Tipus identificació comprador: 1=NIF persona física, 2=NIF persona jurídica, 3=NIE, 5=Altre"
+        },
+        "PaisComprador": { 
+          "type": "string", 
+          "pattern": "^[A-Z]{3}$",
+          "description": "Codi ISO 3166-1 alpha-3 del país del comprador"
+        },
+        "NombreComprador": { 
+          "type": "string",
+          "minLength": 1, 
+          "maxLength": 100,
+          "description": "Nom o raó social del comprador"
+        },
+        "DireccionComprador": { 
+          "type": "string",
+          "minLength": 1, 
+          "maxLength": 100,
+          "description": "Adreça completa del comprador"
+        },
+        "Precio": { 
+          "type": "number",
+          "minimum": 0,
+          "maximum": 999999999.99,
+          "multipleOf": 0.01,
+          "description": "Preu unitari amb 2 decimals màxim"
+        },
+        "CodMoneda": { 
+          "type": "string", 
+          "pattern": "^[A-Z]{3}$", 
+          "default": "EUR",
+          "description": "Codi ISO 4217 de moneda (3 majúscules). Ex: EUR, USD, GBP"
+        },
+        "Cantidad": { 
+          "type": "number",
+          "minimum": 0,
+          "maximum": 999999999.999,
+          "multipleOf": 0.001,
+          "exclusiveMinimum": 0,
+          "description": "Quantitat en kg amb 3 decimals màxim. Ha de ser > 0"
+        },
+        "NumEjemplares": { 
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 999999999,
+          "description": "Nombre d'exemplars"
+        },
+        "NumCajas": { 
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 999999,
+          "description": "Nombre de caixes"
+        },
+        "EsTallaReglamentaria": { 
+          "type": "boolean",
+          "description": "Indica si compleix la talla mínima reglamentària"
+        },
+        "TipoRetirada": { 
+          "type": "integer", 
+          "enum": [1, 2, 3, 4, 5, 6],
+          "description": "Tipus de retirada del mercat"
+        },
+        "CodDestinoRetirado": { 
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 10,
+          "description": "Codi del destí del producte retirat"
+        },
+        "LugarAlmacenamiento": { 
+          "type": "string",
+          "minLength": 1, 
+          "maxLength": 100,
+          "description": "Lloc d'emmagatzematge"
+        },
+        "Observaciones": { 
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Observacions generals (màxim 1000 caràcters)"
+        },
+        "NumActaInspeccion": { 
+          "type": "string",
+          "minLength": 1, 
+          "maxLength": 20,
+          "pattern": "^[A-Z0-9_/-]+$",
+          "description": "Número d'acta d'inspecció"
+        }
       }
     }
   }

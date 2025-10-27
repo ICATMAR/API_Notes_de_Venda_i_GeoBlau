@@ -1,0 +1,201 @@
+{
+  "NumEnvio": "ENV2025-001-ICATMAR",
+  "TipoRespuesta": 1,
+  "EstablecimientosVenta": {
+    "EstablecimientoVenta": [
+      {
+        "NumIdentificacionEstablec": "A12345678",
+        "Ventas": {
+          "VentasUnidadProductiva": [
+            {
+              "DatosUnidadProductiva": {
+                "MetodoProduccion": 1,
+                "CodigoBuque": "ESP000012345",
+                "PuertoAL5": "ESBAR",
+                "Armador": "Pesca Mar S.L.",
+                "Capitan": "Joan Garcia Martinez",
+                "FechaRegresoPuerto": "2025-10-26T18:30:00+02:00",
+                "CodMarea": "M2025-10-234"
+              },
+              "Especies": {
+                "Especie": [
+                  {
+                    "NumDocVenta": "VT-2025-001234",
+                    "EspecieAL3": "ANE",
+                    "FechasCaptura": {
+                      "FechaCaptura": [
+                        {
+                          "FechaCapturaIni": "2025-10-25T05:00:00+02:00",
+                          "FechaCapturaFin": "2025-10-25T14:30:00+02:00"
+                        }
+                      ]
+                    },
+                    "Zona": "37.1.1",
+                    "ZonaGeografica": "Mediterrani Nord-occidental",
+                    "CCAA": 9,
+                    "PaisAL3": "ESP",
+                    "MasaAgua": "Mar Mediterrània",
+                    "ArteAL3": "PS",
+                    "CodEspecieConservacion": "FRE",
+                    "CodEspeciePresentacion": "WHL",
+                    "CodEspecieFrescura": "E",
+                    "CodEspecieCalibre": "1",
+                    "FechaVenta": "2025-10-26T20:00:00+02:00",
+                    "Lote": "LOT-2025-10-26-001",
+                    "CodContratoAlim": "CA-2025-789",
+                    "NumDocTransporte": "TR-2025-456",
+                    "TipoCifNifVendedor": 2,
+                    "NIFVendedor": "A12345678",
+                    "NombreVendedor": "Confraria de Pescadors Barcelona",
+                    "DireccionVendedor": "Moll de Pescadors, 1, 08039 Barcelona",
+                    "NIFComprador": "B87654321",
+                    "IdTipoNifCifComprador": 2,
+                    "PaisComprador": "ESP",
+                    "NombreComprador": "Distribuidora Mariscos S.A.",
+                    "DireccionComprador": "Calle del Mar, 45, 08001 Barcelona",
+                    "Precio": 3.50,
+                    "CodMoneda": "EUR",
+                    "Cantidad": 245.500,
+                    "NumEjemplares": 1850,
+                    "NumCajas": 15,
+                    "EsTallaReglamentaria": true,
+                    "Observaciones": "Producte de qualitat extra. Conservat en gel des de la captura."
+                  },
+                  {
+                    "NumDocVenta": "VT-2025-001235",
+                    "EspecieAL3": "HKE",
+                    "FechasCaptura": {
+                      "FechaCaptura": [
+                        {
+                          "FechaCapturaIni": "2025-10-25T08:00:00+02:00",
+                          "FechaCapturaFin": "2025-10-25T12:00:00+02:00"
+                        }
+                      ]
+                    },
+                    "Zona": "37.1.1",
+                    "ZonaGeografica": "Mediterrani Nord-occidental",
+                    "CCAA": 9,
+                    "PaisAL3": "ESP",
+                    "MasaAgua": "Mar Mediterrània",
+                    "ArteAL3": "OTB",
+                    "CodEspecieConservacion": "FRE",
+                    "CodEspeciePresentacion": "GUT",
+                    "CodEspecieFrescura": "A",
+                    "CodEspecieCalibre": "2-3",
+                    "FechaVenta": "2025-10-26T20:15:00+02:00",
+                    "Lote": "LOT-2025-10-26-002",
+                    "TipoCifNifVendedor": 2,
+                    "NIFVendedor": "A12345678",
+                    "NombreVendedor": "Confraria de Pescadors Barcelona",
+                    "DireccionVendedor": "Moll de Pescadors, 1, 08039 Barcelona",
+                    "NIFComprador": "12345678Z",
+                    "IdTipoNifCifComprador": 1,
+                    "PaisComprador": "ESP",
+                    "NombreComprador": "Restaurante El Pescador",
+                    "DireccionComprador": "Paseo Marítimo, 12, 08003 Barcelona",
+                    "Precio": 12.75,
+                    "CodMoneda": "EUR",
+                    "Cantidad": 87.400,
+                    "NumEjemplares": 156,
+                    "NumCajas": 8,
+                    "EsTallaReglamentaria": true
+                  }
+                ]
+              }
+            },
+            {
+              "DatosUnidadProductiva": {
+                "MetodoProduccion": 2,
+                "CodigoREGA": "08.12345678.BA",
+                "LugarDescarga": "Granja Aquamaris, Delta de l'Ebre",
+                "FechaProduccion": "2025-10-24T10:00:00+02:00"
+              },
+              "Especies": {
+                "Especie": [
+                  {
+                    "NumDocVenta": "VT-2025-001236",
+                    "EspecieAL3": "SBG",
+                    "FechaVenta": "2025-10-26T21:00:00+02:00",
+                    "Zona": "Aquicultura",
+                    "CCAA": 9,
+                    "PaisAL3": "ESP",
+                    "MasaAgua": "Delta de l'Ebre",
+                    "CodEspecieConservacion": "ALI",
+                    "CodEspeciePresentacion": "WHL",
+                    "CodEspecieFrescura": "E",
+                    "Lote": "LOT-AQ-2025-10-24-001",
+                    "CodContratoAlim": "CA-AQ-2025-123",
+                    "TipoCifNifVendedor": 2,
+                    "NIFVendedor": "B98765432",
+                    "NombreVendedor": "Aquamaris Delta S.L.",
+                    "DireccionVendedor": "Carretera del Delta, Km 5, 43580 Deltebre",
+                    "NIFComprador": "B11223344",
+                    "IdTipoNifCifComprador": 2,
+                    "PaisComprador": "ESP",
+                    "NombreComprador": "Pescadería Central S.L.",
+                    "DireccionComprador": "Mercado Central, Local 23, 08001 Barcelona",
+                    "Precio": 8.90,
+                    "CodMoneda": "EUR",
+                    "Cantidad": 150.000,
+                    "NumEjemplares": 75,
+                    "NumCajas": 10,
+                    "EsTallaReglamentaria": true,
+                    "Observaciones": "Producte d'aquicultura ecològica certificada"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "NumIdentificacionEstablec": "B87654321",
+        "Ventas": {
+          "VentasUnidadProductiva": [
+            {
+              "DatosUnidadProductiva": {
+                "MetodoProduccion": 3,
+                "NIFPersona": "X1234567L",
+                "LugarDescarga": "Platja de Sant Pol, S'Agaró",
+                "FechaDescarga": "2025-10-26T08:00:00+02:00"
+              },
+              "Especies": {
+                "Especie": [
+                  {
+                    "NumDocVenta": "VT-2025-001237",
+                    "EspecieAL3": "CLO",
+                    "FechaVenta": "2025-10-26T10:30:00+02:00",
+                    "Zona": "Costa catalana",
+                    "CCAA": 9,
+                    "PaisAL3": "ESP",
+                    "MasaAgua": "Mediterrani litoral",
+                    "CodEspecieConservacion": "ALI",
+                    "CodEspeciePresentacion": "LVE",
+                    "CodEspecieFrescura": "E",
+                    "Lote": "LOT-REC-2025-10-26-001",
+                    "TipoCifNifVendedor": 3,
+                    "NIFVendedor": "X1234567L",
+                    "NombreVendedor": "Maria Kowalski",
+                    "DireccionVendedor": "Carrer de la Mar, 8, 17220 Sant Feliu de Guíxols",
+                    "NIFComprador": "23456789A",
+                    "IdTipoNifCifComprador": 1,
+                    "PaisComprador": "ESP",
+                    "NombreComprador": "Restaurante Mar Azul",
+                    "DireccionComprador": "Paseo Marítimo, 34, 17220 Sant Feliu de Guíxols",
+                    "Precio": 25.00,
+                    "CodMoneda": "EUR",
+                    "Cantidad": 3.500,
+                    "NumEjemplares": 420,
+                    "NumCajas": 2,
+                    "EsTallaReglamentaria": true,
+                    "Observaciones": "Cloïsses recollides de forma artesanal"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
