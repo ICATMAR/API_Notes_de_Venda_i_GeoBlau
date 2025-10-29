@@ -35,7 +35,7 @@ class FechaCapturaSerializer(serializers.ModelSerializer):
 
 class EspecieSerializer(serializers.ModelSerializer):
     """Serialitzador per espècies"""
-    fechas_captura = FechaCapturaSerializer(many=True, required=False, source='fechas_captura')
+    fechas_captura = FechaCapturaSerializer(many=True, required=False)
     
     class Meta:
         model = Especie
