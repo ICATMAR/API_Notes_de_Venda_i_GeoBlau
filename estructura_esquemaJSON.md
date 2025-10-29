@@ -4,6 +4,7 @@ Envio
 └── EstablecimientosVenta
     └── EstablecimientoVenta[]
         ├── NumIdentificacionEstablec (requerit)
+        ├── NombreEstablecimiento (requerit)
         └── Ventas
             └── VentasUnidadProductiva[]
                 ├── DatosUnidadProductiva (oneOf)

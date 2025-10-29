@@ -209,6 +209,7 @@ Content-Type: application/json
     "EstablecimientoVenta": [
       {
         "NumIdentificacionEstablec": "LLOTJA001",
+        "NombreEstablecimiento": "Llotja de Barcelona" ,
         "Ventas": {
           "VentasUnidadProductiva": [
             {

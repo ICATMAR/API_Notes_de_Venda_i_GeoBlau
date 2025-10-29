@@ -5,6 +5,7 @@
     "EstablecimientoVenta": [
       {
         "NumIdentificacionEstablec": "A12345678",
+        "NombreEstablecimiento": "Llotja de Barcelona",
         "Ventas": {
           "VentasUnidadProductiva": [
             {

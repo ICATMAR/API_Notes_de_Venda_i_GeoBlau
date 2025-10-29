@@ -20,6 +20,7 @@ class TestSalesNotesCompleteFlow:
             "EstablecimientosVenta": {
                 "EstablecimientoVenta": [{
                     "NumIdentificacionEstablec": "LLOTJA_TEST",
+                    "NombreEstablecimiento": "Llotja de Test",
                     "Ventas": {
                         "VentasUnidadProductiva": [{
                             "DatosUnidadProductiva": {
