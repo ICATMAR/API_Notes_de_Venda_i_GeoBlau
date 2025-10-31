@@ -8,6 +8,8 @@ from .models import (
     Buque, Granja, PersonaFisicaJuridica,
     Especie, FechaCaptura
 )
+
+from .existing_models import Port, Species, Vessel
 from django.db import transaction
 import jsonschema
 from datetime import datetime
@@ -454,6 +456,23 @@ class EnvioStatusSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = fields
 
+class PortSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Port
+        fields = '__all__'
+        read_only_fields = '__all__'
+
+class SpeciesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Species
+        fields = '__all__'
+        read_only_fields = '__all__'
+
+class VesselSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vessel
+        fields = '__all__'
+        read_only_fields = '__all__'
 
 # Importar datetime per les validacions
 from datetime import datetime

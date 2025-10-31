@@ -4,9 +4,11 @@ Aquestes taules ja existeixen a la BD i només les llegim
 """
 from django.contrib.gis.db import models
 
+from django.contrib.gis.db import models
+
 
 class Port(models.Model):
-    """Taula existent de ports"""
+    """Taula de ports"""
     id = models.SmallIntegerField(primary_key=True, db_column='Id')
     name = models.CharField(max_length=50, db_column='Name')
     region = models.CharField(max_length=50, null=True, blank=True, db_column='Region')
@@ -20,7 +22,7 @@ class Port(models.Model):
     auction = models.BooleanField(null=True, blank=True, db_column='Auction')
     
     class Meta:
-        managed = False 
+        managed = True
         db_table = 'port'
         verbose_name = 'Port'
         verbose_name_plural = 'Ports'
@@ -30,9 +32,9 @@ class Port(models.Model):
 
 
 class Species(models.Model):
-    """Taula existent d'espècies"""
+    """Taula d'espècies"""
     id = models.IntegerField(primary_key=True, db_column='Id')
-    code_3a = models.CharField(max_length=3, null=True, blank=True, db_column='3A_Code')
+    code_3a = models.CharField(max_length=3, unique=True, db_index=True, db_column='3A_Code')
     scientific_name = models.CharField(max_length=37, db_column='ScientificName')
     catalan_name = models.CharField(max_length=30, null=True, blank=True, db_column='CatalanName')
     spanish_name = models.CharField(max_length=30, null=True, blank=True, db_column='SpanishName')
@@ -60,7 +62,7 @@ class Species(models.Model):
     aphia_id = models.IntegerField(null=True, blank=True, db_column='AphiaId')
     
     class Meta:
-        managed = False
+        managed = True
         db_table = 'species'
         verbose_name = 'Espècie'
         verbose_name_plural = 'Espècies'
@@ -70,9 +72,9 @@ class Species(models.Model):
 
 
 class Vessel(models.Model):
-    """Taula existent de vaixells"""
+    """Taula de vaixells"""
     id = models.IntegerField(primary_key=True, db_column='Id')
-    code = models.CharField(max_length=12, null=True, blank=True, db_column='Code')
+    code = models.CharField(max_length=12, unique=True, db_index=True, db_column='Code')
     event_code = models.CharField(max_length=3, null=True, blank=True, db_column='EventCode')
     event_start_date = models.DateField(null=True, blank=True, db_column='EventStartDate')
     event_end_date = models.DateField(null=True, blank=True, db_column='EventEndDate')
@@ -86,15 +88,18 @@ class Vessel(models.Model):
     gear_main_code = models.CharField(max_length=3, null=True, blank=True, db_column='GearMainCode')
     gear_sec_code = models.CharField(max_length=3, null=True, blank=True, db_column='GearSecCode')
     loa_m = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, db_column='LOA_m')
+    lbp_m = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, db_column='LBP_m')
     gt = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, db_column='GT')
+    trb = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, db_column='TRB')
     power_main_kw = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, db_column='PowerMain_kW')
+    power_aux_kw = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, db_column='PowerAux_kW')
     hull_material = models.CharField(max_length=20, null=True, blank=True, db_column='HullMaterial')
     service_starting_date = models.DateField(null=True, blank=True, db_column='ServiceStartingDate')
     base_port_id = models.SmallIntegerField(null=True, blank=True, db_column='BasePortId')
     ais = models.BooleanField(null=True, blank=True, db_column='AIS')
     
     class Meta:
-        managed = False
+        managed = True
         db_table = 'vessel'
         verbose_name = 'Vaixell'
         verbose_name_plural = 'Vaixells'

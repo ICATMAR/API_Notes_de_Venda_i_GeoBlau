@@ -6,6 +6,7 @@ from django.contrib.gis.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
 from django.utils import timezone
 from django.db.models import Q, CheckConstraint
+from .existing_models import Species, Vessel, Port
 import uuid
 
 
@@ -163,6 +164,16 @@ class Buque(models.Model):
         db_index=True,
         help_text="Codi del vaixell (matrícula)"
     )
+
+    vessel_ref = models.ForeignKey(
+        Vessel,
+        on_delete=models.PROTECT,
+        to_field='code',
+        related_name='ventas_buque',
+        null=True,
+        blank=True,
+        help_text="Referència al vaixell del catàleg"
+    )    
     
     puerto_al5_validator = RegexValidator(
         regex=r'^[A-Za-z]{2}[A-Za-z0-9]{3}$',
@@ -174,6 +185,15 @@ class Buque(models.Model):
         blank=True,
         null=True,
         help_text="Codi del port en format AL5"
+    )
+
+    port_ref = models.ForeignKey(
+        Port,
+        on_delete=models.PROTECT,
+        related_name='ventas_puerto',
+        null=True,
+        blank=True,
+        help_text="Referència al port del catàleg"
     )
     
     armador = models.CharField(max_length=100, blank=True)
@@ -188,11 +208,40 @@ class Buque(models.Model):
         blank=True,
         help_text="Codi de marea"
     )
+
+    def clean(self):
+        """Validar i sincronitzar vaixell i port amb catàleg"""
+        from django.core.exceptions import ValidationError
+        
+        errors = {}
+        
+        # Validar vaixell
+        if self.codigo_buque:
+            try:
+                vessel = Vessel.objects.get(code=self.codigo_buque)
+                self.vessel_ref = vessel
+            except Vessel.DoesNotExist:
+                errors['codigo_buque'] = f"Vaixell '{self.codigo_buque}' no trobat al catàleg"
+        
+        # Validar port (si té puerto_al5, podríem validar-lo també)
+        # Nota: puerto_al5 no és directament el code de Port, caldria lògica addicional
+        
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        """Validar abans de guardar"""
+        self.full_clean()
+        super().save(*args, **kwargs)
     
     class Meta:
         db_table = 'buque'
         verbose_name = "Vaixell"
         verbose_name_plural = "Vaixells"
+        indexes = [
+                models.Index(fields=['vessel_ref']),
+                models.Index(fields=['port_ref']),    
+        ]
         #constraints = [
         #    CheckConstraint(
         #        check=Q(unidad_productiva__metodo_produccion__in=[1, 4]),
@@ -319,6 +368,15 @@ class Especie(TimeStampedModel):
     codigo_al3_validator = RegexValidator(
         regex=r'^[A-Za-z]{3}$',
         message='Codi AL3 invàlid (ha de ser 3 lletres)'
+    )
+    species_ref = models.ForeignKey(
+        Species,
+        on_delete=models.PROTECT,
+        to_field='code_3a',
+        related_name='ventas',
+        null=True,
+        blank=True,
+        help_text="Referència a l'espècie del catàleg"
     )
     especie_al3 = models.CharField(
         max_length=3,
@@ -583,6 +641,25 @@ class Especie(TimeStampedModel):
         blank=True,
         help_text="Número d'acta d'inspecció"
     )
+
+    def clean(self):
+        """Validar i sincronitzar espècie amb catàleg"""
+        from django.core.exceptions import ValidationError
+        
+        if self.especie_al3:
+            try:
+                # Buscar l'espècie al catàleg
+                species = Species.objects.get(code_3a=self.especie_al3)
+                self.species_ref = species
+            except Species.DoesNotExist:
+                raise ValidationError({
+                    'especie_al3': f"Espècie '{self.especie_al3}' no trobada al catàleg"
+                })
+
+    def save(self, *args, **kwargs):
+        """Validar abans de guardar"""
+        self.full_clean()
+        super().save(*args, **kwargs)
     
     class Meta:
         db_table = 'especie'
@@ -591,6 +668,7 @@ class Especie(TimeStampedModel):
         verbose_name_plural = "Espècies"
         indexes = [
             models.Index(fields=['especie_al3', 'fecha_venta']),
+            models.Index(fields=['species_ref', 'fecha_venta']),
             models.Index(fields=['arte_al3', 'zona']),
             models.Index(fields=['nif_vendedor', 'fecha_venta']),
             models.Index(fields=['nif_comprador', 'fecha_venta']),

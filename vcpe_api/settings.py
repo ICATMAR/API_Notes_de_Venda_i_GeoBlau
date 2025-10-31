@@ -99,12 +99,12 @@ DATABASES = {
         'CONN_MAX_AGE': 600,
         'OPTIONS': {
             'sslmode': 'require' if not DEBUG else 'prefer',
-            'options': '-c search_path=api_dev,public'
+            #'options': '-c search_path=api_dev,public'
         }
     }
 }
 
-DATABASE_ROUTERS = ['vcpe_api.db_router.SchemaRouter']
+#DATABASE_ROUTERS = ['vcpe_api.db_router.SchemaRouter']
 
 # Cache configuration (usar Redis en comptes de LocMem)
 CACHES = {
@@ -120,6 +120,9 @@ PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.PBKDF2PasswordHasher',
     'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
 ]
+
+# Model d'usuari personalitzat
+AUTH_USER_MODEL = 'authentication.APIUser'
 
 # Password validation amb requisits forts
 AUTH_PASSWORD_VALIDATORS = [
@@ -175,7 +178,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 100,
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    'EXCEPTION_HANDLER': 'vcpe_api.exception_handler.custom_exception_handler',
+    #'EXCEPTION_HANDLER': 'vcpe_api.exception_handler.custom_exception_handler',
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle'

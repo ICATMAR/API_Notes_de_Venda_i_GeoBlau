@@ -6,6 +6,8 @@ from django_ratelimit.decorators import ratelimit
 from django.utils.decorators import method_decorator
 from .models import Envio
 from .serializers import EnvioSerializer, EnvioListSerializer, EnvioStatusSerializer
+from .existing_models import Port, Species, Vessel
+from .serializers import PortSerializer, SpeciesSerializer, VesselSerializer
 import logging
 
 logger = logging.getLogger(__name__)
@@ -69,3 +71,38 @@ class EnvioViewSet(mixins.CreateModelMixin,  # Només CREATE (POST)
         envio = self.get_object()
         serializer = self.get_serializer(envio)
         return Response(serializer.data)
+
+class PortViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    API endpoint per consultar ports (només lectura)
+    """
+    queryset = Port.objects.all()
+    serializer_class = PortSerializer
+    permission_classes = [IsAuthenticated]
+    filterset_fields = ['code', 'name', 'autonomous_community']
+    search_fields = ['name', 'region']
+    ordering_fields = ['name', 'code']
+
+
+class SpeciesViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    API endpoint per consultar espècies (només lectura)
+    """
+    queryset = Species.objects.all()
+    serializer_class = SpeciesSerializer
+    permission_classes = [IsAuthenticated]
+    filterset_fields = ['code_3a', 'taxonomic_group']
+    search_fields = ['scientific_name', 'catalan_name', 'spanish_name']
+    ordering_fields = ['scientific_name', 'code_3a']
+
+
+class VesselViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    API endpoint per consultar vaixells (només lectura)
+    """
+    queryset = Vessel.objects.all()
+    serializer_class = VesselSerializer
+    permission_classes = [IsAuthenticated]
+    filterset_fields = ['code', 'base_port_id']
+    search_fields = ['code', 'name']
+    ordering_fields = ['name', 'code']

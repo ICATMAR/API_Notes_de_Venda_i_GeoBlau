@@ -21,13 +21,38 @@ services:
     #cap_drop:
      # - ALL
 
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: vcpe_postgres
+    environment:
+      POSTGRES_DB: api_segura_bbdd
+      POSTGRES_USER: vcpe_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme_postgres}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init_lab_db.sql:/docker-entrypoint-initdb.d/init_lab_db.sql
+    networks:
+      - vcpe_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vcpe_user -d api_segura_bbdd"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    shm_size: 256mb
+
   api:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: vcpe_api
     command: python manage.py runserver 0.0.0.0:8000
-    #gunicorn vcpe_api.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 60
+    # COMENTEM TEMPORALMENT PER FER PROVA INICIAL: gunicorn vcpe_api.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 60
     volumes:
       - .:/app
       - static_volume:/app/staticfiles
@@ -62,7 +87,7 @@ services:
       - .env
     depends_on:
       - redis
-     #- db
+      - db
     networks:
       - vcpe_network
     restart: unless-stopped
@@ -83,7 +108,7 @@ services:
       - .env
     depends_on:
       - redis
-     #- db
+      - db
     networks:
       - vcpe_network
     restart: unless-stopped
