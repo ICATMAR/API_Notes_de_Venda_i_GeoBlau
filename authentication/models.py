@@ -16,15 +16,49 @@ class APIUser(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     
     # Informació organització
-    organizacion = models.CharField(
+    organization = models.CharField(
         max_length=200,
         help_text="Nom de l'organització (ex: Confraria de pescadors, llotja)"
     )
     
-    cif_organizacion = models.CharField(
+    cif_organization = models.CharField(
         max_length=20,
         unique=True,
         help_text="CIF de l'organització"
+    )
+
+    is_locked = models.BooleanField(
+        default=False,
+        help_text="Indica si el compte està bloquejat per seguretat"
+    )
+
+    locked_until = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Data fins quan està bloquejat el compte"
+    )
+
+    lock_reason = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="Raó del bloqueig del compte"
+    )
+
+    last_failed_login = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Data de l'últim intent de login fallit"
+    )
+
+    password_changed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Data de l'últim canvi de contrasenya"
+    )
+
+    must_change_password = models.BooleanField(
+        default=False,
+        help_text="Indica si l'usuari ha de canviar la contrasenya al proper login"
     )
     
     # Contacte
@@ -98,12 +132,12 @@ class APIUser(AbstractUser):
         verbose_name = "Usuari API"
         verbose_name_plural = "Usuaris API"
         indexes = [
-            models.Index(fields=['cif_organizacion']),
+            models.Index(fields=['cif_organization']),
             models.Index(fields=['is_api_active', 'is_active']),
         ]
     
     def __str__(self):
-        return f"{self.username} - {self.organizacion}"
+        return f"{self.username} - {self.organization}"
     
     def is_account_locked(self):
         """
@@ -181,9 +215,6 @@ class APIAccessLog(models.Model):
         return f"{self.method} {self.endpoint} - {self.status_code} ({self.timestamp})"
 
 
-# ============================================================================
-# NOUS MODELS PER AL TFM - Sistema d'autenticació ampliat
-# ============================================================================
 
 class AuthenticationToken(models.Model):
     """
