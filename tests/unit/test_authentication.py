@@ -7,6 +7,7 @@ from rest_framework import status
 
 
 @pytest.mark.unit
+@pytest.mark.usefixtures('disable_rate_limiting')
 class TestJWTAuthentication:
     """Test suite per autenticació JWT"""
     

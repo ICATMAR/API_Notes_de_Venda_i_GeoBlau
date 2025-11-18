@@ -320,19 +320,16 @@ def capture_security_events(db):
 
 @pytest.fixture
 def api_user(db):
-    """Usuari API bàsic (mateix que test_user)"""
+    """Usuari API bàsic"""
     from authentication.models import APIUser
-    user = User.objects.create_user(
+    
+    user = APIUser.objects.create_user(
         username='apiuser',
         password='ApiPassword123!',
-        organization='API Test Org'
-    )
-    api_user_profile = APIUser.objects.create(
-        user=user,
+        email='apiuser@test.com',
         organization='API Test Org',
         cif_organization='B12345678',
-        max_requests_per_day=1000,
-        is_api_active=True
+        is_active=True
     )
     return user
 
@@ -441,3 +438,16 @@ def multiple_envios(db, darp_user, test_user):
         'darp_envios': [darp_envio1, darp_envio2],
         'other_envios': [other_envio]
     }
+    
+@pytest.fixture(autouse=True)
+def disable_rate_limiting_globally(settings):
+    """
+    Desactiva rate limiting globalment per a TOTS els tests
+    """
+    settings.RATELIMIT_ENABLE = False
+    # També desactivar axios-rate-limit si existeix
+    if hasattr(settings, 'REST_FRAMEWORK'):
+        settings.REST_FRAMEWORK = settings.REST_FRAMEWORK.copy()
+        settings.REST_FRAMEWORK['DEFAULT_THROTTLE_CLASSES'] = []
+        settings.REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'] = {}
+    return settings

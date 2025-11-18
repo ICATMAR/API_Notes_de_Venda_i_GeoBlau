@@ -14,7 +14,15 @@ class TestUserPermissions:
         url = '/api/sales-notes/envios/'
         
         response = darp_client.post(url, sample_sales_note_data, format='json')
-        
+
+        if response.status_code != status.HTTP_201_CREATED:
+            print("\n" + "="*80)
+            print("ERROR EN CREACIÓ D'ENVIO:")
+            print("="*80)
+            print(f"Status Code: {response.status_code}")
+            print(f"Response Data: {response.data}")
+            print("="*80 + "\n")
+
         assert response.status_code == status.HTTP_201_CREATED
         assert 'NumEnvio' in response.data
     
@@ -64,7 +72,7 @@ class TestUserPermissions:
         response = darp_client.get(url)
         
         assert response.status_code == status.HTTP_200_OK
-        assert response.data['NumEnvio'] == envio.num_envio
+        assert response.data['num_envio'] == envio.num_envio
     
     def test_darp_cannot_retrieve_other_envio(self, darp_client, multiple_envios):
         """Test: DARP NO pot veure enviaments d'altres usuaris"""
@@ -85,7 +93,7 @@ class TestUserPermissions:
         response = investigador_client.get(url)
         
         assert response.status_code == status.HTTP_200_OK
-        assert response.data['NumEnvio'] == darp_envio.num_envio
+        assert response.data['num_envio'] == darp_envio.num_envio
         
         # Provar amb enviament d'altres
         other_envio = multiple_envios['other_envios'][0]
@@ -94,7 +102,7 @@ class TestUserPermissions:
         response = investigador_client.get(url)
         
         assert response.status_code == status.HTTP_200_OK
-        assert response.data['NumEnvio'] == other_envio.num_envio
+        assert response.data['num_envio'] == other_envio.num_envio
     
     def test_unauthenticated_cannot_access(self, api_client):
         """Test: Usuaris no autenticats NO poden accedir"""

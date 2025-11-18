@@ -431,14 +431,6 @@ class EnvioInputSerializer(serializers.Serializer):
     Serialitzador d'entrada que accepta PascalCase i ho converteix a snake_case
     Aquest és el format que envia el Ministeri segons l'esquema JSON
     """
-    NumEnvio = serializers.CharField(source='num_envio')
-    TipoRespuesta = serializers.IntegerField(source='tipo_respuesta')
-    EstablecimientosVenta = serializers.DictField(
-        child=serializers.ListField(
-            child=serializers.DictField()
-        ),
-        required=False
-    )
     
     def to_internal_value(self, data):
         """
@@ -456,7 +448,7 @@ class EnvioInputSerializer(serializers.Serializer):
         internal_data = {
             'num_envio': data.get('NumEnvio'),
             'tipo_respuesta': data.get('TipoRespuesta'),
-            'establecimientos': self._convert_establecimientos(establecimientos_list)
+            'establecimientos_venta': self._convert_establecimientos(establecimientos_list) 
         }
         
         return internal_data
@@ -468,7 +460,7 @@ class EnvioInputSerializer(serializers.Serializer):
             converted_est = {
                 'num_identificacion_establec': est.get('NumIdentificacionEstablec'),
                 'nombre_establecimiento': est.get('NombreEstablecimiento'),
-                'unidades_productivas': self._convert_unidades(
+                'ventas_unidad_productiva': self._convert_unidades(
                     est.get('Ventas', {}).get('VentasUnidadProductiva', [])
                 )
             }

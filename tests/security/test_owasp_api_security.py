@@ -68,7 +68,7 @@ class TestOWASPAPISecurity:
         # Fer moltes peticions ràpidament
         responses = []
         for i in range(150):  # Més del limit (100/hora per anon)
-            response = api_client.post(url, data)
+            response = api_client.post(url, data, format='json')
             responses.append(response.status_code)
         
         # Alguna petició hauria de retornar 429 Too Many Requests
@@ -85,7 +85,7 @@ class TestOWASPAPISecurity:
         assert response.status_code in [status.HTTP_403_FORBIDDEN, status.HTTP_302_FOUND]
     
     # API6:2023 - Unrestricted Access to Sensitive Business Flows
-    def test_prevent_automated_submission(self, authenticated_client):
+    def test_prevent_automated_submission(self, darp_client):
         """Test: Prevenir enviaments automatitzats massius"""
         url = '/api/sales-notes/envios/'
         
@@ -97,7 +97,7 @@ class TestOWASPAPISecurity:
                 'TipoRespuesta': 1,
                 # ... més camps
             }
-            response = authenticated_client.post(url, data)
+            response = darp_client.post(url, data, format='json')
             responses.append(response.status_code)
         
         # Hauria d'haver rate limiting
@@ -123,12 +123,17 @@ class TestOWASPAPISecurity:
         """Test: Documentació API no accessible públicament en producció"""
         response = api_client.get('/api/docs/')
         
-        # En producció hauria d'estar restringida
-        if not settings.DEBUG:
+        # En producció hauria d'estar restringida (403)
+        # En desenvolupament pot estar accessible (200)
+        if settings.DEBUG:
+            # En DEBUG mode, la documentació està accessible
+            assert response.status_code in [status.HTTP_200_OK, status.HTTP_403_FORBIDDEN]
+        else:
+            # En producció hauria d'estar restringida
             assert response.status_code == status.HTTP_403_FORBIDDEN
     
     # API10:2023 - Unsafe Consumption of APIs
-    def test_input_validation_sql_injection(self, authenticated_client):
+    def test_input_validation_sql_injection(self, darp_client):
         """Test: Validació d'inputs contra SQL injection"""
         url = '/api/sales-notes/envios/'
         
@@ -138,7 +143,7 @@ class TestOWASPAPISecurity:
             'TipoRespuesta': 1
         }
         
-        response = authenticated_client.post(url, data)
+        response = darp_client.post(url, data, format='json')
         
         # Hauria de fallar la validació, no executar SQL
         assert response.status_code == status.HTTP_400_BAD_REQUEST

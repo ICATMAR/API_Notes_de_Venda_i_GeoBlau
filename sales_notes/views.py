@@ -44,7 +44,7 @@ class EnvioViewSet(mixins.CreateModelMixin,     # POST
     # Filtres, cerca i ordenació
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['tipo_respuesta', 'procesado', 'usuario_envio']
-    search_fields = ['num_envio', 'establecimientos__nombre_establecimiento']
+    search_fields = ['num_envio']
     ordering_fields = ['fecha_recepcion', 'num_envio', 'tipo_respuesta']
     ordering = ['-fecha_recepcion']  # Per defecte: més recents primer
     
@@ -84,43 +84,42 @@ class EnvioViewSet(mixins.CreateModelMixin,     # POST
             return EnvioStatusSerializer
         return EnvioSerializer
     
-@method_decorator(ratelimit(key='user', rate='100/h', method='POST'))
-def create(self, request, *args, **kwargs):
-    """
-    Crear nou enviament amb rate limiting
-    """
-    logger.info(
-        f"User {request.user} creating envio from IP {request.META.get('REMOTE_ADDR')}"
-    )
-    
-    # Validar que només DARP o Admin puguin crear
-    if not (request.user.is_staff or request.user.is_superuser):
-        if not (hasattr(request.user, 'organization') and 'DARP' in request.user.organization.upper()):
-            return Response(
-                {"detail": "Només els usuaris DARP poden crear enviaments."},
-                status=status.HTTP_403_FORBIDDEN
-            )
-    
-    # PRIMER: Convertir de PascalCase a snake_case
-    input_serializer = EnvioInputSerializer(data=request.data)
-    input_serializer.is_valid(raise_exception=True)
-    converted_data = input_serializer.validated_data
-    
-    # SEGON: Validar amb el serializer principal
-    serializer = EnvioSerializer(data=converted_data, context={'request': request})
-    serializer.is_valid(raise_exception=True)
-    
-    # Guardar
-    envio = serializer.save()
-    
-    logger.info(f"Envio {envio.num_envio} created successfully by {request.user}")
-    
-    headers = self.get_success_headers(serializer.data)
-    return Response(
-        serializer.data,
-        status=status.HTTP_201_CREATED,
-        headers=headers
-    )
+    @method_decorator(ratelimit(key='user', rate='100/h', method='POST'), name='dispatch')
+    def create(self, request, *args, **kwargs):
+        """
+        Crear nou enviament amb rate limiting
+        """
+        logger.info(
+            f"User {request.user} creating envio from IP {request.META.get('REMOTE_ADDR')}"
+        )
+        
+        # Validar que només DARP o Admin puguin crear
+        if not (request.user.is_staff or request.user.is_superuser):
+            if not (hasattr(request.user, 'organization') and 'DARP' in request.user.organization.upper()):
+                return Response(
+                    {"detail": "Només els usuaris DARP poden crear enviaments."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        
+        # PRIMER: Convertir de PascalCase a snake_case
+        input_serializer = EnvioInputSerializer()
+        converted_data = input_serializer.to_internal_value(request.data)
+        
+        # SEGON: Validar amb el serializer principal
+        serializer = EnvioSerializer(data=converted_data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        
+        # Guardar
+        envio = serializer.save()
+        
+        logger.info(f"Envio {envio.num_envio} created successfully by {request.user}")
+        
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED,
+            headers=headers
+        )
     
     def list(self, request, *args, **kwargs):
         """
