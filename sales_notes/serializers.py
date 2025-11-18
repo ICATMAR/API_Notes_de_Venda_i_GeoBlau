@@ -163,7 +163,7 @@ class UnidadProductivaSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = UnidadProductiva
-        fields = ['metodo_produccion', 'tipo_unidad', 'buque', 'granja', 'persona', 'especies']
+        fields = ['metodo_produccion', 'buque', 'granja', 'persona', 'especies']
     
     def validate(self, data):
         """

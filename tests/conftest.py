@@ -137,52 +137,6 @@ def multiple_test_users(db):
         users.append(user)
     return users
 
-
-@pytest.fixture
-def sample_sales_note_data():
-    """
-    Dades d'exemple per crear una nota de venda
-    
-    Returns:
-        dict: Payload JSON vàlid per POST /api/sales-notes/envios/
-    """
-    return {
-        "NumEnvio": "TEST_001",
-        "TipoRespuesta": 1,
-        "EstablecimientosVenta": {
-            "EstablecimientoVenta": [{
-                "NumIdentificacionEstablec": "LLOTJA_TEST",
-                "NombreEstablecimiento": "Llotja de Test",
-                "Ventas": {
-                    "VentasUnidadProductiva": [{
-                        "DatosUnidadProductiva": {
-                            "MetodoProduccion": 1,
-                            "CodigoBuque": "TEST-BOAT-001",
-                            "PuertoAL5": "ESBAR",
-                            "FechaRegresoPuerto": "2025-10-22T10:00:00Z"
-                        },
-                        "Especies": {
-                            "Especie": [{
-                                "NumDocVenta": "NV_TEST_001",
-                                "EspecieAL3": "HKE",  # Lluç (Hake)
-                                "FechaVenta": "2025-10-22T11:00:00Z",
-                                "Cantidad": 100.5,
-                                "Precio": 350.00,
-                                "TipoCifNifVendedor": 1,
-                                "NIFVendedor": "12345678A",
-                                "NombreVendedor": "Test Pescador",
-                                "NIFComprador": "B12345678",
-                                "IdTipoNifCifComprador": 1,
-                                "NombreComprador": "Test Comprador SA"
-                            }]
-                        }
-                    }]
-                }
-            }]
-        }
-    }
-
-
 @pytest.fixture
 def invalid_sales_note_data():
     """
@@ -439,15 +393,95 @@ def multiple_envios(db, darp_user, test_user):
         'other_envios': [other_envio]
     }
     
+@pytest.fixture
+def test_catalog_data(db):
+    """
+    Crea dades de catàleg necessàries per als tests
+    (Vessel, Port, Species)
+    
+    Returns:
+        dict: {'vessel': vessel_obj, 'port': port_obj, 'species': species_obj}
+    """
+    from sales_notes.existing_models import Vessel, Port, Species
+    
+    vessel = Vessel.objects.create(
+        id=9999,  # ID explícit (no és auto-increment)
+        code='TEST-001',
+        name='Vaixell de Test',
+        registration_num='TEST-REG-001',
+        base_port_name='Barcelona'
+    )
+    
+    port = Port.objects.create(
+        id=9999,  # ID explícit
+        name='Barcelona',
+        code=8,
+        latitude=41.38,
+        longitude=2.17
+    )
+    
+    species = Species.objects.create(
+        id=9999,  # ID explícit
+        code_3a='HKE',
+        scientific_name='Merluccius merluccius',
+        catalan_name='Lluç',
+        spanish_name='Merluza',
+        english_name='Hake'
+    )
+    
+    return {'vessel': vessel, 'port': port, 'species': species}
+    
 @pytest.fixture(autouse=True)
 def disable_rate_limiting_globally(settings):
-    """
-    Desactiva rate limiting globalment per a TOTS els tests
-    """
+    """Desactiva rate limiting globalment per a TOTS els tests"""
     settings.RATELIMIT_ENABLE = False
-    # També desactivar axios-rate-limit si existeix
     if hasattr(settings, 'REST_FRAMEWORK'):
         settings.REST_FRAMEWORK = settings.REST_FRAMEWORK.copy()
         settings.REST_FRAMEWORK['DEFAULT_THROTTLE_CLASSES'] = []
         settings.REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'] = {}
     return settings
+    
+@pytest.fixture
+def sample_sales_note_data(test_catalog_data):
+    """
+    Dades d'exemple per crear una nota de venda
+    ACTUALITZAT per usar dades de catàleg
+    
+    Returns:
+        dict: Payload JSON vàlid per POST /api/sales-notes/envios/
+    """
+    return {
+        "NumEnvio": "TEST_001",
+        "TipoRespuesta": 1,
+        "EstablecimientosVenta": {
+            "EstablecimientoVenta": [{
+                "NumIdentificacionEstablec": "LLOTJA_TEST",
+                "NombreEstablecimiento": "Llotja de Test",
+                "Ventas": {
+                    "VentasUnidadProductiva": [{
+                        "DatosUnidadProductiva": {
+                            "MetodoProduccion": 1,
+                            "CodigoBuque": "BOAT-001",
+                            "PuertoAL5": "ESBAR",
+                            "FechaRegresoPuerto": "2025-10-22T10:00:00Z"
+                        },
+                        "Especies": {
+                            "Especie": [{
+                                "NumDocVenta": "NV_TEST_001",
+                                "EspecieAL3": "HKE",
+                                "FechaVenta": "2025-10-22T11:00:00Z",
+                                "Cantidad": 100.5,
+                                "Precio": 350.00,
+                                "TipoCifNifVendedor": 1,
+                                "NIFVendedor": "12345678A",
+                                "NombreVendedor": "Test Pescador",
+                                "NIFComprador": "B12345678",
+                                "IdTipoNifCifComprador": 1,
+                                "NombreComprador": "Test Comprador SA"
+                            }]
+                        }
+                    }]
+                }
+            }]
+        }
+    }

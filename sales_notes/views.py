@@ -7,7 +7,7 @@ from django.utils.decorators import method_decorator
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
 from .models import Envio
-from .serializers import EnvioSerializer, EnvioListSerializer, EnvioStatusSerializer
+from .serializers import EnvioSerializer, EnvioListSerializer, EnvioStatusSerializer, EnvioInputSerializer
 from .permissions import DARPCanCreateInvestigadorCanRead
 import logging
 

@@ -160,7 +160,7 @@ class Buque(models.Model):
     )
     
     codigo_buque = models.CharField(
-        max_length=12,
+        max_length=20,  
         db_index=True,
         help_text="Codi del vaixell (matrícula)"
     )
@@ -196,16 +196,17 @@ class Buque(models.Model):
         help_text="Referència al port del catàleg"
     )
     
-    armador = models.CharField(max_length=100, blank=True)
-    capitan = models.CharField(max_length=60, blank=True)
-    
+    armador = models.CharField(max_length=100, blank=True, null=True)
+    capitan = models.CharField(max_length=60, blank=True, null=True)
+
     fecha_regreso_puerto = models.DateTimeField(
         help_text="Data i hora de retorn al port"
     )
-    
+
     cod_marea = models.CharField(
         max_length=50,
         blank=True,
+        null=True,
         help_text="Codi de marea"
     )
 
