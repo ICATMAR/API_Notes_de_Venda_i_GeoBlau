@@ -18,7 +18,7 @@ class TestJWTAuthentication:
             'password': 'TestPassword123!'
         }
         
-        response = api_client.post(url, data)
+        response = api_client.post(url, data,format='json')
         
         assert response.status_code == status.HTTP_200_OK
         assert 'access' in response.data
@@ -32,7 +32,7 @@ class TestJWTAuthentication:
             'password': 'WrongPassword'
         }
         
-        response = api_client.post(url, data)
+        response = api_client.post(url, data,format='json')
         
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
     
@@ -44,13 +44,13 @@ class TestJWTAuthentication:
             'username': 'testuser',
             'password': 'TestPassword123!'
         }
-        response_obtain = api_client.post(url_obtain, data_obtain)
+        response_obtain = api_client.post(url_obtain, data_obtain,format='json')
         refresh_token = response_obtain.data['refresh']
         
         # Ara refresquem
         url_refresh = reverse('authentication:token_refresh')
         data_refresh = {'refresh': refresh_token}
-        response = api_client.post(url_refresh, data_refresh)
+        response = api_client.post(url_refresh, data_refresh, format='json')
         
         assert response.status_code == status.HTTP_200_OK
         assert 'access' in response.data
@@ -63,13 +63,13 @@ class TestJWTAuthentication:
             'username': 'testuser',
             'password': 'TestPassword123!'
         }
-        response_obtain = api_client.post(url_obtain, data_obtain)
+        response_obtain = api_client.post(url_obtain, data_obtain,format='json')
         access_token = response_obtain.data['access']
         
         # Verificar token
         url_verify = reverse('authentication:token_verify')
         data_verify = {'token': access_token}
-        response = api_client.post(url_verify, data_verify)
+        response = api_client.post(url_verify, data_verify, format='json')
         
         assert response.status_code == status.HTTP_200_OK
     
