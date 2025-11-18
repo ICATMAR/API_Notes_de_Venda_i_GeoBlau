@@ -4,6 +4,7 @@ Tests de seguretat basats en OWASP API Security Top 10
 import pytest
 from django.urls import reverse
 from rest_framework import status
+from django.conf import settings
 
 
 @pytest.mark.security

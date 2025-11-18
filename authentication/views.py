@@ -260,7 +260,7 @@ class LoginView(APIView):
             )
             
             # Update last login information
-            user.record_successful_login(ip_address, user_agent)
+            user.record_successful_login(ip_address=ip_address)
             
             # Log successful authentication
             AuthenticationAuditLog.log_event(
@@ -293,7 +293,7 @@ class LoginView(APIView):
             
             return Response(response_data, status=status.HTTP_200_OK)
         
-        except User.DoesNotExist:
+        except APIUser.DoesNotExist:
             # User not found
             AuthenticationAuditLog.log_event(
                 event_type='LOGIN_FAILED',

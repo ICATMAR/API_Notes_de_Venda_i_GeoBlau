@@ -317,3 +317,127 @@ def capture_security_events(db):
         return SecurityEvent.objects.all()[initial_count:]
     
     return get_new_events
+
+@pytest.fixture
+def api_user(db):
+    """Usuari API bàsic (mateix que test_user)"""
+    from authentication.models import APIUser
+    user = User.objects.create_user(
+        username='apiuser',
+        password='ApiPassword123!',
+        organization='API Test Org'
+    )
+    api_user_profile = APIUser.objects.create(
+        user=user,
+        organization='API Test Org',
+        cif_organization='B12345678',
+        max_requests_per_day=1000,
+        is_api_active=True
+    )
+    return user
+
+@pytest.fixture
+def darp_user(db):
+    """
+    Usuari DARP (Generalitat Catalunya)
+    
+    Pot:
+    - Crear enviaments (POST)
+    - Consultar els seus propis enviaments (GET)
+    """
+    from django.contrib.auth.models import Group
+    
+    # Crear grup DARP si no existeix
+    darp_group, _ = Group.objects.get_or_create(name='DARP')
+    
+    user = User.objects.create_user(
+        username='darp_user',
+        email='darp@gencat.cat',
+        password='DarpPassword123!',
+        organization='DARP - Generalitat de Catalunya',
+        is_active=True
+    )
+    user.groups.add(darp_group)
+    return user
+
+
+@pytest.fixture
+def darp_client(api_client, darp_user):
+    """Client API autenticat com a usuari DARP"""
+    refresh = RefreshToken.for_user(darp_user)
+    api_client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
+    return api_client
+
+
+@pytest.fixture
+def investigador_user(db):
+    """
+    Usuari Investigador (ICATMAR)
+    
+    Pot:
+    - Consultar TOTS els enviaments (GET) - només lectura
+    - NO pot crear ni modificar
+    """
+    from django.contrib.auth.models import Group
+    
+    # Crear grup Investigadors si no existeix
+    inv_group, _ = Group.objects.get_or_create(name='Investigadors')
+    
+    user = User.objects.create_user(
+        username='investigador_user',
+        email='investigador@icatmar.cat',
+        password='InvPassword123!',
+        organization='ICATMAR - Investigació',
+        is_active=True
+    )
+    user.groups.add(inv_group)
+    return user
+
+
+@pytest.fixture
+def investigador_client(api_client, investigador_user):
+    """Client API autenticat com a Investigador"""
+    refresh = RefreshToken.for_user(investigador_user)
+    api_client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
+    return api_client
+
+
+@pytest.fixture
+def multiple_envios(db, darp_user, test_user):
+    """
+    Crea múltiples enviaments de diferents usuaris per tests
+    
+    Returns:
+        dict: {
+            'darp_envios': [envio1, envio2],  # Enviaments del DARP
+            'other_envios': [envio3]          # Enviaments d'altres usuaris
+        }
+    """
+    from sales_notes.models import Envio
+    
+    # Enviaments del DARP
+    darp_envio1 = Envio.objects.create(
+        num_envio='DARP_ENV_001',
+        tipo_respuesta=1,
+        usuario_envio=darp_user,
+        ip_origen='192.168.1.10'
+    )
+    darp_envio2 = Envio.objects.create(
+        num_envio='DARP_ENV_002',
+        tipo_respuesta=2,
+        usuario_envio=darp_user,
+        ip_origen='192.168.1.10'
+    )
+    
+    # Enviament d'un altre usuari
+    other_envio = Envio.objects.create(
+        num_envio='OTHER_ENV_001',
+        tipo_respuesta=1,
+        usuario_envio=test_user,
+        ip_origen='192.168.1.20'
+    )
+    
+    return {
+        'darp_envios': [darp_envio1, darp_envio2],
+        'other_envios': [other_envio]
+    }

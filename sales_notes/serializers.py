@@ -426,26 +426,181 @@ class EnvioSerializer(serializers.ModelSerializer):
         # tipo_respuesta == 1: Resposta completa (per defecte)
         return representation
 
-
-class EnvioListSerializer(serializers.ModelSerializer):
-    """Serialitzador lleuger per llistar enviaments"""
-    usuario = serializers.StringRelatedField(source='usuario_envio')
-    num_establecimientos = serializers.IntegerField(
-        source='establecimientos.count',
-        read_only=True
+class EnvioInputSerializer(serializers.Serializer):
+    """
+    Serialitzador d'entrada que accepta PascalCase i ho converteix a snake_case
+    Aquest és el format que envia el Ministeri segons l'esquema JSON
+    """
+    NumEnvio = serializers.CharField(source='num_envio')
+    TipoRespuesta = serializers.IntegerField(source='tipo_respuesta')
+    EstablecimientosVenta = serializers.DictField(
+        child=serializers.ListField(
+            child=serializers.DictField()
+        ),
+        required=False
     )
+    
+    def to_internal_value(self, data):
+        """
+        Convertir format del Ministeri (PascalCase + nested dict)
+        a format Django (snake_case + flat list)
+        """
+        # Extreure el wrapper EstablecimientosVenta.EstablecimientoVenta
+        establecimientos_data = data.get('EstablecimientosVenta', {})
+        if isinstance(establecimientos_data, dict):
+            establecimientos_list = establecimientos_data.get('EstablecimientoVenta', [])
+        else:
+            establecimientos_list = []
+        
+        # Convertir a format intern
+        internal_data = {
+            'num_envio': data.get('NumEnvio'),
+            'tipo_respuesta': data.get('TipoRespuesta'),
+            'establecimientos': self._convert_establecimientos(establecimientos_list)
+        }
+        
+        return internal_data
+    
+    def _convert_establecimientos(self, establecimientos):
+        """Convertir llista d'establiments de PascalCase a snake_case"""
+        result = []
+        for est in establecimientos:
+            converted_est = {
+                'num_identificacion_establec': est.get('NumIdentificacionEstablec'),
+                'nombre_establecimiento': est.get('NombreEstablecimiento'),
+                'unidades_productivas': self._convert_unidades(
+                    est.get('Ventas', {}).get('VentasUnidadProductiva', [])
+                )
+            }
+            result.append(converted_est)
+        return result
+    
+    def _convert_unidades(self, unidades):
+        """Convertir unitats productives"""
+        result = []
+        for unidad in unidades:
+            datos_unidad = unidad.get('DatosUnidadProductiva', {})
+            metodo_produccion = datos_unidad.get('MetodoProduccion')
+            
+            converted_unidad = {
+                'metodo_produccion': metodo_produccion,
+            }
+            
+            # Segons el mètode, determinar el tipus
+            if metodo_produccion in [1, 4] and 'CodigoBuque' in datos_unidad:
+                converted_unidad['buque'] = {
+                    'codigo_buque': datos_unidad.get('CodigoBuque'),
+                    'puerto_al5': datos_unidad.get('PuertoAL5'),
+                    'armador': datos_unidad.get('Armador'),
+                    'capitan': datos_unidad.get('Capitan'),
+                    'fecha_regreso_puerto': datos_unidad.get('FechaRegresoPuerto'),
+                    'cod_marea': datos_unidad.get('CodMarea')
+                }
+            elif metodo_produccion == 2:
+                converted_unidad['granja'] = {
+                    'codigo_rega': datos_unidad.get('CodigoREGA'),
+                    'lugar_descarga': datos_unidad.get('LugarDescarga'),
+                    'fecha_produccion': datos_unidad.get('FechaProduccion')
+                }
+            elif metodo_produccion == 3:
+                converted_unidad['persona'] = {
+                    'nif_persona': datos_unidad.get('NIFPersona'),
+                    'lugar_descarga': datos_unidad.get('LugarDescarga'),
+                    'fecha_descarga': datos_unidad.get('FechaDescarga')
+                }
+            
+            # Convertir espècies
+            especies_data = unidad.get('Especies', {}).get('Especie', [])
+            converted_unidad['especies'] = self._convert_especies(especies_data)
+            
+            result.append(converted_unidad)
+        return result
+    
+    def _convert_especies(self, especies):
+        """Convertir espècies de PascalCase a snake_case"""
+        result = []
+        for esp in especies:
+            converted_esp = {
+                'num_doc_venta': esp.get('NumDocVenta'),
+                'especie_al3': esp.get('EspecieAL3'),
+                'fecha_venta': esp.get('FechaVenta'),
+                'cantidad': esp.get('Cantidad'),
+                'precio': esp.get('Precio'),
+                'tipo_cif_nif_vendedor': esp.get('TipoCifNifVendedor'),
+                'nif_vendedor': esp.get('NIFVendedor'),
+                'nombre_vendedor': esp.get('NombreVendedor'),
+                'nif_comprador': esp.get('NIFComprador'),
+                'id_tipo_nif_cif_comprador': esp.get('IdTipoNifCifComprador'),
+                'nombre_comprador': esp.get('NombreComprador'),
+                # Afegir més camps segons necessitat
+            }
+            
+            # Afegir dates de captura si existeixen
+            fechas_captura = esp.get('FechasCaptura', {}).get('FechaCaptura', [])
+            if fechas_captura:
+                converted_esp['fechas_captura'] = [
+                    {
+                        'fecha_captura_ini': fc.get('FechaCapturaIni'),
+                        'fecha_captura_fin': fc.get('FechaCapturaFin')
+                    }
+                    for fc in fechas_captura
+                ]
+            
+            result.append(converted_esp)
+        return result
+        
+class EnvioListSerializer(serializers.ModelSerializer):
+    """
+    Serialitzador resumit per llistat d'enviaments
+    
+    Només mostra camps essencials per no carregar massa dades
+    """
+    usuario_envio = serializers.StringRelatedField(read_only=True)
+    num_establecimientos = serializers.SerializerMethodField()
+    num_especies = serializers.SerializerMethodField()
     
     class Meta:
         model = Envio
         fields = [
-            'id', 'num_envio', 'tipo_respuesta',
-            'fecha_recepcion', 'procesado', 'validado',
-            'usuario', 'num_establecimientos'
+            'id',
+            'num_envio',
+            'tipo_respuesta',
+            'procesado',
+            'fecha_recepcion',
+            'usuario_envio',
+            'num_establecimientos',
+            'num_especies',
+            'ip_origen'
         ]
         read_only_fields = fields
+    
+    def get_num_establecimientos(self, obj):
+        """Número d'establiments en aquest enviament"""
+        return obj.establecimientos.count()
+    
+    def get_num_especies(self, obj):
+        """Número total d'espècies en aquest enviament"""
+        total = 0
+        for estab in obj.establecimientos.all():
+            for unidad in estab.unidades_productivas.all():
+                total += unidad.especies.count()
+        return total
 
 
 class EnvioStatusSerializer(serializers.ModelSerializer):
+    """
+    Serialitzador per consultar estat de processament
+    """
+    class Meta:
+        model = Envio
+        fields = [
+            'id',
+            'num_envio',
+            'procesado',
+            'errores_validacion',
+            'fecha_recepcion',
+        ]
+        read_only_fields = fields
     """Serialitzador per consultar l'estat d'un enviament"""
     
     class Meta:

@@ -6,6 +6,7 @@ import hashlib
 import logging
 from django.utils.deprecation import MiddlewareMixin
 from django.utils import timezone
+from django.http.request import RawPostDataException
 from authentication.models import APIAccessLog
 from audit.models import SecurityEvent
 
@@ -39,8 +40,16 @@ class AuditMiddleware(MiddlewareMixin):
         
         # Hash del body per privacitat (no guardem dades sensibles)
         request_body_hash = ''
-        if request.body:
-            request_body_hash = hashlib.sha256(request.body).hexdigest()
+
+        # Només calcular hash per mètodes que poden tenir body
+        if request.method in ['POST', 'PUT', 'PATCH', 'DELETE']:
+            try:
+                body = request.body
+                request_body_hash = hashlib.sha256(body).hexdigest()
+            except RawPostDataException:
+                request_body_hash = hashlib.sha256(b'').hexdigest()
+        else:
+            request_body_hash = hashlib.sha256(b'').hexdigest()
         
         # Només registrar si és una petició a l'API
         if request.path.startswith('/api/'):

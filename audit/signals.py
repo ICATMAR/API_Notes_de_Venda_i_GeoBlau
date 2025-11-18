@@ -149,11 +149,11 @@ def audit_user_changes(sender, instance, created, **kwargs):
             AuditLog.objects.create(
                 action='CREATE',
                 content_object=instance,
-                description=f"Creat usuari {instance.username} ({instance.organizacion})",
+                description=f"Creat usuari {instance.username} ({instance.organization})",
                 new_value={
                     'username': instance.username,
-                    'organizacion': instance.organizacion,
-                    'cif_organizacion': instance.cif_organizacion,
+                    'organization': instance.organization,
+                    'cif_organization': instance.cif_organization,
                 },
                 severity='INFO'
             )
