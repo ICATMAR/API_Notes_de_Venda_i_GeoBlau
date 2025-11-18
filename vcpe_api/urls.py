@@ -22,7 +22,7 @@ urlpatterns = [
     path('', views.root_view, name='root'),
     
     # API endpoints
-    path('api/auth/', include('authentication.urls')),
+    path('api/auth/', include('authentication.urls', namespace='authentication')),
     path('api/sales-notes/', include('sales_notes.urls')),
     
     # Documentació API (OpenAPI/Swagger)
