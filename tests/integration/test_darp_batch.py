@@ -10,7 +10,7 @@ from django.db import transaction
 class TestDARPBatchSubmission:
     """Tests per enviaments batch nocturns del DARP"""
     
-    def test_batch_submission_success(self, darp_client, sample_sales_note_data):
+    def test_batch_submission_success(self, darp_client, sample_sales_note_data, test_catalog_data):
         """Test: Enviar batch de 10 notes de venda amb èxit"""
         url = '/api/sales-notes/envios/'
         created_envios = []
@@ -19,12 +19,12 @@ class TestDARPBatchSubmission:
         for i in range(10):
             # Modificar num_envio per fer-lo únic
             data = sample_sales_note_data.copy()
-            data['NumEnvio'] = f'BATCH_TEST_{i:04d}'
+            data['num_envio'] = f'BATCH_TEST_{i:04d}'
             
             response = darp_client.post(url, data, format='json')
             
             assert response.status_code == status.HTTP_201_CREATED
-            created_envios.append(response.data['NumEnvio'])
+            created_envios.append(response.data['num_envio'])
         
         # Verificar que s'han creat tots
         assert len(created_envios) == 10

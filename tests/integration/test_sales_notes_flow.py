@@ -18,9 +18,9 @@ class TestSalesNotesCompleteFlow:
         response_create = darp_client.post(create_url, sample_sales_note_data, format='json')
         
         assert response_create.status_code == status.HTTP_201_CREATED
-        assert 'NumEnvio' in response_create.data
+        assert 'num_envio' in response_create.data
         envio_id = response_create.data['id']
-        num_envio = response_create.data['NumEnvio']
+        num_envio = response_create.data['num_envio']
         
         # 2. Llistar enviaments (hauria de veure el que acaba de crear)
         list_url = '/api/sales-notes/envios/'
@@ -28,15 +28,15 @@ class TestSalesNotesCompleteFlow:
         
         assert response_list.status_code == status.HTTP_200_OK
         assert len(response_list.data) >= 1
-        assert any(e['NumEnvio'] == num_envio for e in response_list.data)
+        assert any(e['num_envio'] == num_envio for e in response_list.data)
         
         # 3. Consultar detall de l'enviament
         detail_url = f'/api/sales-notes/envios/{envio_id}/'
         response_detail = darp_client.get(detail_url)
         
         assert response_detail.status_code == status.HTTP_200_OK
-        assert response_detail.data['NumEnvio'] == num_envio
-        assert response_detail.data['TipoRespuesta'] == sample_sales_note_data['TipoRespuesta']
+        assert response_detail.data['num_envio'] == num_envio
+        assert response_detail.data['tipo_respuesta'] == sample_sales_note_data['TipoRespuesta']
         
         # 4. Consultar estat
         status_url = f'/api/sales-notes/envios/{envio_id}/status/'
@@ -44,7 +44,7 @@ class TestSalesNotesCompleteFlow:
         
         assert response_status.status_code == status.HTTP_200_OK
         assert 'procesado' in response_status.data
-        assert response_status.data['NumEnvio'] == num_envio
+        assert response_status.data['num_envio'] == num_envio
         
         # 5. Validar auditoria
         from audit.models import AuditLog

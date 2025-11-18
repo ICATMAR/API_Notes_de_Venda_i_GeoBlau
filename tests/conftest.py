@@ -400,20 +400,29 @@ def test_catalog_data(db):
     (Vessel, Port, Species)
     
     Returns:
-        dict: {'vessel': vessel_obj, 'port': port_obj, 'species': species_obj}
+        dict: {'vessels': [vessel_objs], 'port': port_obj, 'species': species_obj}
     """
     from sales_notes.existing_models import Vessel, Port, Species
     
-    vessel = Vessel.objects.create(
-        id=9999,  # ID explícit (no és auto-increment)
-        code='TEST-001',
-        name='Vaixell de Test',
-        registration_num='TEST-REG-001',
-        base_port_name='Barcelona'
-    )
+    # Crear TOTS els vaixells necessaris amb registration_num curt
+    vessels = []
+    vessel_configs = [
+        {'id': 9999, 'code': 'TEST-001', 'reg': 'REG001'},
+        {'id': 10000, 'code': 'BOAT-001', 'reg': 'REG002'},
+    ]
+    
+    for config in vessel_configs:
+        vessel = Vessel.objects.create(
+            id=config['id'],
+            code=config['code'],
+            name=f"Vessel {config['code']}",
+            registration_num=config['reg'], 
+            base_port_name='Barcelona'
+        )
+        vessels.append(vessel)
     
     port = Port.objects.create(
-        id=9999,  # ID explícit
+        id=9999,
         name='Barcelona',
         code=8,
         latitude=41.38,
@@ -421,7 +430,7 @@ def test_catalog_data(db):
     )
     
     species = Species.objects.create(
-        id=9999,  # ID explícit
+        id=9999,
         code_3a='HKE',
         scientific_name='Merluccius merluccius',
         catalan_name='Lluç',
@@ -429,18 +438,8 @@ def test_catalog_data(db):
         english_name='Hake'
     )
     
-    return {'vessel': vessel, 'port': port, 'species': species}
-    
-@pytest.fixture(autouse=True)
-def disable_rate_limiting_globally(settings):
-    """Desactiva rate limiting globalment per a TOTS els tests"""
-    settings.RATELIMIT_ENABLE = False
-    if hasattr(settings, 'REST_FRAMEWORK'):
-        settings.REST_FRAMEWORK = settings.REST_FRAMEWORK.copy()
-        settings.REST_FRAMEWORK['DEFAULT_THROTTLE_CLASSES'] = []
-        settings.REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'] = {}
-    return settings
-    
+    return {'vessels': vessels, 'port': port, 'species': species}
+
 @pytest.fixture
 def sample_sales_note_data(test_catalog_data):
     """
@@ -485,3 +484,44 @@ def sample_sales_note_data(test_catalog_data):
             }]
         }
     }
+
+@pytest.fixture(autouse=True)
+def disable_rate_limiting_globally(settings):
+    """Desactiva rate limiting globalment per a TOTS els tests"""
+    settings.RATELIMIT_ENABLE = False
+    if hasattr(settings, 'REST_FRAMEWORK'):
+        settings.REST_FRAMEWORK = settings.REST_FRAMEWORK.copy()
+        settings.REST_FRAMEWORK['DEFAULT_THROTTLE_CLASSES'] = []
+        settings.REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'] = {}
+    return settings
+    
+
+@pytest.fixture
+def enable_rate_limiting(settings, disable_rate_limiting_globally):
+    """
+    Reactiva rate limiting per a tests específics
+    
+    Com que disable_rate_limiting_globally té autouse=True,
+    primer desactiva el rate limiting. Aquest fixture el reactiva.
+    
+    Usage:
+        def test_rate_limiting(self, api_client, enable_rate_limiting):
+            # Rate limiting està actiu aquí
+    """
+    # Reactivar rate limiting
+    settings.RATELIMIT_ENABLE = True
+    settings.REST_FRAMEWORK = settings.REST_FRAMEWORK.copy()
+    settings.REST_FRAMEWORK['DEFAULT_THROTTLE_CLASSES'] = [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ]
+    settings.REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'] = {
+        'anon': '5/minute',      # Límit MOLT baix per fer fallar ràpid en tests
+        'user': '10/minute'      # 10 peticions per minut
+    }
+    
+    # Important: netejar cache de throttling entre tests
+    from django.core.cache import cache
+    cache.clear()
+    
+    return settings

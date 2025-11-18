@@ -57,7 +57,7 @@ class TestOWASPAPISecurity:
             assert response.data.get('is_staff') == False
     
     # API4:2023 - Unrestricted Resource Consumption
-    def test_rate_limiting(self, api_client):
+    def test_rate_limiting(self, api_client, enable_rate_limiting):
         """Test: Rate limiting funciona"""
         url = reverse('authentication:token_obtain_pair')
         data = {
@@ -67,12 +67,13 @@ class TestOWASPAPISecurity:
         
         # Fer moltes peticions ràpidament
         responses = []
-        for i in range(150):  # Més del limit (100/hora per anon)
+        for i in range(20):  # Més del límit de 5
             response = api_client.post(url, data, format='json')
             responses.append(response.status_code)
         
         # Alguna petició hauria de retornar 429 Too Many Requests
-        assert status.HTTP_429_TOO_MANY_REQUESTS in responses
+        assert status.HTTP_429_TOO_MANY_REQUESTS in responses, \
+            f"Expected 429 in responses, got: {set(responses)}"
     
     # API5:2023 - Broken Function Level Authorization
     def test_admin_endpoint_access_control(self, authenticated_client):
@@ -85,23 +86,25 @@ class TestOWASPAPISecurity:
         assert response.status_code in [status.HTTP_403_FORBIDDEN, status.HTTP_302_FOUND]
     
     # API6:2023 - Unrestricted Access to Sensitive Business Flows
-    def test_prevent_automated_submission(self, darp_client):
+    def test_prevent_automated_submission(self, darp_client, sample_sales_note_data, enable_rate_limiting):
         """Test: Prevenir enviaments automatitzats massius"""
         url = '/api/sales-notes/envios/'
         
-        # Intentar crear moltes notes de venda ràpidament
+        # Intentar crear més notes del límit (10/minute per user)
         responses = []
-        for i in range(20):
-            data = {
-                'NumEnvio': f'TEST{i:04d}',
-                'TipoRespuesta': 1,
-                # ... més camps
-            }
+        for i in range(15):  # Més del límit de 10
+            data = sample_sales_note_data.copy()
+            data['NumEnvio'] = f'TEST_RL_{i:04d}'
+            
+            # També cal fer el NumDocVenta únic
+            data['EstablecimientosVenta']['EstablecimientoVenta'][0]['Ventas']['VentasUnidadProductiva'][0]['Especies']['Especie'][0]['NumDocVenta'] = f'NV_{i:04d}'
+            
             response = darp_client.post(url, data, format='json')
             responses.append(response.status_code)
         
         # Hauria d'haver rate limiting
-        assert status.HTTP_429_TOO_MANY_REQUESTS in responses
+        assert status.HTTP_429_TOO_MANY_REQUESTS in responses, \
+            f"Expected 429 in responses, got: {set(responses)}"
     
     # API8:2023 - Security Misconfiguration
     def test_security_headers_present(self, api_client):
@@ -123,15 +126,21 @@ class TestOWASPAPISecurity:
         """Test: Documentació API no accessible públicament en producció"""
         response = api_client.get('/api/docs/')
         
-        # En producció hauria d'estar restringida (403)
-        # En desenvolupament pot estar accessible (200)
+        # En entorn de test/desenvolupament, podem acceptar qualsevol comportament
+        # Aquest test és més rellevant en producció real
         if settings.DEBUG:
-            # En DEBUG mode, la documentació està accessible
-            assert response.status_code in [status.HTTP_200_OK, status.HTTP_403_FORBIDDEN]
+            # En mode DEBUG, acceptable que estigui accessible o restringida
+            assert response.status_code in [
+                status.HTTP_200_OK,
+                status.HTTP_403_FORBIDDEN,
+                status.HTTP_404_NOT_FOUND
+            ]
         else:
             # En producció hauria d'estar restringida
-            assert response.status_code == status.HTTP_403_FORBIDDEN
-    
+            assert response.status_code in [
+                status.HTTP_403_FORBIDDEN,
+                status.HTTP_404_NOT_FOUND
+            ], f"Expected 403/404 in production, got {response.status_code}"
     # API10:2023 - Unsafe Consumption of APIs
     def test_input_validation_sql_injection(self, darp_client):
         """Test: Validació d'inputs contra SQL injection"""

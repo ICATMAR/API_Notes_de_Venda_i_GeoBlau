@@ -24,7 +24,7 @@ class TestUserPermissions:
             print("="*80 + "\n")
 
         assert response.status_code == status.HTTP_201_CREATED
-        assert 'NumEnvio' in response.data
+        assert 'num_envio' in response.data
     
     def test_investigador_cannot_create_envio(self, investigador_client, sample_sales_note_data):
         """Test: Investigador NO pot crear enviaments"""
