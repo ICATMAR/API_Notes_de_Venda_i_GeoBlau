@@ -313,11 +313,14 @@ def darp_user(db):
 
 
 @pytest.fixture
-def darp_client(api_client, darp_user):
+def darp_client(darp_user):
     """Client API autenticat com a usuari DARP"""
+    from rest_framework.test import APIClient
+
+    client = APIClient() 
     refresh = RefreshToken.for_user(darp_user)
-    api_client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
-    return api_client
+    client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
+    return client
 
 
 @pytest.fixture
@@ -346,11 +349,14 @@ def investigador_user(db):
 
 
 @pytest.fixture
-def investigador_client(api_client, investigador_user):
+def investigador_client(investigador_user):
     """Client API autenticat com a Investigador"""
+    from rest_framework.test import APIClient
+
+    client = APIClient()
     refresh = RefreshToken.for_user(investigador_user)
-    api_client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
-    return api_client
+    client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
+    return client
 
 
 @pytest.fixture
@@ -500,28 +506,35 @@ def disable_rate_limiting_globally(settings):
 def enable_rate_limiting(settings, disable_rate_limiting_globally):
     """
     Reactiva rate limiting per a tests específics
-    
-    Com que disable_rate_limiting_globally té autouse=True,
-    primer desactiva el rate limiting. Aquest fixture el reactiva.
-    
-    Usage:
-        def test_rate_limiting(self, api_client, enable_rate_limiting):
-            # Rate limiting està actiu aquí
     """
-    # Reactivar rate limiting
+    # Reactivar AMBDÓS sistemes de rate limiting
+    
+    # 1. Django-ratelimit (decoradors @ratelimit)
     settings.RATELIMIT_ENABLE = True
+    
+    # 2. DRF Throttling (REST_FRAMEWORK settings)
     settings.REST_FRAMEWORK = settings.REST_FRAMEWORK.copy()
     settings.REST_FRAMEWORK['DEFAULT_THROTTLE_CLASSES'] = [
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle'
     ]
     settings.REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'] = {
-        'anon': '5/minute',      # Límit MOLT baix per fer fallar ràpid en tests
-        'user': '10/minute'      # 10 peticions per minut
+        'anon': '5/minute',      # Molt baix per tests
+        'user': '10/minute'      # Molt baix per tests
     }
     
-    # Important: netejar cache de throttling entre tests
+    # 3. Netejar cache de throttling
     from django.core.cache import cache
     cache.clear()
     
-    return settings
+    # 4. IMPORTANT: Re-instanciar els throttles amb els nous settings
+    from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
+    AnonRateThrottle.cache = cache
+    AnonRateThrottle.rate = '5/minute'
+    UserRateThrottle.cache = cache  
+    UserRateThrottle.rate = '10/minute'
+    
+    yield settings
+    
+    # Cleanup: restaurar cache
+    cache.clear()

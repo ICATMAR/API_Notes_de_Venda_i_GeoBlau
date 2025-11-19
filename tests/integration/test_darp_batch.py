@@ -19,8 +19,9 @@ class TestDARPBatchSubmission:
         for i in range(10):
             # Modificar num_envio per fer-lo únic
             data = sample_sales_note_data.copy()
-            data['num_envio'] = f'BATCH_TEST_{i:04d}'
+            data['NumEnvio'] = f'BATCH_TEST_{i:04d}'
             
+            data['EstablecimientosVenta']['EstablecimientoVenta'][0]['Ventas']['VentasUnidadProductiva'][0]['Especies']['Especie'][0]['NumDocVenta'] = f'NV_BATCH_{i:04d}'
             response = darp_client.post(url, data, format='json')
             
             assert response.status_code == status.HTTP_201_CREATED
