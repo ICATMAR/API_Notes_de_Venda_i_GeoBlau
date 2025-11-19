@@ -11,6 +11,7 @@ from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils.translation import gettext_lazy as _
+from drf_spectacular.utils import extend_schema_field
 
 from .models import APIUser, AuthenticationToken, AuthenticationAuditLog
 
@@ -123,13 +124,14 @@ class UserSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = fields
     
-    def get_is_account_locked(self, obj):
+    @extend_schema_field(serializers.BooleanField())
+    def get_is_account_locked(self, obj) -> bool:
         """
         Get current account lock status.
-        
+
         Args:
             obj (User): User instance
-            
+
         Returns:
             bool: True if account is currently locked
         """
@@ -348,13 +350,14 @@ class AuthenticationTokenSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = fields
     
-    def get_is_valid_token(self, obj):
+    @extend_schema_field(serializers.BooleanField())
+    def get_is_valid_token(self, obj) -> bool:
         """
         Check if token is currently valid.
-        
+
         Args:
             obj (AuthenticationToken): Token instance
-            
+
         Returns:
             bool: True if token is valid
         """

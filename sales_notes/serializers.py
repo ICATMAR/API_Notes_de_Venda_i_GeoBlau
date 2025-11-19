@@ -3,6 +3,7 @@ Serialitzadors per l'API de notes de venda
 Implementen validacions segons l'esquema JSON proporcionat
 """
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 from .models import (
     Envio, EstablecimientoVenta, UnidadProductiva,
     Buque, Granja, PersonaFisicaJuridica,
@@ -566,11 +567,13 @@ class EnvioListSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = fields
     
-    def get_num_establecimientos(self, obj):
+    @extend_schema_field(serializers.IntegerField())
+    def get_num_establecimientos(self, obj) -> int:
         """Número d'establiments en aquest enviament"""
         return obj.establecimientos.count()
-    
-    def get_num_especies(self, obj):
+
+    @extend_schema_field(serializers.IntegerField())
+    def get_num_especies(self, obj) -> int:
         """Número total d'espècies en aquest enviament"""
         total = 0
         for estab in obj.establecimientos.all():

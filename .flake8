@@ -1,0 +1,60 @@
+[flake8]
+# Configuració de flake8 per al projecte VCPE API
+
+# Llargada màxima de línia (consistent amb black)
+max-line-length = 120
+
+# Errors i warnings a ignorar
+extend-ignore =
+    # E203: whitespace before ':' (incompatible amb black)
+    E203,
+    # W503: line break before binary operator (incompatible amb black)
+    W503,
+    # E501: line too long (gestionat per black)
+    E501,
+    # F401: imported but unused (en __init__.py és normal)
+    # Només en __init__.py específics si cal
+
+# Directoris a excloure
+exclude =
+    .git,
+    __pycache__,
+    .venv,
+    venv,
+    env,
+    ENV,
+    build,
+    dist,
+    *.egg-info,
+    .pytest_cache,
+    .mypy_cache,
+    migrations,
+    .tox,
+    htmlcov,
+
+# Complexitat ciclomàtica màxima
+max-complexity = 10
+
+# Nombre màxim d'arguments per funció
+max-args = 8
+
+# Configuració per imports
+per-file-ignores =
+    # __init__.py pot tenir imports no utilitzats
+    __init__.py:F401,F403
+    # Settings pot tenir imports d'entorn
+    settings.py:F405
+    # Tests poden tenir imports llargs
+    tests/*:E501
+
+# Mostrar codi d'error
+show-source = True
+
+# Estadístiques
+statistics = True
+
+# Format de sortida
+format = default
+
+# Habilitar comprovació de docstrings
+docstring-convention = google

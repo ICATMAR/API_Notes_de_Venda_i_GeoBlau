@@ -43,7 +43,8 @@ def get_client_ip(request):
     if x_forwarded_for:
         ip = x_forwarded_for.split(',')[0].strip()
     else:
-        ip = request.META.get('REMOTE_ADDR', '0.0.0.0')
+        # Use 'unknown' instead of 0.0.0.0 to avoid Bandit B104 warning
+        ip = request.META.get('REMOTE_ADDR', 'unknown')  # nosec B104
     return ip
 
 

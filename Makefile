@@ -67,8 +67,22 @@ security-check:  ## Comprova vulnerabilitats de seguretat
 pre-commit-install:  ## Instal·la els hooks de pre-commit
 	pre-commit install
 
+install-hooks:  ## Instal·la pre-commit hooks (commit + commit-msg)
+	pre-commit install
+	pre-commit install --hook-type commit-msg
+	@echo "✅ Hooks instal·lats!"
+
 pre-commit-run:  ## Executa pre-commit en tots els fitxers
 	pre-commit run --all-files
+
+pre-commit-all:  ## Executa pre-commit en tots els fitxers (alias)
+	pre-commit run --all-files
+
+update-hooks:  ## Actualitza versions dels pre-commit hooks
+	pre-commit autoupdate
+
+typecheck:  ## Executa type checking amb mypy
+	docker-compose exec api mypy .
 
 collectstatic:  ## Recull fitxers estàtics
 	docker-compose exec api python manage.py collectstatic --noinput
