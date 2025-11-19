@@ -140,7 +140,7 @@ add_section "## 2. Tests d'Autenticació JWT"
 echo -e "${YELLOW}▶ 2.1 Obtenir Token JWT${NC}"
 TOKEN_RESPONSE=$(curl -s -X POST http://localhost:8000/api/auth/token/ \
   -H "Content-Type: application/json" \
-  -d '{"username": "admin_test", "password": "TestSecure123!"}')
+  -d '{"username": "admin_test", "password": "admin"}')
 
 if echo "$TOKEN_RESPONSE" | grep -q "access"; then
     echo -e "${GREEN}  ✓ Token obtingut correctament${NC}"
@@ -278,14 +278,6 @@ echo -e "${MAGENTA}━━━━━━━━━━━━━━━━━━━━�
 
 # Taula resum
 cat >> "$CONSOLIDATED_REPORT" << EOF
-
-## 📚 Referències per a la Memòria
-
-- OWASP API Security Top 10 2023
-- Django Security Checklist
-- Microsoft Security Development Lifecycle (SDL)
-- MAGERIT v3 - Metodologia de Análisis y Gestión de Riesgos
-
 ---
 
 *Report generat automàticament per run_all_tests_with_report.sh*  

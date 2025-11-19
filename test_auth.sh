@@ -129,7 +129,7 @@ TOKEN_RESPONSE=$(curl -s -X POST http://localhost:8000/api/auth/token/ \
   -H "Content-Type: application/json" \
   -d '{
     "username": "admin_test",
-    "password": "TestSecure123!"
+    "password": "admin"
   }')
 
 run_test "Obtenir Token JWT amb credencials vàlides" \
@@ -421,7 +421,7 @@ TOKEN_RESPONSE=$(curl -s -X POST http://localhost:8000/api/auth/token/ \
   -H "Content-Type: application/json" \
   -d '{
     "username": "admin_test",
-    "password": "TestSecure123!"
+    "password": "admin"
   }')
 
 run_test "Obtenir Token JWT amb credencials vàlides" \
@@ -713,7 +713,7 @@ TOKEN_RESPONSE=$(curl -s -X POST http://localhost:8000/api/auth/token/ \
   -H "Content-Type: application/json" \
   -d '{
     "username": "admin_test",
-    "password": "TestSecure123!"
+    "password": "admin"
   }')
 
 run_test "Obtenir Token JWT amb credencials vàlides" \
@@ -1005,7 +1005,7 @@ TOKEN_RESPONSE=$(curl -s -X POST http://localhost:8000/api/auth/token/ \
   -H "Content-Type: application/json" \
   -d '{
     "username": "admin_test",
-    "password": "TestSecure123!"
+    "password": "admin"
   }')
 
 run_test "Obtenir Token JWT amb credencials vàlides" \
@@ -1297,7 +1297,7 @@ TOKEN_RESPONSE=$(curl -s -X POST http://localhost:8000/api/auth/token/ \
   -H "Content-Type: application/json" \
   -d '{
     "username": "admin_test",
-    "password": "TestSecure123!"
+    "password": "admin"
   }')
 
 run_test "Obtenir Token JWT amb credencials vàlides" \
