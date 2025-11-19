@@ -53,7 +53,7 @@ coverage:  ## Genera informe de cobertura
 	@echo "Informe generat a htmlcov/index.html"
 
 lint:  ## Executa linters (flake8, mypy)
-	docker-compose exec api flake8 .
+	docker-compose exec api flake8 . --max-line-length=120 --extend-ignore=E203,W503
 	docker-compose exec api mypy .
 
 format:  ## Formata el codi amb black i isort

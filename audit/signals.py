@@ -1,15 +1,18 @@
 """
 Signals per auditoria automàtica de canvis en models crítics
 """
-from django.db.models.signals import post_save, post_delete, pre_save
-from django.dispatch import receiver
-from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
-from sales_notes.models import Envio, Especie
-from authentication.models import APIUser
-from audit.models import AuditLog
+
 import logging
 
-logger = logging.getLogger('audit')
+from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
+from django.db.models.signals import post_delete, post_save, pre_save
+from django.dispatch import receiver
+
+from audit.models import AuditLog
+from authentication.models import APIUser
+from sales_notes.models import Envio, Especie
+
+logger = logging.getLogger("audit")
 
 
 @receiver(post_save, sender=Envio)
@@ -18,16 +21,16 @@ def audit_envio_created(sender, instance, created, **kwargs):
     if created:
         try:
             AuditLog.objects.create(
-                action='CREATE',
+                action="CREATE",
                 user=instance.usuario_envio,
                 content_object=instance,
                 description=f"Creat enviament {instance.num_envio}",
                 new_value={
-                    'num_envio': instance.num_envio,
-                    'tipo_respuesta': instance.tipo_respuesta,
-                    'fecha_recepcion': instance.fecha_recepcion.isoformat(),
+                    "num_envio": instance.num_envio,
+                    "tipo_respuesta": instance.tipo_respuesta,
+                    "fecha_recepcion": instance.fecha_recepcion.isoformat(),
                 },
-                severity='INFO'
+                severity="INFO",
             )
             logger.info(f"Auditat creació d'enviament {instance.num_envio}")
         except Exception as e:
@@ -40,28 +43,28 @@ def audit_envio_status_change(sender, instance, **kwargs):
     if instance.pk:  # Només si és una actualització
         try:
             old_instance = Envio.objects.get(pk=instance.pk)
-            
+
             # Detectar canvis importants
             if old_instance.procesado != instance.procesado:
                 AuditLog.objects.create(
-                    action='UPDATE',
+                    action="UPDATE",
                     user=instance.usuario_envio,
                     content_object=instance,
                     description=f"Canviat estat processament de {instance.num_envio}",
-                    old_value={'procesado': old_instance.procesado},
-                    new_value={'procesado': instance.procesado},
-                    severity='INFO'
+                    old_value={"procesado": old_instance.procesado},
+                    new_value={"procesado": instance.procesado},
+                    severity="INFO",
                 )
-            
+
             if old_instance.validado != instance.validado:
                 AuditLog.objects.create(
-                    action='UPDATE',
+                    action="UPDATE",
                     user=instance.usuario_envio,
                     content_object=instance,
                     description=f"Canviat estat validació de {instance.num_envio}",
-                    old_value={'validado': old_instance.validado},
-                    new_value={'validado': instance.validado},
-                    severity='WARNING' if not instance.validado else 'INFO'
+                    old_value={"validado": old_instance.validado},
+                    new_value={"validado": instance.validado},
+                    severity="WARNING" if not instance.validado else "INFO",
                 )
         except Envio.DoesNotExist:
             pass
@@ -73,24 +76,23 @@ def audit_envio_status_change(sender, instance, **kwargs):
 def audit_user_login(sender, request, user, **kwargs):
     """Auditar login exitós"""
     try:
-        ip_address = request.META.get('REMOTE_ADDR')
-        
+        ip_address = request.META.get("REMOTE_ADDR")
+
         AuditLog.objects.create(
-            action='LOGIN',
+            action="LOGIN",
             user=user,
             description=f"Login exitós de {user.username}",
             ip_address=ip_address,
-            user_agent=request.META.get('HTTP_USER_AGENT', ''),
-            severity='INFO'
+            user_agent=request.META.get("HTTP_USER_AGENT", ""),
+            severity="INFO",
         )
-        
+
         # Actualitzar última IP de login
-        if hasattr(user, 'last_login_ip'):
+        if hasattr(user, "last_login_ip"):
             user.last_login_ip = ip_address
             user.reset_failed_login()
-            user.save(update_fields=['last_login_ip', 'failed_login_attempts', 
-                                    'account_locked_until'])
-        
+            user.save(update_fields=["last_login_ip", "failed_login_attempts", "account_locked_until"])
+
         logger.info(f"Login exitós: {user.username} des de {ip_address}")
     except Exception as e:
         logger.error(f"Error auditant login: {str(e)}", exc_info=True)
@@ -101,11 +103,11 @@ def audit_user_logout(sender, request, user, **kwargs):
     """Auditar logout"""
     try:
         AuditLog.objects.create(
-            action='LOGOUT',
+            action="LOGOUT",
             user=user,
             description=f"Logout de {user.username}",
-            ip_address=request.META.get('REMOTE_ADDR') if request else None,
-            severity='INFO'
+            ip_address=request.META.get("REMOTE_ADDR") if request else None,
+            severity="INFO",
         )
         logger.info(f"Logout: {user.username}")
     except Exception as e:
@@ -116,27 +118,25 @@ def audit_user_logout(sender, request, user, **kwargs):
 def audit_failed_login(sender, credentials, request, **kwargs):
     """Auditar intents de login fallits"""
     try:
-        username = credentials.get('username', 'Unknown')
-        ip_address = request.META.get('REMOTE_ADDR') if request else None
-        
+        username = credentials.get("username", "Unknown")
+        ip_address = request.META.get("REMOTE_ADDR") if request else None
+
         AuditLog.objects.create(
-            action='FAILED_LOGIN',
+            action="FAILED_LOGIN",
             description=f"Intent de login fallit per {username}",
             ip_address=ip_address,
-            user_agent=request.META.get('HTTP_USER_AGENT', '') if request else '',
-            severity='WARNING'
+            user_agent=request.META.get("HTTP_USER_AGENT", "") if request else "",
+            severity="WARNING",
         )
-        
+
         # Incrementar contador d'intents fallits si l'usuari existeix
         try:
             user = APIUser.objects.get(username=username)
             user.increment_failed_login()
         except APIUser.DoesNotExist:
             pass
-        
-        logger.warning(
-            f"Intent de login fallit: {username} des de {ip_address}"
-        )
+
+        logger.warning(f"Intent de login fallit: {username} des de {ip_address}")
     except Exception as e:
         logger.error(f"Error auditant login fallit: {str(e)}", exc_info=True)
 
@@ -147,24 +147,24 @@ def audit_user_changes(sender, instance, created, **kwargs):
     try:
         if created:
             AuditLog.objects.create(
-                action='CREATE',
+                action="CREATE",
                 content_object=instance,
                 description=f"Creat usuari {instance.username} ({instance.organization})",
                 new_value={
-                    'username': instance.username,
-                    'organization': instance.organization,
-                    'cif_organization': instance.cif_organization,
+                    "username": instance.username,
+                    "organization": instance.organization,
+                    "cif_organization": instance.cif_organization,
                 },
-                severity='INFO'
+                severity="INFO",
             )
         else:
             # Per actualitzacions, només registrar si hi ha canvis importants
             # (això requeriria guardar l'estat anterior, es pot fer amb django-dirtyfields)
             AuditLog.objects.create(
-                action='UPDATE',
+                action="UPDATE",
                 content_object=instance,
                 description=f"Actualitzat usuari {instance.username}",
-                severity='INFO'
+                severity="INFO",
             )
     except Exception as e:
         logger.error(f"Error auditant usuari: {str(e)}", exc_info=True)
@@ -175,13 +175,13 @@ def audit_envio_deleted(sender, instance, **kwargs):
     """Auditar eliminació d'enviaments (molt crític!)"""
     try:
         AuditLog.objects.create(
-            action='DELETE',
+            action="DELETE",
             description=f"ELIMINAT enviament {instance.num_envio}",
             old_value={
-                'num_envio': instance.num_envio,
-                'fecha_recepcion': instance.fecha_recepcion.isoformat(),
+                "num_envio": instance.num_envio,
+                "fecha_recepcion": instance.fecha_recepcion.isoformat(),
             },
-            severity='CRITICAL'
+            severity="CRITICAL",
         )
         logger.critical(f"ELIMINAT enviament {instance.num_envio}")
     except Exception as e:
