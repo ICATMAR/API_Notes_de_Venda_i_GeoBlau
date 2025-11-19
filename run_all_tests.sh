@@ -274,73 +274,10 @@ echo -e "${MAGENTA}━━━━━━━━━━━━━━━━━━━━�
 echo -e "${MAGENTA}  7. GENERANT RESUM I CONCLUSIONS                          ${NC}"
 echo -e "${MAGENTA}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
-add_section "## 7. Resum Executiu"
+#add_section "## 7. Resum Executiu"
 
 # Taula resum
 cat >> "$CONSOLIDATED_REPORT" << EOF
-
-| Categoria | Estat |
-|-----------|-------|
-| **Connectivitat** | ✅ Operatiu |
-| **Autenticació JWT** | ✅ Implementat |
-| **Tests Automatitzats** | ⚠️ En desenvolupament |
-| **Seguretat (SAST)** | ✅ Analitzat |
-| **Cobertura Codi** | ⚠️ Per completar |
-| **Documentació** | ✅ Accessible |
-
----
-
-## 8. Conclusions i Recomanacions
-
-### ✅ Punts Forts
-
-1. **Infraestructura Docker**: Correctament configurada amb docker-compose
-2. **Autenticació JWT**: Sistema implementat i funcional
-3. **Health Checks**: Endpoints de monitoratge operatius
-4. **Documentació API**: Swagger/ReDoc accessibles i actualitzats
-5. **Seguretat**: Headers i configuracions bàsiques implementades
-
-### ⚠️ Àrees de Millora
-
-1. **Tests Automatitzats**: Completar suite de tests pytest (OE5-T5.1)
-2. **Cobertura de Codi**: Incrementar fins >80% (objectiu TFM)
-3. **Base de Dades**: Configurar PostgreSQL/PostGIS (OE3-T3.1)
-4. **Endpoints**: Implementar CRUD de sales_notes (OE2-T2.2)
-5. **Validacions**: Sistema de validació automàtica (OE2-T2.5)
-
-### 📋 Següents Passos per al TFM
-
-**Prioritat Alta (Aquesta setmana):**
-1. Configurar PostgreSQL/PostGIS
-2. Executar migracions
-3. Implementar models de sales_notes
-4. Crear tests unitaris per autenticació
-
-**Prioritat Mitjana (Propera setmana):**
-1. Desenvolupar endpoints CRUD
-2. Implementar validacions
-3. Tests d'integració
-4. Tests de seguretat OWASP
-
-**Prioritat Baixa (Abans de lliurament):**
-1. Tests de performance (Locust)
-2. OWASP ZAP penetration testing
-3. Documentació completa
-4. Anàlisi de riscos MAGERIT
-
----
-
-## 📊 Mètriques del Projecte
-
-| Mètrica | Valor Actual | Objectiu TFM |
-|---------|--------------|--------------|
-| Cobertura Tests | TBD | >80% |
-| Tests Automatitzats | 0 | >50 |
-| Vulnerabilitats High | 0 | 0 |
-| Endpoints Implementats | 3 | >10 |
-| Temps Resposta API | <100ms | <500ms |
-
----
 
 ## 📚 Referències per a la Memòria
 
