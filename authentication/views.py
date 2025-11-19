@@ -41,7 +41,7 @@ def get_client_ip(request):
     if x_forwarded_for:
         ip = x_forwarded_for.split(",")[0].strip()
     else:
-        ip = request.META.get("REMOTE_ADDR", "0.0.0.0")
+        ip = request.META.get("REMOTE_ADDR", "unknown")
     return ip
 
 
@@ -223,7 +223,7 @@ class LoginView(APIView):
             expires_at = timezone.now() + access_token_lifetime
 
             # Store tokens in database
-            AuthenticationToken.objects.create(
+            AuthenticationToken.objects.create(  # nosec B106
                 jti=str(refresh.access_token["jti"]),
                 user=user,
                 token_type="access",
@@ -234,7 +234,7 @@ class LoginView(APIView):
 
             refresh_lifetime = getattr(settings, "SIMPLE_JWT", {}).get("REFRESH_TOKEN_LIFETIME", timedelta(days=7))
 
-            AuthenticationToken.objects.create(
+            AuthenticationToken.objects.create(  # nosec B106
                 jti=str(refresh["jti"]),
                 user=user,
                 token_type="refresh",

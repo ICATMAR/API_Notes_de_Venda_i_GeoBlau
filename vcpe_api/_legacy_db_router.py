@@ -1,11 +1,9 @@
 """
-Database Router per compartir taules Django core (public) 
+Database Router per compartir taules Django core (public)
 i crear només les específiques del projecte (api_dev)
 
 Col·loca aquest fitxer a: vcpe_api/db_router.py
 """
-
-from django.conf import settings
 
 
 class SchemaRouter:

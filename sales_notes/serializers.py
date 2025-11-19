@@ -6,10 +6,9 @@ Implementen validacions segons l'esquema JSON proporcionat
 import logging
 from datetime import datetime
 
-import jsonschema
 from django.db import transaction
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
-from .serializers import UnidadProductivaSerializer
 
 from .existing_models import Port, Species, Vessel
 from .models import (
@@ -544,11 +543,13 @@ class EnvioListSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = fields
 
-    def get_num_establecimientos(self, obj):
+    @extend_schema_field(serializers.IntegerField())
+    def get_num_establecimientos(self, obj) -> int:
         """Número d'establiments en aquest enviament"""
         return obj.establecimientos.count()
 
-    def get_num_especies(self, obj):
+    @extend_schema_field(serializers.IntegerField())
+    def get_num_especies(self, obj) -> int:
         """Número total d'espècies en aquest enviament"""
         total = 0
         for estab in obj.establecimientos.all():
@@ -558,21 +559,6 @@ class EnvioListSerializer(serializers.ModelSerializer):
 
 
 class EnvioStatusSerializer(serializers.ModelSerializer):
-    """
-    Serialitzador per consultar estat de processament
-    """
-
-    class Meta:
-        model = Envio
-        fields = [
-            "id",
-            "num_envio",
-            "procesado",
-            "errores_validacion",
-            "fecha_recepcion",
-        ]
-        read_only_fields = fields
-
     """Serialitzador per consultar l'estat d'un enviament"""
 
     class Meta:
@@ -600,7 +586,3 @@ class VesselSerializer(serializers.ModelSerializer):
         model = Vessel
         fields = "__all__"
         read_only_fields = "__all__"
-
-
-# Importar datetime per les validacions
-from datetime import datetime

@@ -40,9 +40,9 @@ echo -e "${NC}"
 cat > "$CONSOLIDATED_REPORT" << EOF
 # 📋 Report Consolidat de Tests - VCPE API
 
-**Data d'execució:** $(date '+%d/%m/%Y %H:%M:%S')  
-**Projecte:** TFM Ciberseguretat i Privadesa  
-**Institució:** ICATMAR  
+**Data d'execució:** $(date '+%d/%m/%Y %H:%M:%S')
+**Projecte:** TFM Ciberseguretat i Privadesa
+**Institució:** ICATMAR
 **Autor:** Aram Puig Capdevila
 
 ---
@@ -73,21 +73,21 @@ add_section() {
 run_and_capture() {
     local title="$1"
     local command="$2"
-    
+
     echo -e "${YELLOW}▶ $title${NC}"
     add_section "### $title"
-    
+
     local start_time=$(date +%s)
     local output=$(eval "$command" 2>&1)
     local exit_code=$?
     local end_time=$(date +%s)
     local duration=$((end_time - start_time))
-    
+
     add_section "**Temps d'execució:** ${duration}s"
     add_section '```'
     add_section "$output"
     add_section '```'
-    
+
     if [ $exit_code -eq 0 ]; then
         echo -e "${GREEN}  ✓ Completat (${duration}s)${NC}"
         add_section "**Resultat:** ✅ Completat correctament"
@@ -95,7 +95,7 @@ run_and_capture() {
         echo -e "${RED}  ✗ Error (${duration}s)${NC}"
         add_section "**Resultat:** ❌ Ha fallat amb exit code $exit_code"
     fi
-    
+
     echo ""
     return $exit_code
 }
@@ -186,11 +186,11 @@ if docker-compose exec -T api pytest --version > /dev/null 2>&1; then
     # 3.1 Tests unitaris
     run_and_capture "3.1 Tests Unitaris" \
         "docker-compose exec -T api pytest tests/unit -v --tb=short" || true
-    
+
     # 3.2 Tests d'integració
     run_and_capture "3.2 Tests d'Integració" \
         "docker-compose exec -T api pytest tests/integration -v --tb=short" || true
-    
+
     # 3.3 Tests de seguretat
     run_and_capture "3.3 Tests de Seguretat" \
         "docker-compose exec -T api pytest tests/security -v --tb=short" || true
@@ -212,7 +212,7 @@ add_section "## 4. Cobertura de Codi"
 if docker-compose exec -T api pytest --version > /dev/null 2>&1; then
     run_and_capture "4.1 Generar Informe de Cobertura" \
         "docker-compose exec -T api pytest --cov --cov-report=term --cov-report=html" || true
-    
+
     add_section "ℹ️ Informe HTML disponible a: \`htmlcov/index.html\`"
 else
     add_section "⚠️ **Cobertura no disponible**"
@@ -280,8 +280,8 @@ echo -e "${MAGENTA}━━━━━━━━━━━━━━━━━━━━�
 cat >> "$CONSOLIDATED_REPORT" << EOF
 ---
 
-*Report generat automàticament per run_all_tests_with_report.sh*  
-*Data: $(date '+%d/%m/%Y %H:%M:%S')*  
+*Report generat automàticament per run_all_tests_with_report.sh*
+*Data: $(date '+%d/%m/%Y %H:%M:%S')*
 *TFM Ciberseguretat i Privadesa - ICATMAR*
 
 EOF
@@ -307,7 +307,7 @@ if command -v pandoc &> /dev/null; then
         --toc-depth=3 \
         --css=https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css \
         --self-contained 2>/dev/null || echo "Error generant HTML"
-    
+
     if [ -f "$HTML_REPORT" ]; then
         echo "📄 Report HTML: $HTML_REPORT"
     fi

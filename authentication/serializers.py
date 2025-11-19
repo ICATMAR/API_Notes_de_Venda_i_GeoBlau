@@ -8,9 +8,10 @@ Author: ICATMAR Development Team
 Date: October 2025
 """
 
+from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
-from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils.translation import gettext_lazy as _
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from .models import APIUser, AuthenticationAuditLog, AuthenticationToken
@@ -108,7 +109,8 @@ class UserSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = fields
 
-    def get_is_account_locked(self, obj):
+    @extend_schema_field(serializers.BooleanField())
+    def get_is_account_locked(self, obj) -> bool:
         """
         Get current account lock status.
 
@@ -294,7 +296,8 @@ class AuthenticationTokenSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = fields
 
-    def get_is_valid_token(self, obj):
+    @extend_schema_field(serializers.BooleanField())
+    def get_is_valid_token(self, obj) -> bool:
         """
         Check if token is currently valid.
 

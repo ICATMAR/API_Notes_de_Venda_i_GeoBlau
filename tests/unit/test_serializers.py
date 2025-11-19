@@ -3,16 +3,12 @@ Tests complets per als serializers de sales_notes
 Cobreix validacions, creació i representació de dades
 """
 
-from datetime import date, datetime
+from datetime import datetime
+from decimal import Decimal
 
 import pytest
-from django.utils import timezone
-from rest_framework.exceptions import ValidationError
 
-from sales_notes.models import (
-    Envio,
-    EstablecimientoVenta,
-)
+from sales_notes.models import Envio, EstablecimientoVenta
 from sales_notes.serializers import (
     BuqueSerializer,
     EnvioListSerializer,

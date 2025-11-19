@@ -7,8 +7,8 @@ import uuid
 from decimal import Decimal
 
 from django.contrib.gis.db import models
-from django.core.validators import  MinValueValidator,RegexValidator
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator, RegexValidator
 from django.utils import timezone
 
 from .existing_models import Port, Species, Vessel
@@ -505,7 +505,3 @@ class FechaCaptura(models.Model):
         if self.fecha_captura_fin:
             return f"{self.fecha_captura_ini} - {self.fecha_captura_fin}"
         return f"{self.fecha_captura_ini}"
-
-
-# Importar TimeStampedModel del fitxer anterior
-from .models import TimeStampedModel
