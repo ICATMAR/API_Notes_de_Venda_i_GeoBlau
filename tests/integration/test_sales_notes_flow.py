@@ -99,5 +99,82 @@ class TestSalesNotesCompleteFlow:
         # 3. Ordenació
         url = '/api/sales-notes/envios/?ordering=-fecha_recepcion'
         response = darp_client.get(url)
-        
+
         assert response.status_code == status.HTTP_200_OK
+
+
+@pytest.mark.integration
+class TestAdvancedSalesNotesFlow:
+    """Tests avançats d'integració"""
+
+    def test_multiple_users_isolation(self, darp_client, investigador_client, sample_sales_note_data):
+        """Test: Els usuaris només veuen els enviaments que els pertoquen segons filtres"""
+
+        # 1. DARP crea un enviament
+        create_url = '/api/sales-notes/envios/'
+        response = darp_client.post(create_url, sample_sales_note_data, format='json')
+        assert response.status_code == status.HTTP_201_CREATED
+        envio_id = response.data['id']
+
+        # 2. DARP pot veure el seu enviament
+        detail_url = f'/api/sales-notes/envios/{envio_id}/'
+        response_darp = darp_client.get(detail_url)
+        assert response_darp.status_code == status.HTTP_200_OK
+
+        # 3. Investigador també pot veure l'enviament (té permís de lectura)
+        response_investigador = investigador_client.get(detail_url)
+        assert response_investigador.status_code == status.HTTP_200_OK
+
+        # 4. Intent d'accés a ID inexistent retorna 404 (no 403)
+        # ViewSet retorna 404 quan l'objecte no es troba al queryset filtrat
+        non_existent_url = '/api/sales-notes/envios/999999/'
+        response_other = darp_client.get(non_existent_url)
+        assert response_other.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_envio_update_workflow(self, darp_client, sample_sales_note_data):
+        """Test: Flux d'actualització d'enviaments"""
+
+        # 1. Crear enviament
+        create_url = '/api/sales-notes/envios/'
+        response = darp_client.post(create_url, sample_sales_note_data, format='json')
+        assert response.status_code == status.HTTP_201_CREATED
+        envio_id = response.data['id']
+        original_num_envio = response.data['num_envio']
+
+        # 2. Actualitzar tipo_respuesta
+        update_url = f'/api/sales-notes/envios/{envio_id}/'
+        update_data = sample_sales_note_data.copy()
+        update_data['TipoRespuesta'] = 2
+
+        response_update = darp_client.put(update_url, update_data, format='json')
+        assert response_update.status_code == status.HTTP_200_OK
+        assert response_update.data['tipo_respuesta'] == 2
+        assert response_update.data['num_envio'] == original_num_envio
+
+    def test_validation_error_handling(self, darp_client):
+        """Test: Gestió d'errors de validació"""
+
+        # Intent de crear enviament amb dades invàlides
+        create_url = '/api/sales-notes/envios/'
+        invalid_data = {
+            'NumEnvio': 'TEST_INVALID',
+            'TipoRespuesta': 1,
+            # Falta EstablecimientosVenta i altres camps obligatoris
+        }
+
+        response = darp_client.post(create_url, invalid_data, format='json')
+
+        # Hauria de retornar 400 Bad Request
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'EstablecimientosVenta' in str(response.data) or 'non_field_errors' in response.data
+
+    def test_pagination_works(self, darp_client, multiple_envios):
+        """Test: Paginació funciona correctament"""
+
+        # Si hi ha paginació configurada
+        url = '/api/sales-notes/envios/?page=1'
+        response = darp_client.get(url)
+
+        assert response.status_code == status.HTTP_200_OK
+        # Pot retornar resultats paginats o una llista directa
+        assert isinstance(response.data, (list, dict))

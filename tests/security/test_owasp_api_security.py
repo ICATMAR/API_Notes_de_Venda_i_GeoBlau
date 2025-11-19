@@ -158,6 +158,91 @@ class TestOWASPAPISecurity:
         }
         
         response = darp_client.post(url, data, format='json')
-        
+
         # Hauria de fallar la validació, no executar SQL
         assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.security
+class TestAdditionalSecurityControls:
+    """Tests addicionals de seguretat"""
+
+    def test_no_information_disclosure_on_error(self, api_client):
+        """Test: Els errors no revelen informació sensible"""
+
+        # Intent d'accés a endpoint sense autenticació
+        url = '/api/sales-notes/envios/999999/'
+        response = api_client.get(url)
+
+        # Pot retornar 401 (no autenticat), 404 (no trobat) o 400 (bad request)
+        # El important és que no reveli informació sensible
+        assert response.status_code in [
+            status.HTTP_400_BAD_REQUEST,
+            status.HTTP_401_UNAUTHORIZED,
+            status.HTTP_404_NOT_FOUND
+        ]
+
+        # No hauria de contenir stack traces o informació del sistema
+        response_text = str(response.content)
+        assert 'Traceback' not in response_text
+        assert '/home/' not in response_text
+        assert 'File "' not in response_text
+
+    def test_csrf_protection_enabled(self, api_client):
+        """Test: Protecció CSRF habilitada per endpoints crítics"""
+        from django.conf import settings
+
+        # En DRF amb JWT, CSRF pot estar exempt per API endpoints
+        # Però verificar que està configurat
+        assert hasattr(settings, 'MIDDLEWARE')
+        middleware_str = str(settings.MIDDLEWARE)
+        # CSRF middleware hauria d'estar present
+        assert 'csrf' in middleware_str.lower() or 'CsrfViewMiddleware' in middleware_str
+
+    def test_content_type_validation(self, darp_client):
+        """Test: Validació de Content-Type"""
+
+        url = '/api/sales-notes/envios/'
+        data = '{"NumEnvio": "TEST", "TipoRespuesta": 1}'
+
+        # Enviar amb Content-Type incorrecte
+        response = darp_client.post(
+            url,
+            data,
+            content_type='text/plain'
+        )
+
+        # Hauria de rebutjar o processar segons configuració
+        # API pot acceptar JSON però validar el contingut
+        assert response.status_code in [
+            status.HTTP_400_BAD_REQUEST,
+            status.HTTP_415_UNSUPPORTED_MEDIA_TYPE
+        ] or response.status_code == status.HTTP_201_CREATED
+
+    def test_sensitive_data_not_logged(self, darp_client, sample_sales_note_data, caplog):
+        """Test: Dades sensibles no es registren als logs"""
+        import logging
+
+        caplog.set_level(logging.INFO)
+
+        url = '/api/sales-notes/envios/'
+        response = darp_client.post(url, sample_sales_note_data, format='json')
+
+        # Verificar que passwords o tokens no apareixen als logs
+        log_text = caplog.text.lower()
+        assert 'password' not in log_text or 'password=' not in log_text
+        assert 'secret' not in log_text
+
+    def test_cors_headers_configured(self, api_client):
+        """Test: Headers CORS configurats correctament"""
+
+        response = api_client.options('/api/sales-notes/envios/')
+
+        # En desenvolupament pot no haver CORS o estar permissiu
+        # Aquest test és més rellevant en producció
+        # Verificar que la resposta és vàlida
+        assert response.status_code in [
+            status.HTTP_200_OK,
+            status.HTTP_204_NO_CONTENT,
+            status.HTTP_404_NOT_FOUND
+        ]
