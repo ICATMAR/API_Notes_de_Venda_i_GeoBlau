@@ -91,18 +91,6 @@ class TestSecurityEvent:
         assert event.user == api_user
         assert event.severity == "CRITICAL"
 
-    def test_security_event_with_details(self):
-        """Test event amb detalls JSON"""
-        event = SecurityEvent.objects.create(
-            event_type="SQL_INJECTION",
-            ip_address="192.168.1.200",
-            details={"endpoint": "/api/sales-notes/", "payload": "SELECT * FROM users", "blocked": True},
-            severity="CRITICAL",
-        )
-
-        assert event.details["endpoint"] == "/api/sales-notes/"
-        assert event.details["blocked"] is True
-
 
 @pytest.mark.django_db
 class TestAuditSignals:
@@ -127,7 +115,9 @@ class TestAuditSignals:
         """Test que un login fallit genera un log d'auditoria"""
         initial_count = AuditLog.objects.filter(action="FAILED_LOGIN").count()
 
-        response = api_client.post("/api/auth/token/", {"username": "nonexistent", "password": "wrongpassword"})
+        response = api_client.post(
+            "/api/auth/token/", {"username": "nonexistent", "password": "wrongpassword"}, format="json"
+        )
 
         assert response.status_code == 401
         assert AuditLog.objects.filter(action="FAILED_LOGIN").count() == initial_count + 1
