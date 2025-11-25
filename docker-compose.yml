@@ -11,15 +11,15 @@ services:
     networks:
       - vcpe_network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"] # COMENTEM TEMPORALMENT PER FER PROVA INICIAL: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ] # COMENTEM TEMPORALMENT PER FER PROVA INICIAL: ["CMD", "redis-cli", "--raw", "incr", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
     restart: unless-stopped
     #security_opt:
-     # - no-new-privileges:true
+    # - no-new-privileges:true
     #cap_drop:
-     # - ALL
+    # - ALL
 
   db:
     image: postgis/postgis:16-3.4
@@ -37,7 +37,7 @@ services:
     networks:
       - vcpe_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U vcpe_user -d api_segura_bbdd"]
+      test: [ "CMD-SHELL", "pg_isready -U vcpe_user -d api_segura_bbdd" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -97,6 +97,11 @@ services:
       - no-new-privileges:true
     cap_drop:
       - ALL
+    healthcheck:
+      test: [ "CMD-SHELL", "celery -A vcpe_api inspect ping -d celery@$$HOSTNAME" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   celery_beat:
     build:
@@ -118,12 +123,18 @@ services:
       - no-new-privileges:true
     cap_drop:
       - ALL
+    healthcheck:
+      test: [ "CMD-SHELL", "celery -A vcpe_api inspect ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   postgres_data:
   redis_data:
   static_volume:
   media_volume:
+
 
 networks:
   vcpe_network:

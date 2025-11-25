@@ -56,7 +56,7 @@ class DARPCanCreateInvestigadorCanRead(permissions.BasePermission):
         if not request.user or not request.user.is_authenticated:
             return False
 
-        # Admin pot fer tot
+        # Admin pot fer-ho tot
         if request.user.is_staff or request.user.is_superuser:
             return True
 

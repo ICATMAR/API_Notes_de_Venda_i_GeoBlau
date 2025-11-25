@@ -137,7 +137,7 @@ class TestAdvancedSalesNotesFlow:
         assert response.status_code == status.HTTP_201_CREATED
         envio_id = response.data["id"]
 
-        # 2. DARP pot veure el seu enviament
+        # 2. DARP només pot veure el seu enviament
         detail_url = f"/api/sales-notes/envios/{envio_id}/"
         response_darp = darp_client.get(detail_url)
         assert response_darp.status_code == status.HTTP_200_OK
