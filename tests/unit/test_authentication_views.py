@@ -23,7 +23,7 @@ class TestUserRegistrationView:
 
     def test_user_registration_success(self, api_client):
         """Test registre exitós d'usuari"""
-        url = reverse("authentication:register")
+        url = reverse("authentication:user_registration")
         data = {
             "username": "newuser",
             "email": "newuser@test.com",
@@ -45,7 +45,7 @@ class TestUserRegistrationView:
 
     def test_user_registration_password_mismatch(self, api_client):
         """Test registre amb passwords que no coincideixen"""
-        url = reverse("authentication:register")
+        url = reverse("authentication:user_registration")
         data = {
             "username": "newuser",
             "email": "newuser@test.com",
@@ -62,7 +62,7 @@ class TestUserRegistrationView:
 
     def test_user_registration_duplicate_username(self, api_client, test_user):
         """Test registre amb username que ja existeix"""
-        url = reverse("authentication:register")
+        url = reverse("authentication:user_registration")
         data = {
             "username": "testuser",  # Ja existeix
             "email": "another@test.com",
@@ -292,7 +292,7 @@ class TestUserProfileView:
 
     def test_get_profile_success(self, authenticated_client, test_user):
         """Test obtenir perfil d'usuari autenticat"""
-        url = reverse("authentication:profile")
+        url = reverse("authentication:user_profile")
 
         response = authenticated_client.get(url)
 
@@ -304,7 +304,7 @@ class TestUserProfileView:
 
     def test_get_profile_unauthenticated(self, api_client):
         """Test obtenir perfil sense estar autenticat"""
-        url = reverse("authentication:profile")
+        url = reverse("authentication:user_profile")
 
         response = api_client.get(url)
 
