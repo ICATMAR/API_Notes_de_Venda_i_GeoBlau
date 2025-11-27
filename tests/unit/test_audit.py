@@ -5,12 +5,16 @@ Tests unitaris per al sistema d'auditoria
 from datetime import timedelta
 
 import pytest
+from django.core.cache import cache
+from django.urls import reverse
 from django.utils import timezone
 
 from audit.models import AuditLog, SecurityEvent
+from sales_notes.models import Envio
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("disable_rate_limiting")
 class TestAuditLog:
     """Tests per al model AuditLog"""
 
@@ -113,6 +117,8 @@ class TestAuditSignals:
 
     def test_failed_login_generates_audit_log(self, api_client):
         """Test que un login fallit genera un log d'auditoria"""
+        cache.clear()
+
         initial_count = AuditLog.objects.filter(action="FAILED_LOGIN").count()
 
         response = api_client.post(
@@ -125,6 +131,75 @@ class TestAuditSignals:
         log = AuditLog.objects.filter(action="FAILED_LOGIN").latest("timestamp")
         assert log.severity == "WARNING"
         assert "nonexistent" in log.description
+
+    @pytest.mark.usefixtures("rf")
+    def test_successful_login_resets_failures(self, api_user, rf):
+        """Test que un login exitós reseteja el comptador de fallades i registra IP.
+        (Cobreix la lògica 'user.reset_failed_login()' a audit/signals.py)
+        """
+        from django.contrib.auth import login
+        from django.contrib.sessions.middleware import SessionMiddleware
+        from django.urls import reverse  # Cal afegir import
+
+        # 1. Preparar l'usuari amb intents fallits
+        api_user.failed_login_attempts = 3
+        api_user.save()
+
+        # 2. Preparar la request (simulant middleware)
+        request = rf.get(reverse("authentication:login"))
+        SessionMiddleware(lambda r: r).process_request(request)
+        request.session.save()
+        request.META["REMOTE_ADDR"] = "192.168.1.50"
+
+        # 3. Executar el signal (simulant el login)
+        # Això dispara el signal user_logged_in
+        login(request, api_user)
+
+        # 4. Verificar el log
+        log = AuditLog.objects.latest("timestamp")
+        assert log.action == "LOGIN"
+        assert log.user == api_user
+        assert log.ip_address == "192.168.1.50"
+
+        # 5. Verificar l'usuari
+        api_user.refresh_from_db()
+        assert api_user.failed_login_attempts == 0
+        assert api_user.last_login_ip == "192.168.1.50"
+
+    def test_failed_login_for_nonexistent_user_logs_warning(self, api_client):
+        """Test que un login fallit d'usuari inexistent només registra el log i no dóna error.
+        (Cobreix la ruta 'except APIUser.DoesNotExist' a audit/signals.py L137)
+        """
+        initial_count = AuditLog.objects.filter(action="FAILED_LOGIN").count()
+
+        # Utilitzem el client per simular la crida amb credencials que disparen el signal
+        api_client.post(
+            reverse("authentication:token_obtain_pair"),
+            {"username": "nonexistent_user", "password": "wrongpassword"},
+            format="json",
+        )
+
+        assert AuditLog.objects.filter(action="FAILED_LOGIN").count() == initial_count + 1
+
+        log = AuditLog.objects.filter(action="FAILED_LOGIN").latest("timestamp")
+        assert log.severity == "WARNING"
+        assert "nonexistent_user" in log.description
+
+    def test_envio_deleted_generates_critical_log(self, darp_user, test_user):
+        """Test que eliminar un Envio genera un log CRITICAL (cobreix L176-188 a audit/signals.py)"""
+        # Cal crear l'enviament abans de l'eliminació
+        envio = Envio.objects.create(num_envio="DELETE_TEST", tipo_respuesta=1, usuario_envio=darp_user)
+        initial_count = AuditLog.objects.count()
+
+        # Simular l'eliminació (dispara el signal post_delete)
+        envio.delete()
+
+        assert AuditLog.objects.count() == initial_count + 1
+
+        log = AuditLog.objects.latest("timestamp")
+        assert log.action == "DELETE"
+        assert log.severity == "CRITICAL"
+        assert "ELIMINAT enviament DELETE_TEST" in log.description
 
 
 @pytest.mark.django_db

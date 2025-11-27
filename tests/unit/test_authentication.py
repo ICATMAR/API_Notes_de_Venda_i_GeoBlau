@@ -3,6 +3,7 @@ Tests unitaris per autenticació JWT
 """
 
 import pytest
+from django.core.cache import cache
 from django.urls import reverse
 from rest_framework import status
 
@@ -14,6 +15,8 @@ class TestJWTAuthentication:
 
     def test_obtain_token_success(self, api_client, test_user):
         """Test: Obtenir token amb credencials vàlides"""
+        cache.clear()
+
         url = reverse("authentication:token_obtain_pair")
         data = {"username": "testuser", "password": "TestPassword123!"}
 
@@ -25,6 +28,8 @@ class TestJWTAuthentication:
 
     def test_obtain_token_invalid_credentials(self, api_client, test_user):
         """Test: Token amb credencials invàlides"""
+        cache.clear()
+
         url = reverse("authentication:token_obtain_pair")
         data = {"username": "testuser", "password": "WrongPassword"}
 
@@ -34,6 +39,8 @@ class TestJWTAuthentication:
 
     def test_refresh_token_success(self, api_client, test_user):
         """Test: Refrescar token vàlid"""
+        cache.clear()
+
         # Primer obtenim tokens
         url_obtain = reverse("authentication:token_obtain_pair")
         data_obtain = {"username": "testuser", "password": "TestPassword123!"}
@@ -50,6 +57,8 @@ class TestJWTAuthentication:
 
     def test_verify_token_success(self, api_client, test_user):
         """Test: Verificar token vàlid"""
+        cache.clear()
+
         # Obtenir token
         url_obtain = reverse("authentication:token_obtain_pair")
         data_obtain = {"username": "testuser", "password": "TestPassword123!"}

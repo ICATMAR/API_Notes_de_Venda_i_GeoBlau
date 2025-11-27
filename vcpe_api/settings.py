@@ -24,6 +24,9 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 # SECURITY WARNING: mantenir la secret key en secret en producció!
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 
+# SEGURETAT - XIFRATGE EN REPÒS (Fernet)
+FERNET_KEY = env("SECRET_ENCRYPTION_KEY")
+
 # SECURITY: Debug ha de ser False en producció
 DEBUG = env("DJANGO_DEBUG")
 

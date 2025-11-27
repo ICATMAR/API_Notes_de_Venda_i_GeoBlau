@@ -1,5 +1,5 @@
 # Core Django i REST Framework (últimes versions estables)
-Django==5.1.2
+Django==5.1.13
 djangorestframework==3.15.2
 django-cors-headers==4.5.0
 django-filter==24.3
@@ -10,12 +10,13 @@ django-environ==0.11.2
 
 # Servidor WSGI per producció
 gunicorn==23.0.0
-gevent==24.10.3
+gevent==25.4.2
 
 # Autenticació i seguretat
-djangorestframework-simplejwt==5.3.1
+djangorestframework-simplejwt==5.5.1
 django-oauth-toolkit==3.0.1
-cryptography==43.0.1
+cryptography==44.0.1
+django-fernet-fields==0.6
 argon2-cffi==23.1.0  # Per hash de contrasenyes més segur que PBKDF2
 
 # Validació i JSON Schema
@@ -47,7 +48,7 @@ drf-spectacular==0.27.2
 # Utilitats
 python-dateutil==2.9.0
 pytz==2024.2
-requests==2.32.3
+requests==2.32.4
 
 # Processament asíncron
 celery==5.4.0
@@ -59,4 +60,4 @@ flake8==7.1.1
 isort==5.13.2
 pre-commit==4.0.1
 mypy==1.11.2
-django-stubs==5.1.0
+django-stubs==5.2.0

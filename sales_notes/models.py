@@ -10,6 +10,7 @@ from django.contrib.gis.db import models
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, RegexValidator
 from django.utils import timezone
+from fernet_fields import EncryptedCharField, EncryptedDecimalField
 
 from .existing_models import Port, Species, Vessel
 
@@ -369,31 +370,31 @@ class Especie(TimeStampedModel):
         choices=TIPO_NIF_CHOICES, help_text="Tipus document identificació venedor"
     )
 
-    nif_vendedor = models.CharField(max_length=17, db_index=True, help_text="NIF/CIF del venedor")
-
+    nif_vendedor = EncryptedCharField(max_length=17, help_text="NIF/CIF del venedor (xifrat)")
     nombre_vendedor = models.CharField(max_length=100, help_text="Nom del venedor")
 
-    direccion_vendedor = models.CharField(max_length=100, blank=True, help_text="Direcció del venedor")
+    direccion_vendedor = EncryptedCharField(max_length=100, blank=True, help_text="Direcció del venedor (xifrat)")
 
-    # Comprador
-    nif_comprador = models.CharField(max_length=17, db_index=True, help_text="NIF/CIF del comprador")
+    nif_comprador = EncryptedCharField(max_length=17, help_text="NIF/CIF del comprador (xifrat)")
 
     id_tipo_nif_cif_comprador = models.IntegerField(
         choices=TIPO_NIF_CHOICES, help_text="Tipus document identificació comprador"
     )
 
     pais_comprador_validator = RegexValidator(regex=r"^[A-Za-z]{3}$", message="Codi país invàlid (ISO-3, 3 lletres)")
-    pais_comprador = models.CharField(
+    pais_comprador = models.CharField(  # No es considera sensible
         max_length=3, validators=[pais_comprador_validator], blank=True, help_text="Codi ISO-3 país del comprador"
     )
 
     nombre_comprador = models.CharField(max_length=100, help_text="Nom del comprador")
 
-    direccion_comprador = models.CharField(max_length=100, blank=True, help_text="Direcció del comprador")
-
+    direccion_comprador = EncryptedCharField(max_length=100, blank=True, help_text="Direcció del comprador (xifrat)")
     # Informació econòmica
-    precio = models.DecimalField(
-        max_digits=12, decimal_places=2, validators=[MinValueValidator(Decimal("0.00"))], help_text="Preu total"
+    precio = EncryptedDecimalField(
+        max_digits=12,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal("0.00"))],
+        help_text="Preu total (xifrat)",
     )
 
     cod_moneda_validator = RegexValidator(regex=r"^[A-Za-z]{3}$", message="Codi moneda invàlid (ISO-4217, 3 lletres)")
@@ -402,8 +403,11 @@ class Especie(TimeStampedModel):
     )
 
     # Quantitats
-    cantidad = models.DecimalField(
-        max_digits=10, decimal_places=3, validators=[MinValueValidator(Decimal("0.001"))], help_text="Quantitat en kg"
+    cantidad = EncryptedDecimalField(
+        max_digits=10,
+        decimal_places=3,
+        validators=[MinValueValidator(Decimal("0.001"))],
+        help_text="Quantitat en kg (xifrat)",
     )
 
     num_ejemplares = models.IntegerField(
