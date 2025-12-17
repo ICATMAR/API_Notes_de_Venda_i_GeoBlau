@@ -25,7 +25,13 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 # SEGURETAT - XIFRATGE EN REPÒS (Fernet)
-FERNET_KEY = env("SECRET_ENCRYPTION_KEY")
+ENCRYPTION_KEY = env("SECRET_ENCRYPTION_KEY")
+
+if not ENCRYPTION_KEY:
+    raise ValueError(
+        "ENCRYPTION_KEY no està configurada! "
+        "Genera una clau amb: python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'"
+    )
 
 # SECURITY: Debug ha de ser False en producció
 DEBUG = env("DJANGO_DEBUG")

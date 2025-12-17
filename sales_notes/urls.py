@@ -19,7 +19,6 @@ router = DefaultRouter()
 # Registrar ViewSet (només permet POST gràcies als mixins)
 router.register(r"envios", views.EnvioViewSet, basename="envio")
 
-# URLs buides temporalment fins que creem les views
 urlpatterns = [
     path("", include(router.urls)),
 ]

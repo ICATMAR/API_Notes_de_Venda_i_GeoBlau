@@ -10,8 +10,8 @@ from django.contrib.gis.db import models
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, RegexValidator
 from django.utils import timezone
-from fernet_fields import EncryptedCharField, EncryptedDecimalField
 
+from .encrypted_fields import EncryptedCharField, EncryptedDecimalField
 from .existing_models import Port, Species, Vessel
 
 
@@ -468,8 +468,8 @@ class Especie(TimeStampedModel):
             models.Index(fields=["especie_al3", "fecha_venta"]),
             models.Index(fields=["species_ref", "fecha_venta"]),
             models.Index(fields=["arte_al3", "zona"]),
-            models.Index(fields=["nif_vendedor", "fecha_venta"]),
-            models.Index(fields=["nif_comprador", "fecha_venta"]),
+            # models.Index(fields=["nif_vendedor", "fecha_venta"]),
+            # models.Index(fields=["nif_comprador", "fecha_venta"]),
         ]
 
     def __str__(self):
