@@ -5,6 +5,7 @@ Implementen validacions segons l'esquema JSON proporcionat
 
 import logging
 from datetime import datetime
+from decimal import Decimal
 
 from django.db import transaction
 from drf_spectacular.utils import extend_schema_field
@@ -44,6 +45,23 @@ class EspecieSerializer(serializers.ModelSerializer):
     """Serialitzador per espècies"""
 
     fechas_captura = FechaCapturaSerializer(many=True, required=False)
+
+    # Declarar explícitament els camps xifrats per evitar errors amb drf-spectacular
+    precio = serializers.DecimalField(
+        max_digits=10, decimal_places=2, min_value=Decimal("0.00"), help_text="Preu total (xifrat)"
+    )
+    cantidad = serializers.DecimalField(
+        max_digits=10, decimal_places=3, min_value=Decimal("0.001"), help_text="Quantitat en kg (xifrat)"
+    )
+    # Camps de text xifrats
+    nif_vendedor = serializers.CharField(help_text="NIF/CIF del venedor (xifrat)")
+    nif_comprador = serializers.CharField(help_text="NIF/CIF del comprador (xifrat)")
+    direccion_vendedor = serializers.CharField(
+        required=False, allow_blank=True, help_text="Direcció del venedor (xifrat)"
+    )
+    direccion_comprador = serializers.CharField(
+        required=False, allow_blank=True, help_text="Direcció del comprador (xifrat)"
+    )
 
     class Meta:
         model = Especie
