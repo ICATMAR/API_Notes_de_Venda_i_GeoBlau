@@ -106,15 +106,61 @@ class EnvioViewSet(
                     {"detail": "Només els usuaris DARP poden crear enviaments."}, status=status.HTTP_403_FORBIDDEN
                 )
 
-        # PRIMER: Convertir de PascalCase a snake_case
-        input_serializer = EnvioInputSerializer()
-        converted_data = input_serializer.to_internal_value(request.data)
+        # Acceptar tant single-envoi com batch (llista) en PascalCase
+        data = request.data
 
-        # SEGON: Validar amb el serializer principal
+        # Si és una llista, tractar com a batch
+        is_batch = isinstance(data, list)
+
+        if is_batch:
+            created = []
+            errors = []
+            # PRIMER: Pre-validar TOTS els elements per separat (convertir i validar)
+            prepared_serializers = []
+            for idx, item in enumerate(data):
+                input_serializer = EnvioInputSerializer()
+                try:
+                    converted = input_serializer.to_internal_value(item)
+                except Exception as e:
+                    errors.append({"index": idx, "error": str(e)})
+                    continue
+
+                s = EnvioSerializer(data=converted, context={"request": request})
+                try:
+                    s.is_valid(raise_exception=True)
+                    prepared_serializers.append((s, converted))
+                except Exception as e:
+                    errors.append({"index": idx, "error": str(e)})
+
+            if errors:
+                # Retornar errors sense crear res
+                return Response(
+                    {"detail": "Validation failed for one or more items", "errors": errors},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # TOTS valids: crear dins d'una transacció per garantir atomicitat
+            from django.db import transaction
+            from rest_framework.exceptions import ValidationError as DRFValidationError
+
+            try:
+                with transaction.atomic():
+                    for s, converted in prepared_serializers:
+                        envio = s.save()
+                        created.append(EnvioSerializer(envio).data)
+
+                return Response(created, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                logger.error(f"Batch create failed: {e}", exc_info=True)
+                raise DRFValidationError(detail=str(e))
+
+        # Single item flow (compatibilitat enrere)
+        input_serializer = EnvioInputSerializer()
+        converted_data = input_serializer.to_internal_value(data)
+
         serializer = EnvioSerializer(data=converted_data, context={"request": request})
         serializer.is_valid(raise_exception=True)
 
-        # Guardar
         envio = serializer.save()
 
         logger.info(f"Envio {envio.num_envio} created successfully by {request.user}")

@@ -3,7 +3,6 @@ Tests d'integració per enviaments batch del DARP
 """
 
 import pytest
-from django.db import transaction
 from rest_framework import status
 
 
@@ -74,3 +73,81 @@ class TestDARPBatchSubmission:
 
             # No hauria de retornar 429 Too Many Requests
             assert response.status_code != status.HTTP_429_TOO_MANY_REQUESTS
+
+    def test_batch_post_success(self, darp_client, sample_sales_note_data):
+        """Enviar una llista (batch) amb diversos enviaments vàlids en una sola POST"""
+        from sales_notes.existing_models import Species, Vessel
+        from sales_notes.models import Envio
+
+        # Preparar catàleg mínim
+        Species.objects.get_or_create(code_3a="HKE", defaults={"id": 21001, "scientific_name": "Hake"})
+        Vessel.objects.get_or_create(code="ESP000000001", defaults={"id": 21001})
+        Vessel.objects.get_or_create(code="ESP000000002", defaults={"id": 21002})
+
+        url = "/api/sales-notes/envios/"
+
+        batch = []
+        for i, boat in enumerate(("ESP000000001", "ESP000000002")):
+            data = sample_sales_note_data.copy()
+            data = dict(data)  # shallow copy
+            data["NumEnvio"] = f"BATCH_POST_OK_{i}"
+            # Ensure DatosUnidadProductiva CodigoBuque matches allowed vessel
+            establecimientos = data["EstablecimientosVenta"]["EstablecimientoVenta"]
+            establecimientos[0]["Ventas"]["VentasUnidadProductiva"][0]["DatosUnidadProductiva"]["CodigoBuque"] = boat
+            # also adjust NumDocVenta to be unique
+            establecimientos[0]["Ventas"]["VentasUnidadProductiva"][0]["Especies"]["Especie"][0][
+                "NumDocVenta"
+            ] = f"NV_BATCH_OK_{i}"
+            batch.append(data)
+
+        response = darp_client.post(url, batch, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+        # Comprovar que s'han creat tots
+        assert len(response.data) == len(batch)
+        for item in response.data:
+            assert Envio.objects.filter(num_envio=item.get("num_envio")).exists()
+
+    def test_batch_post_rollback_on_error(self, darp_client, sample_sales_note_data):
+        """Enviar un batch amb una nota invàlida i verificar que tot el batch fa rollback"""
+        from sales_notes.existing_models import Species, Vessel
+        from sales_notes.models import Envio
+
+        # Preparar catàleg mínim
+        Species.objects.get_or_create(code_3a="HKE", defaults={"id": 22001, "scientific_name": "Hake"})
+        Vessel.objects.get_or_create(code="ESP000000001", defaults={"id": 22001})
+
+        url = "/api/sales-notes/envios/"
+
+        batch = []
+        # 2 enviaments vàlids
+        for i in range(2):
+            data = sample_sales_note_data.copy()
+            data = dict(data)
+            data["NumEnvio"] = f"BATCH_POST_OK_{i}"
+            establecimientos = data["EstablecimientosVenta"]["EstablecimientoVenta"]
+            establecimientos[0]["Ventas"]["VentasUnidadProductiva"][0]["Especies"]["Especie"][0][
+                "NumDocVenta"
+            ] = f"NV_BATCH_OK_{i}"
+            establecimientos[0]["Ventas"]["VentasUnidadProductiva"][0]["DatosUnidadProductiva"][
+                "CodigoBuque"
+            ] = "ESP000000001"
+            batch.append(data)
+
+        # 1 enviament invàlid (espècie no existent ZZZ)
+        bad = sample_sales_note_data.copy()
+        bad = dict(bad)
+        bad["NumEnvio"] = "BATCH_POST_BAD"
+        establecimientos = bad["EstablecimientosVenta"]["EstablecimientoVenta"]
+        establecimientos[0]["Ventas"]["VentasUnidadProductiva"][0]["Especies"]["Especie"][0]["EspecieAL3"] = "ZZZ"
+        establecimientos[0]["Ventas"]["VentasUnidadProductiva"][0]["DatosUnidadProductiva"][
+            "CodigoBuque"
+        ] = "ESP000000001"
+        batch.append(bad)
+
+        response = darp_client.post(url, batch, format="json")
+
+        # Ha de fallar i retornar 400, i no s'ha de crear cap Envio del batch
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        for item in batch:
+            num = item.get("NumEnvio")
+            assert not Envio.objects.filter(num_envio=num).exists()

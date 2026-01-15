@@ -10,7 +10,7 @@ from django.dispatch import receiver
 
 from audit.models import AuditLog
 from authentication.models import APIUser
-from sales_notes.models import Envio, Especie
+from sales_notes.models import Envio
 
 logger = logging.getLogger("audit")
 
@@ -78,20 +78,36 @@ def audit_user_login(sender, request, user, **kwargs):
     try:
         ip_address = request.META.get("REMOTE_ADDR")
 
-        AuditLog.objects.create(
-            action="LOGIN",
-            user=user,
-            description=f"Login exitós de {user.username}",
-            ip_address=ip_address,
-            user_agent=request.META.get("HTTP_USER_AGENT", ""),
-            severity="INFO",
-        )
+        # Actualitzar última IP de login i restablir comptador d'intents fallits
+        # Hem d'actualitzar l'usuari abans de crear el log 'LOGIN' perquè
+        # el post_save d'APIUser també genera un AuditLog 'UPDATE' i volem
+        # que el log 'LOGIN' sigui el més recent (segons tests).
+        try:
+            if hasattr(user, "record_successful_login"):
+                user.record_successful_login(ip_address=ip_address)
+            else:
+                # Fallback mínim si el model no exposa el mètode
+                if hasattr(user, "last_login_ip"):
+                    user.last_login_ip = ip_address
+                    user.failed_login_attempts = 0
+                    user.account_locked_until = None
+                    user.save(update_fields=["last_login_ip", "failed_login_attempts", "account_locked_until"])
+        except Exception:
+            # No fem fallar l'auditoria per un error no crític en el model d'usuari
+            logger.exception("Error actualitzant l'estat d'usuari després de login exitós")
 
-        # Actualitzar última IP de login
-        if hasattr(user, "last_login_ip"):
-            user.last_login_ip = ip_address
-            user.reset_failed_login()
-            user.save(update_fields=["last_login_ip", "failed_login_attempts", "account_locked_until"])
+        # Ara crear el log d'event 'LOGIN' — ha de ser el més recent
+        try:
+            AuditLog.objects.create(
+                action="LOGIN",
+                user=user,
+                description=f"Login exitós de {user.username}",
+                ip_address=ip_address,
+                user_agent=request.META.get("HTTP_USER_AGENT", ""),
+                severity="INFO",
+            )
+        except Exception:
+            logger.exception("Error creant AuditLog de LOGIN")
 
         logger.info(f"Login exitós: {user.username} des de {ip_address}")
     except Exception as e:
@@ -132,7 +148,13 @@ def audit_failed_login(sender, credentials, request, **kwargs):
         # Incrementar contador d'intents fallits si l'usuari existeix
         try:
             user = APIUser.objects.get(username=username)
-            user.increment_failed_login()
+            # Utilitzar la funció proporcionada pel model
+            if hasattr(user, "record_failed_login"):
+                user.record_failed_login()
+            else:
+                # Fallback senzill
+                user.failed_login_attempts = getattr(user, "failed_login_attempts", 0) + 1
+                user.save(update_fields=["failed_login_attempts"])
         except APIUser.DoesNotExist:
             pass
 

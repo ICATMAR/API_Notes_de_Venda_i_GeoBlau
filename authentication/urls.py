@@ -24,4 +24,6 @@ urlpatterns = [
     path("password/change/", PasswordChangeView.as_view(), name="password_change"),
     # Audit trail
     path("audit-logs/", AuditLogListView.as_view(), name="audit_logs"),
+    # Allow fetching audit logs for a specific user by UUID in the path (admin-only)
+    path("audit-logs/<uuid:user_id>/", AuditLogListView.as_view(), name="audit_logs_by_user"),
 ]

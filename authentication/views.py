@@ -442,7 +442,7 @@ class UserProfileView(generics.RetrieveAPIView):
 
 class AuditLogListView(generics.ListAPIView):
     """
-    API endpoint to retrieve authentication audit logs for current user.
+    API endpoint to retrieve authentication audit logs for all or selected user.
 
     Returns the most recent 100 audit log entries.
 
@@ -450,14 +450,32 @@ class AuditLogListView(generics.ListAPIView):
     """
 
     serializer_class = AuthenticationAuditLogSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    # Only administrators may query audit logs for any user
+    permission_classes = [permissions.IsAdminUser]
 
     def get_queryset(self):
         """
-        Get audit logs for authenticated user.
+        Return audit logs.
 
-        Returns:
-            QuerySet: User's audit log entries
+        - If `?user_id=<uuid>` is provided, return the most recent 100 logs for that user.
+        - Otherwise return the most recent 100 logs across all users.
+
+        Only accessible to admin users.
         """
-        user = self.request.user
-        return AuthenticationAuditLog.objects.filter(user=user).order_by("-timestamp")[:100]
+        # Accept user id either as a path parameter or a query parameter for flexibility
+        user_id = self.kwargs.get("user_id") or self.request.query_params.get("user_id")
+
+        qs = AuthenticationAuditLog.objects.all()
+
+        if user_id:
+            try:
+                # Import here to avoid circular imports at module load
+                from .models import APIUser
+
+                target_user = APIUser.objects.get(id=user_id)
+                qs = qs.filter(user=target_user)
+            except Exception:
+                # If user not found or id invalid, return empty queryset
+                return AuthenticationAuditLog.objects.none()
+
+        return qs.order_by("-timestamp")[:100]
