@@ -116,8 +116,8 @@ class AuditMiddleware(MiddlewareMixin):
             try:
                 if hasattr(response, "data"):
                     return str(response.data)[:1000]
-            except:
-                pass
+            except (AttributeError, TypeError, ValueError) as e:
+                logger.debug(f"No s'ha pogut extreure missatge d'error: {e}")
         return ""
 
     def detect_security_issues(self, request, response, user, ip_address):
