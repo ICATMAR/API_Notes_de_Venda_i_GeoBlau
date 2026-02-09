@@ -8,13 +8,12 @@ Author: ICATMAR Development Team
 Date: October 2025
 """
 
-from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from .models import APIUser, AuthenticationAuditLog, AuthenticationToken
+from .models import AuthenticationAuditLog, AuthenticationToken, User
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -38,9 +37,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = APIUser
-        fields = ["id", "username", "email", "organization", "password", "password_confirm", "is_active", "created_at"]
-        read_only_fields = ["id", "is_active", "created_at"]
+        model = User
+        fields = ["id", "username", "email", "password", "password_confirm", "is_active", "date_joined"]
+        read_only_fields = ["id", "is_active", "date_joined"]
         extra_kwargs = {"password": {"write_only": True}}
 
     def validate(self, attrs):
@@ -82,45 +81,19 @@ class UserSerializer(serializers.ModelSerializer):
     Provides comprehensive user information excluding sensitive data.
     """
 
-    is_account_locked = serializers.SerializerMethodField()
-
     class Meta:
-        model = APIUser
+        model = User
         fields = [
             "id",
             "username",
             "email",
-            "organization",
             "is_active",
             "is_staff",
             "is_superuser",
-            "is_locked",
-            "locked_until",
-            "lock_reason",
-            "failed_login_attempts",
-            "last_failed_login",
             "last_login",
-            "last_login_ip",
-            "password_changed_at",
-            "must_change_password",
-            "created_at",
-            "updated_at",
-            "is_account_locked",
+            "date_joined",
         ]
         read_only_fields = fields
-
-    @extend_schema_field(serializers.BooleanField())
-    def get_is_account_locked(self, obj) -> bool:
-        """
-        Get current account lock status.
-
-        Args:
-            obj (User): User instance
-
-        Returns:
-            bool: True if account is currently locked
-        """
-        return obj.is_account_locked()
 
 
 class LoginSerializer(serializers.Serializer):

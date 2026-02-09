@@ -5,11 +5,11 @@ Signals per auditoria automàtica de canvis en models crítics
 import logging
 
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
-from django.db.models.signals import post_delete, post_save, pre_save
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
 from audit.models import AuditLog
-from authentication.models import APIUser
+from authentication.models import User
 from sales_notes.models import Envio
 
 logger = logging.getLogger("audit")
@@ -19,57 +19,17 @@ logger = logging.getLogger("audit")
 def audit_envio_created(sender, instance, created, **kwargs):
     """Auditar creació d'enviaments"""
     if created:
-        try:
-            AuditLog.objects.create(
-                action="CREATE",
-                user=instance.usuario_envio,
-                content_object=instance,
-                description=f"Creat enviament {instance.num_envio}",
-                new_value={
-                    "num_envio": instance.num_envio,
-                    "tipo_respuesta": instance.tipo_respuesta,
-                    "fecha_recepcion": instance.fecha_recepcion.isoformat(),
-                },
-                severity="INFO",
-            )
-            logger.info(f"Auditat creació d'enviament {instance.num_envio}")
-        except Exception as e:
-            logger.error(f"Error auditant enviament: {str(e)}", exc_info=True)
-
-
-@receiver(pre_save, sender=Envio)
-def audit_envio_status_change(sender, instance, **kwargs):
-    """Auditar canvis d'estat en enviaments"""
-    if instance.pk:  # Només si és una actualització
-        try:
-            old_instance = Envio.objects.get(pk=instance.pk)
-
-            # Detectar canvis importants
-            if old_instance.procesado != instance.procesado:
-                AuditLog.objects.create(
-                    action="UPDATE",
-                    user=instance.usuario_envio,
-                    content_object=instance,
-                    description=f"Canviat estat processament de {instance.num_envio}",
-                    old_value={"procesado": old_instance.procesado},
-                    new_value={"procesado": instance.procesado},
-                    severity="INFO",
-                )
-
-            if old_instance.validado != instance.validado:
-                AuditLog.objects.create(
-                    action="UPDATE",
-                    user=instance.usuario_envio,
-                    content_object=instance,
-                    description=f"Canviat estat validació de {instance.num_envio}",
-                    old_value={"validado": old_instance.validado},
-                    new_value={"validado": instance.validado},
-                    severity="WARNING" if not instance.validado else "INFO",
-                )
-        except Envio.DoesNotExist:
-            pass
-        except Exception as e:
-            logger.error(f"Error auditant canvi d'estat: {str(e)}", exc_info=True)
+        # No capturem excepcions aquí per evitar trencar transaccions atòmiques silenciosament.
+        # Si falla l'auditoria, ha de fallar la creació de l'enviament.
+        AuditLog.objects.create(
+            action="CREATE",
+            user=instance.usuario_envio,
+            content_object=instance,
+            description=f"Creat enviament {instance.num_envio}",
+            new_value={"num_envio": instance.num_envio, "fecha_recepcion": instance.fecha_recepcion.isoformat()},
+            severity="INFO",
+        )
+        logger.info(f"Auditat creació d'enviament {instance.num_envio}")
 
 
 @receiver(user_logged_in)
@@ -79,21 +39,9 @@ def audit_user_login(sender, request, user, **kwargs):
         ip_address = request.META.get("REMOTE_ADDR")
 
         # Actualitzar última IP de login i restablir comptador d'intents fallits
-        # Hem d'actualitzar l'usuari abans de crear el log 'LOGIN' perquè
-        # el post_save d'APIUser també genera un AuditLog 'UPDATE' i volem
-        # que el log 'LOGIN' sigui el més recent (segons tests).
         try:
-            if hasattr(user, "record_successful_login"):
-                user.record_successful_login(ip_address=ip_address)
-            else:
-                # Fallback mínim si el model no exposa el mètode
-                if hasattr(user, "last_login_ip"):
-                    user.last_login_ip = ip_address
-                    user.failed_login_attempts = 0
-                    user.account_locked_until = None
-                    user.save(update_fields=["last_login_ip", "failed_login_attempts", "account_locked_until"])
+            user.record_successful_login(ip_address=ip_address)
         except Exception:
-            # No fem fallar l'auditoria per un error no crític en el model d'usuari
             logger.exception("Error actualitzant l'estat d'usuari després de login exitós")
 
         # Ara crear el log d'event 'LOGIN' — ha de ser el més recent
@@ -147,15 +95,9 @@ def audit_failed_login(sender, credentials, request, **kwargs):
 
         # Incrementar contador d'intents fallits si l'usuari existeix
         try:
-            user = APIUser.objects.get(username=username)
-            # Utilitzar la funció proporcionada pel model
-            if hasattr(user, "record_failed_login"):
-                user.record_failed_login()
-            else:
-                # Fallback senzill
-                user.failed_login_attempts = getattr(user, "failed_login_attempts", 0) + 1
-                user.save(update_fields=["failed_login_attempts"])
-        except APIUser.DoesNotExist:
+            user = User.objects.get(username=username)
+            user.record_failed_login()
+        except User.DoesNotExist:
             pass
 
         logger.warning(f"Intent de login fallit: {username} des de {ip_address}")
@@ -163,7 +105,7 @@ def audit_failed_login(sender, credentials, request, **kwargs):
         logger.error(f"Error auditant login fallit: {str(e)}", exc_info=True)
 
 
-@receiver(post_save, sender=APIUser)
+@receiver(post_save, sender=User)
 def audit_user_changes(sender, instance, created, **kwargs):
     """Auditar canvis en usuaris"""
     try:
@@ -171,15 +113,17 @@ def audit_user_changes(sender, instance, created, **kwargs):
             AuditLog.objects.create(
                 action="CREATE",
                 content_object=instance,
-                description=f"Creat usuari {instance.username} ({instance.organization})",
-                new_value={
-                    "username": instance.username,
-                    "organization": instance.organization,
-                    "cif_organization": instance.cif_organization,
-                },
+                description=f"Creat usuari {instance.username}",
+                new_value={"username": instance.username},
                 severity="INFO",
             )
         else:
+            # Evitar soroll: Si només s'actualitza el last_login, és part del procés de login
+            # i ja es genera un log específic d'acció "LOGIN".
+            update_fields = kwargs.get("update_fields")
+            if update_fields and "last_login" in update_fields and len(update_fields) == 1:
+                return
+
             # Per actualitzacions, només registrar si hi ha canvis importants
             # (això requeriria guardar l'estat anterior, es pot fer amb django-dirtyfields)
             AuditLog.objects.create(

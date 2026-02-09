@@ -60,7 +60,7 @@ class AuditMiddleware(MiddlewareMixin):
                 # Crear log d'accés
                 APIAccessLog.objects.create(
                     user=user,
-                    endpoint=request.path,
+                    path=request.path,
                     method=request.method,
                     ip_address=ip_address,
                     user_agent=user_agent,
@@ -87,7 +87,7 @@ class AuditMiddleware(MiddlewareMixin):
         try:
             APIAccessLog.objects.create(
                 user=user,
-                endpoint=request.path,
+                path=request.path,
                 method=request.method,
                 ip_address=ip_address,
                 user_agent=request.META.get("HTTP_USER_AGENT", "")[:500],

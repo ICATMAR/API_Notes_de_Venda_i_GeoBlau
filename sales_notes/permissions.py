@@ -19,9 +19,8 @@ class IsDARP(permissions.BasePermission):
         if not request.user or not request.user.is_authenticated:
             return False
 
-        # Comprovar si l'organització és DARP
-        # Pots usar el camp 'organization' del User o crear un grup 'DARP'
-        return hasattr(request.user, "organization") and "DARP" in request.user.organization.upper()
+        # Comprovar si l'usuari té el permís per afegir enviaments
+        return request.user.has_perm("sales_notes.add_envio")
 
 
 class IsInvestigador(permissions.BasePermission):
@@ -64,8 +63,8 @@ class DARPCanCreateInvestigadorCanRead(permissions.BasePermission):
         if request.user.groups.filter(name="Investigadors").exists():
             return request.method in permissions.SAFE_METHODS  # GET, HEAD, OPTIONS
 
-        # DARP pot POST i GET
-        if hasattr(request.user, "organization") and "DARP" in request.user.organization.upper():
+        # Qualsevol usuari amb permís per afegir pot fer POST i GET
+        if request.user.has_perm("sales_notes.add_envio"):
             return request.method in ["GET", "POST", "HEAD", "OPTIONS"]
 
         # Per defecte, denegar
@@ -81,8 +80,8 @@ class DARPCanCreateInvestigadorCanRead(permissions.BasePermission):
         if request.user.groups.filter(name="Investigadors").exists():
             return request.method in permissions.SAFE_METHODS
 
-        # DARP només pot veure els seus propis enviaments
-        if hasattr(request.user, "organization") and "DARP" in request.user.organization.upper():
+        # Els usuaris amb permís per afegir només poden veure els seus propis enviaments
+        if request.user.has_perm("sales_notes.add_envio"):
             # Només els enviaments creats per aquest usuari
             return obj.usuario_envio == request.user
 

@@ -12,10 +12,10 @@ from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
-from .models import APIUser, AuthenticationAuditLog, AuthenticationToken
+from .models import APIAccessLog, AuthenticationAuditLog, AuthenticationToken, User
 
 
-@admin.register(APIUser)
+@admin.register(User)
 class UserAdmin(BaseUserAdmin):
     """
     Enhanced admin interface for User model.
@@ -28,48 +28,31 @@ class UserAdmin(BaseUserAdmin):
         "username",
         "email",
         "is_active",
-        "account_status_badge",
-        "failed_login_attempts",
         "last_login",
-        "created_at",
+        "date_joined",
     ]
 
-    list_filter = ["is_active", "is_staff", "is_superuser", "created_at", "last_login"]
+    list_filter = ["is_active", "is_staff", "is_superuser", "date_joined", "last_login"]
 
-    search_fields = ["username", "email", "full_name", "organization"]
+    search_fields = ["username", "email", "first_name", "last_name"]
 
-    ordering = ["-created_at"]
+    ordering = ["-date_joined"]
 
     readonly_fields = [
         "id",
-        "created_at",
-        "updated_at",
+        "date_joined",
         "last_login",
-        "last_login_ip",
-        "failed_login_attempts",
     ]
 
     fieldsets = (
-        (_("Basic Information"), {"fields": ("id", "username", "email", "full_name", "organization")}),
+        (_("Basic Information"), {"fields": ("id", "username", "email", "first_name", "last_name")}),
         (_("Permissions"), {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")}),
-        (
-            _("Security and Account Locking"),
-            {"fields": ("is_locked", "locked_until", "lock_reason", "failed_login_attempts", "last_failed_login")},
-        ),
-        (
-            _("Password Management"),
-            {"fields": ("password", "password_changed_at", "must_change_password", "password_history")},
-        ),
         (
             _("Audit Information"),
             {
                 "fields": (
                     "last_login",
-                    "last_login_ip",
-                    "last_login_user_agent",
-                    "created_at",
-                    "updated_at",
-                    "created_by",
+                    "date_joined",
                 )
             },
         ),
@@ -80,87 +63,13 @@ class UserAdmin(BaseUserAdmin):
             _("Basic Information"),
             {
                 "classes": ("wide",),
-                "fields": ("username", "email", "full_name", "organization", "password1", "password2"),
+                "fields": ("username", "email", "first_name", "last_name", "password1", "password2"),
             },
         ),
         (_("Permissions"), {"fields": ("is_active", "is_staff", "is_superuser")}),
     )
 
-    actions = ["unlock_selected_accounts", "lock_selected_accounts", "reset_failed_attempts"]
-
-    def account_status_badge(self, obj):
-        """
-        Display account status with color-coded badge.
-
-        Args:
-            obj (User): User instance
-
-        Returns:
-            str: HTML formatted status badge
-        """
-        if obj.is_account_locked():
-            return format_html(
-                '<span style="color: white; background-color: #dc3545; '
-                'padding: 3px 10px; border-radius: 3px; font-weight: bold;">'
-                "LOCKED</span>"
-            )
-        elif not obj.is_active:
-            return format_html(
-                '<span style="color: white; background-color: #fd7e14; '
-                'padding: 3px 10px; border-radius: 3px; font-weight: bold;">'
-                "INACTIVE</span>"
-            )
-        else:
-            return format_html(
-                '<span style="color: white; background-color: #28a745; '
-                'padding: 3px 10px; border-radius: 3px; font-weight: bold;">'
-                "ACTIVE</span>"
-            )
-
-    account_status_badge.short_description = _("Status")
-
-    def unlock_selected_accounts(self, request, queryset):
-        """
-        Admin action to unlock selected user accounts.
-
-        Args:
-            request: HTTP request object
-            queryset: Selected user queryset
-        """
-        count = queryset.update(is_locked=False, locked_until=None, failed_login_attempts=0, lock_reason="")
-        self.message_user(request, _(f"{count} account(s) have been unlocked"))
-
-    unlock_selected_accounts.short_description = _("Unlock selected accounts")
-
-    def lock_selected_accounts(self, request, queryset):
-        """
-        Admin action to lock selected user accounts.
-
-        Args:
-            request: HTTP request object
-            queryset: Selected user queryset
-        """
-        count = queryset.update(
-            is_locked=True,
-            locked_until=timezone.now() + timezone.timedelta(hours=24),
-            lock_reason=_("Locked manually by administrator"),
-        )
-        self.message_user(request, _(f"{count} account(s) have been locked"))
-
-    lock_selected_accounts.short_description = _("Lock selected accounts")
-
-    def reset_failed_attempts(self, request, queryset):
-        """
-        Admin action to reset failed login attempts counter.
-
-        Args:
-            request: HTTP request object
-            queryset: Selected user queryset
-        """
-        count = queryset.update(failed_login_attempts=0, last_failed_login=None)
-        self.message_user(request, _(f"Failed login attempts reset for {count} account(s)"))
-
-    reset_failed_attempts.short_description = _("Reset failed login attempts")
+    actions = []
 
 
 @admin.register(AuthenticationToken)
@@ -355,4 +264,34 @@ class AuthenticationAuditLogAdmin(admin.ModelAdmin):
         Returns:
             bool: False (no delete permission)
         """
+        return False
+
+
+@admin.register(APIAccessLog)
+class APIAccessLogAdmin(admin.ModelAdmin):
+    """
+    Admin interface for APIAccessLog model.
+    """
+
+    list_display = ["timestamp", "method", "path", "status_code", "user", "ip_address", "response_time_ms"]
+    list_filter = ["method", "status_code", "timestamp"]
+    search_fields = ["user__username", "path", "ip_address", "request_id"]
+    readonly_fields = [
+        "id",
+        "user",
+        "ip_address",
+        "method",
+        "path",
+        "query_params",
+        "status_code",
+        "user_agent",
+        "timestamp",
+        "response_time_ms",
+        "request_id",
+        "error_message",
+        "request_body_hash",
+    ]
+    ordering = ["-timestamp"]
+
+    def has_add_permission(self, request):
         return False
