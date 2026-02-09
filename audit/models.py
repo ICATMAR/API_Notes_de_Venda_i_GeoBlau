@@ -33,7 +33,7 @@ class AuditLog(models.Model):
 
     # Usuari que fa l'acció
     user = models.ForeignKey(
-        "authentication.APIUser", on_delete=models.SET_NULL, null=True, blank=True, related_name="audit_logs"
+        "authentication.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="audit_logs"
     )
 
     # Objecte afectat (GenericForeignKey per referir qualsevol model)
@@ -105,7 +105,7 @@ class SecurityEvent(models.Model):
 
     # Qui/què ho va originar
     user = models.ForeignKey(
-        "authentication.APIUser", on_delete=models.SET_NULL, null=True, blank=True, related_name="security_events"
+        "authentication.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="security_events"
     )
 
     ip_address = models.GenericIPAddressField(db_index=True)
@@ -150,7 +150,7 @@ class SecurityEvent(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
     resolved_at = models.DateTimeField(null=True, blank=True)
     resolved_by = models.ForeignKey(
-        "authentication.APIUser",
+        "authentication.User",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

@@ -14,7 +14,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import APIUser, AuthenticationAuditLog, AuthenticationToken
+from .models import AuthenticationAuditLog, AuthenticationToken, User
 from .serializers import (
     AuthenticationAuditLogSerializer,
     LoginSerializer,
@@ -68,7 +68,7 @@ class UserRegistrationView(generics.CreateAPIView):
     POST /api/auth/register/
     """
 
-    queryset = APIUser.objects.all()
+    queryset = User.objects.all()
     serializer_class = UserRegistrationSerializer
     permission_classes = [permissions.AllowAny]
 
@@ -143,7 +143,7 @@ class LoginView(APIView):
         user_agent = get_user_agent(request)
 
         try:
-            user = APIUser.objects.get(username=username)
+            user = User.objects.get(username=username)
 
             # Check if account is locked
             if user.is_account_locked():
@@ -200,10 +200,10 @@ class LoginView(APIView):
                     ip_address=ip_address,
                     user_agent=user_agent,
                     severity="WARNING",
-                    details={"reason": "Invalid password", "failed_attempts": user.failed_login_attempts},
+                    details={"reason": "Invalid password"},
                 )
 
-                logger.warning(f"Failed login attempt for user {username} - " f"attempt {user.failed_login_attempts}")
+                logger.warning(f"Failed login attempt for user {username}")
 
                 return Response(
                     {"error": _("Invalid credentials"), "detail": _("Username or password is incorrect")},
@@ -248,7 +248,12 @@ class LoginView(APIView):
 
             # Log successful authentication
             AuthenticationAuditLog.log_event(
-                event_type="LOGIN_SUCCESS", user=user, ip_address=ip_address, user_agent=user_agent, severity="INFO"
+                event_type="LOGIN_SUCCESS",
+                user=user,
+                ip_address=ip_address,
+                user_agent=user_agent,
+                severity="INFO",
+                username_attempted=username,
             )
 
             AuthenticationAuditLog.log_event(
@@ -258,6 +263,7 @@ class LoginView(APIView):
                 user_agent=user_agent,
                 severity="INFO",
                 details={"token_type": "access+refresh"},
+                username_attempted=username,
             )
 
             logger.info(f"Successful login for user {username}")
@@ -273,7 +279,7 @@ class LoginView(APIView):
 
             return Response(response_data, status=status.HTTP_200_OK)
 
-        except APIUser.DoesNotExist:
+        except User.DoesNotExist:
             # User not found
             AuthenticationAuditLog.log_event(
                 event_type="LOGIN_FAILED",
@@ -470,9 +476,9 @@ class AuditLogListView(generics.ListAPIView):
         if user_id:
             try:
                 # Import here to avoid circular imports at module load
-                from .models import APIUser
+                from .models import User
 
-                target_user = APIUser.objects.get(id=user_id)
+                target_user = User.objects.get(id=user_id)
                 qs = qs.filter(user=target_user)
             except Exception:
                 # If user not found or id invalid, return empty queryset

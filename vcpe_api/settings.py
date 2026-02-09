@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     "sales_notes",
     "authentication",
     "audit",
+    "legacy",
 ]
 
 MIDDLEWARE = [
@@ -108,7 +109,7 @@ DATABASES = {
         "CONN_MAX_AGE": 600,
         "OPTIONS": {
             "sslmode": "require" if not DEBUG else "prefer",
-            # 'options': '-c search_path=api_dev,public'
+            "options": "-c search_path=public",
         },
     }
 }
@@ -128,10 +129,14 @@ PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
     "django.contrib.auth.hashers.PBKDF2PasswordHasher",
     "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
+    # Afegim hashers antics per compatibilitat amb la BD legacy
+    "authentication.hashers.UnsaltedMD5PasswordHasher",
+    "authentication.hashers.UnsaltedSHA1PasswordHasher",
+    "django.contrib.auth.hashers.MD5PasswordHasher",
 ]
 
 # Model d'usuari personalitzat
-AUTH_USER_MODEL = "authentication.APIUser"
+AUTH_USER_MODEL = "authentication.User"
 
 # Password validation amb requisits forts
 AUTH_PASSWORD_VALIDATORS = [
