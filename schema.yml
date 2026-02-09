@@ -1,0 +1,1315 @@
+openapi: 3.0.3
+info:
+  title: VCPE API - Notes de Venda ICATMAR
+  version: 1.0.0
+  description: API REST segura per rebre i processar notes de venda del sector pesquer
+  contact:
+    name: ICATMAR
+    email: info@icatmar.cat
+  license:
+    name: Propietari - ICATMAR
+paths:
+  /api/auth/audit-logs/:
+    get:
+      operationId: auth_audit_logs_list
+      description: |-
+        API endpoint to retrieve authentication audit logs for all or selected user.
+
+        Returns the most recent 100 audit log entries.
+
+        GET /api/auth/audit-logs/
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAuthenticationAuditLogList'
+          description: ''
+  /api/auth/audit-logs/{user_id}/:
+    get:
+      operationId: auth_audit_logs_list_2
+      description: |-
+        API endpoint to retrieve authentication audit logs for all or selected user.
+
+        Returns the most recent 100 audit log entries.
+
+        GET /api/auth/audit-logs/
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: path
+        name: user_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAuthenticationAuditLogList'
+          description: ''
+  /api/auth/login/:
+    post:
+      operationId: auth_login_create
+      description: |-
+        Handle login request.
+
+        Args:
+            request: Django REST Framework request object
+
+        Returns:
+            Response: JWT tokens and user information on success,
+                     error message on failure
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Login'
+          description: ''
+  /api/auth/logout/:
+    post:
+      operationId: auth_logout_create
+      description: |-
+        Handle logout request.
+
+        Args:
+            request: Django REST Framework request object
+
+        Returns:
+            Response: Confirmation message
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/auth/password/change/:
+    post:
+      operationId: auth_password_change_create
+      description: |-
+        Handle password change request.
+
+        Args:
+            request: Django REST Framework request object
+
+        Returns:
+            Response: Confirmation message
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/auth/profile/:
+    get:
+      operationId: auth_profile_retrieve
+      description: |-
+        API endpoint to retrieve authenticated user profile.
+
+        GET /api/auth/profile/
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/auth/register/:
+    post:
+      operationId: auth_register_create
+      description: |-
+        API endpoint for user registration.
+
+        Allows anonymous users to create new accounts.
+        Logs account creation event for audit purposes.
+
+        POST /api/auth/register/
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRegistration'
+          description: ''
+  /api/auth/token/:
+    post:
+      operationId: auth_token_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/auth/token/refresh/:
+    post:
+      operationId: auth_token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/auth/token/verify/:
+    post:
+      operationId: auth_token_verify_create
+      description: |-
+        Takes a token and indicates if it is valid.  This view provides no
+        information about a token's fitness for a particular use.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenVerify'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenVerify'
+          description: ''
+  /api/sales-notes/envios/:
+    get:
+      operationId: sales_notes_envios_list
+      description: |-
+        Llistar enviaments (paginat)
+
+        DARP: Només veu els seus enviaments
+        Investigadors: Veuen TOTS els enviaments
+        Admin: Veu tot
+
+        Filtres disponibles:
+        - ?tipo_respuesta=1
+        - ?procesado=true
+        - ?search=ENV2025
+        - ?ordering=-fecha_recepcion
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: procesado
+        schema:
+          type: boolean
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: tipo_respuesta
+        schema:
+          type: integer
+          enum:
+          - 1
+          - 2
+          - 3
+        description: |-
+          Tipus de resposta esperada del sistema
+
+          * `1` - Completa
+          * `2` - Media
+          * `3` - Reducida
+      - in: query
+        name: usuario_envio
+        schema:
+          type: string
+          format: uuid
+      tags:
+      - sales-notes
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EnvioList'
+          description: ''
+    post:
+      operationId: sales_notes_envios_create
+      description: Crear nou enviament amb rate limiting
+      tags:
+      - sales-notes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Envio'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envio'
+          description: ''
+  /api/sales-notes/envios/{id}/:
+    get:
+      operationId: sales_notes_envios_retrieve
+      description: |-
+        Obtenir detall d'un enviament específic
+
+        DARP: Només els seus enviaments
+        Investigadors: Qualsevol enviament
+        Admin: Qualsevol enviament
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Enviament.
+        required: true
+      tags:
+      - sales-notes
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envio'
+          description: ''
+  /api/sales-notes/envios/{id}/status/:
+    get:
+      operationId: sales_notes_envios_status_retrieve
+      description: |-
+        Consultar l'estat de processament d'un enviament específic
+
+        URL: /api/sales-notes/envios/{id}/status/
+
+        Retorna:
+        - procesado: bool
+        - errores_validacion: JSON amb errors si n'hi ha
+        - fecha_recepcion: timestamp
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Enviament.
+        required: true
+      tags:
+      - sales-notes
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvioStatus'
+          description: ''
+components:
+  schemas:
+    AuthenticationAuditLog:
+      type: object
+      description: |-
+        Serializer for authentication audit log entries.
+
+        Provides detailed information about authentication events.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        user:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+          title: Usuari
+        user_username:
+          type: string
+          readOnly: true
+          description: Username associated with the event
+        event_type:
+          allOf:
+          - $ref: '#/components/schemas/EventTypeEnum'
+          readOnly: true
+        event_type_display:
+          type: string
+          readOnly: true
+          description: Human-readable event type
+        severity:
+          allOf:
+          - $ref: '#/components/schemas/SeverityEnum'
+          readOnly: true
+        severity_display:
+          type: string
+          readOnly: true
+          description: Human-readable severity level
+        ip_address:
+          type: string
+          readOnly: true
+          title: Adreça IP
+        user_agent:
+          type: string
+          readOnly: true
+        username_attempted:
+          type: string
+          readOnly: true
+          title: Attempted username
+        details:
+          readOnly: true
+          title: Event details
+        timestamp:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - details
+      - event_type
+      - event_type_display
+      - id
+      - ip_address
+      - severity
+      - severity_display
+      - timestamp
+      - user
+      - user_agent
+      - user_username
+      - username_attempted
+    Buque:
+      type: object
+      description: Serialitzador per vaixells
+      properties:
+        codigo_buque:
+          type: string
+          description: Codi del vaixell (matrícula)
+          maxLength: 20
+        puerto_al5:
+          type: string
+          nullable: true
+          description: Codi del port en format AL5
+          pattern: ^[A-Za-z]{2}[A-Za-z0-9]{3}$
+          maxLength: 5
+        armador:
+          type: string
+          nullable: true
+          maxLength: 100
+        capitan:
+          type: string
+          nullable: true
+          maxLength: 60
+        fecha_regreso_puerto:
+          type: string
+          format: date-time
+          description: Data i hora de retorn al port
+        cod_marea:
+          type: string
+          nullable: true
+          description: Codi de marea
+          maxLength: 50
+      required:
+      - codigo_buque
+      - fecha_regreso_puerto
+    Envio:
+      type: object
+      description: |-
+        Serialitzador principal per l'enviament de notes de venda
+        Gestiona tota la jerarquia de dades
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        num_envio:
+          type: string
+          description: Número únic d'enviament
+          maxLength: 50
+        tipo_respuesta:
+          allOf:
+          - $ref: '#/components/schemas/TipoRespuestaEnum'
+          description: |-
+            Tipus de resposta esperada del sistema
+
+            * `1` - Completa
+            * `2` - Media
+            * `3` - Reducida
+          minimum: -2147483648
+          maximum: 2147483647
+        fecha_recepcion:
+          type: string
+          format: date-time
+          readOnly: true
+        procesado:
+          type: boolean
+          readOnly: true
+        validado:
+          type: boolean
+          readOnly: true
+        errores:
+          readOnly: true
+        establecimientos_venta:
+          type: array
+          items:
+            $ref: '#/components/schemas/EstablecimientoVenta'
+      required:
+      - errores
+      - fecha_recepcion
+      - id
+      - num_envio
+      - procesado
+      - validado
+    EnvioList:
+      type: object
+      description: |-
+        Serialitzador resumit per llistat d'enviaments
+
+        Només mostra camps essencials per no carregar massa dades
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        num_envio:
+          type: string
+          readOnly: true
+          description: Número únic d'enviament
+        tipo_respuesta:
+          allOf:
+          - $ref: '#/components/schemas/TipoRespuestaEnum'
+          readOnly: true
+          description: |-
+            Tipus de resposta esperada del sistema
+
+            * `1` - Completa
+            * `2` - Media
+            * `3` - Reducida
+        procesado:
+          type: boolean
+          readOnly: true
+        fecha_recepcion:
+          type: string
+          format: date-time
+          readOnly: true
+        usuario_envio:
+          type: string
+          readOnly: true
+        num_establecimientos:
+          type: integer
+          readOnly: true
+        num_especies:
+          type: integer
+          readOnly: true
+        ip_origen:
+          type: string
+          readOnly: true
+          nullable: true
+      required:
+      - fecha_recepcion
+      - id
+      - ip_origen
+      - num_envio
+      - num_especies
+      - num_establecimientos
+      - procesado
+      - tipo_respuesta
+      - usuario_envio
+    EnvioStatus:
+      type: object
+      description: Serialitzador per consultar l'estat d'un enviament
+      properties:
+        num_envio:
+          type: string
+          readOnly: true
+          description: Número únic d'enviament
+        fecha_recepcion:
+          type: string
+          format: date-time
+          readOnly: true
+        procesado:
+          type: boolean
+          readOnly: true
+        fecha_procesado:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        validado:
+          type: boolean
+          readOnly: true
+        errores:
+          readOnly: true
+      required:
+      - errores
+      - fecha_procesado
+      - fecha_recepcion
+      - num_envio
+      - procesado
+      - validado
+    Especie:
+      type: object
+      description: Serialitzador per espècies
+      properties:
+        num_doc_venta:
+          type: string
+          description: Número del document de venda
+          maxLength: 21
+        especie_al3:
+          type: string
+          description: Codi FAO de l'espècie (3 lletres)
+          pattern: ^[A-Za-z]{3}$
+          maxLength: 3
+        zona:
+          type: string
+          maxLength: 50
+        zona_geografica:
+          type: string
+          maxLength: 50
+        ccaa:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+          description: Codi Comunitat Autònoma
+        pais_al3:
+          type: string
+          description: Codi ISO-3 del país
+          pattern: ^[A-Za-z]{3}$
+          maxLength: 3
+        masa_agua:
+          type: string
+          description: Massa d'aigua on es va capturar
+          maxLength: 100
+        arte_al3:
+          type: string
+          description: Codi d'art de pesca (FAO)
+          maxLength: 3
+        otro_arte:
+          type: string
+          description: Descripció d'altres arts no estandarditzats
+          maxLength: 100
+        cod_especie_conservacion:
+          type: string
+          description: Codi estat de conservació
+          maxLength: 3
+        cod_especie_presentacion:
+          type: string
+          description: Codi presentació del producte
+          maxLength: 5
+        presentacion_oth:
+          type: string
+          description: Altres presentacions
+          maxLength: 50
+        id_presentacion_oth:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        cod_especie_frescura:
+          type: string
+          description: Codi frescura
+          maxLength: 2
+        cod_especie_calibre:
+          type: string
+          description: Codi calibre
+          maxLength: 15
+        fecha_venta:
+          type: string
+          format: date-time
+          description: Data i hora de venda
+        lote:
+          type: string
+          description: Número de lot
+          maxLength: 50
+        cod_contrato_alim:
+          type: string
+          description: Codi contracte alimentari
+          maxLength: 50
+        num_doc_transporte:
+          type: string
+          description: Número document de transport
+          maxLength: 50
+        num_declaracion_recog:
+          type: string
+          description: Número declaració recollida
+          maxLength: 21
+        certificado_de_origen:
+          type: boolean
+          description: Té certificat d'origen
+        tipo_cif_nif_vendedor:
+          allOf:
+          - $ref: '#/components/schemas/TipoCifNifVendedorEnum'
+          description: |-
+            Tipus document identificació venedor
+
+            * `1` - NIF
+            * `2` - NIE
+            * `3` - Passaport
+            * `5` - Altres documents
+          minimum: -2147483648
+          maximum: 2147483647
+        nif_vendedor:
+          type: string
+          description: NIF/CIF del venedor (xifrat)
+        nombre_vendedor:
+          type: string
+          description: Nom del venedor
+          maxLength: 100
+        direccion_vendedor:
+          type: string
+          description: Direcció del venedor (xifrat)
+        nif_comprador:
+          type: string
+          description: NIF/CIF del comprador (xifrat)
+        id_tipo_nif_cif_comprador:
+          allOf:
+          - $ref: '#/components/schemas/IdTipoNifCifCompradorEnum'
+          description: |-
+            Tipus document identificació comprador
+
+            * `1` - NIF
+            * `2` - NIE
+            * `3` - Passaport
+            * `5` - Altres documents
+          minimum: -2147483648
+          maximum: 2147483647
+        pais_comprador:
+          type: string
+          description: Codi ISO-3 país del comprador
+          pattern: ^[A-Za-z]{3}$
+          maxLength: 3
+        nombre_comprador:
+          type: string
+          description: Nom del comprador
+          maxLength: 100
+        direccion_comprador:
+          type: string
+          description: Direcció del comprador (xifrat)
+        precio:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          description: Preu total (xifrat)
+        cod_moneda:
+          type: string
+          description: Codi ISO-4217 moneda
+          pattern: ^[A-Za-z]{3}$
+          maxLength: 3
+        cantidad:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+          description: Quantitat en kg (xifrat)
+        num_ejemplares:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Nombre d'exemplars
+        num_cajas:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Nombre de caixes
+        es_talla_reglamentaria:
+          type: boolean
+          description: És talla reglamentària
+        tipo_retirada:
+          nullable: true
+          description: |-
+            Tipus de retirada
+
+            * `1` - No s'ha retirat
+            * `2` - Retirada per talla
+            * `3` - Retirada per quota
+            * `4` - Retirada sense preu
+            * `5` - Retirada altre
+            * `6` - Desembarcament per sota mínims
+          minimum: -2147483648
+          maximum: 2147483647
+          oneOf:
+          - $ref: '#/components/schemas/TipoRetiradaEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        cod_destino_retirado:
+          type: string
+          description: Codi destí del producte retirat
+          maxLength: 50
+        lugar_almacenamiento:
+          type: string
+          description: Lloc d'emmagatzematge
+          maxLength: 100
+        observaciones:
+          type: string
+          description: Observacions addicionals
+        num_acta_inspeccion:
+          type: string
+          description: Número d'acta d'inspecció
+          maxLength: 20
+        fechas_captura:
+          type: array
+          items:
+            $ref: '#/components/schemas/FechaCaptura'
+      required:
+      - cantidad
+      - especie_al3
+      - fecha_venta
+      - id_tipo_nif_cif_comprador
+      - nif_comprador
+      - nif_vendedor
+      - nombre_comprador
+      - nombre_vendedor
+      - num_doc_venta
+      - precio
+      - tipo_cif_nif_vendedor
+    EstablecimientoVenta:
+      type: object
+      description: Serialitzador per establiments de venda
+      properties:
+        num_identificacion_establec:
+          type: string
+          description: Número d'identificació de l'establiment
+          maxLength: 50
+        ventas_unidad_productiva:
+          type: array
+          items:
+            $ref: '#/components/schemas/UnidadProductiva'
+      required:
+      - num_identificacion_establec
+    EventTypeEnum:
+      enum:
+      - LOGIN_SUCCESS
+      - LOGIN_FAILED
+      - LOGIN_BLOCKED
+      - LOGOUT
+      - TOKEN_ISSUED
+      - TOKEN_REFRESHED
+      - TOKEN_REVOKED
+      - TOKEN_EXPIRED
+      - PASSWORD_CHANGED
+      - ACCOUNT_LOCKED
+      - ACCOUNT_UNLOCKED
+      type: string
+      description: |-
+        * `LOGIN_SUCCESS` - Successful login
+        * `LOGIN_FAILED` - Failed login attempt
+        * `LOGIN_BLOCKED` - Login blocked due to account lock
+        * `LOGOUT` - User logout
+        * `TOKEN_ISSUED` - JWT token issued
+        * `TOKEN_REFRESHED` - JWT token refreshed
+        * `TOKEN_REVOKED` - JWT token revoked
+        * `TOKEN_EXPIRED` - Expired token used
+        * `PASSWORD_CHANGED` - Password changed
+        * `ACCOUNT_LOCKED` - Account locked
+        * `ACCOUNT_UNLOCKED` - Account unlocked
+    FechaCaptura:
+      type: object
+      description: Serialitzador per dates de captura
+      properties:
+        fecha_captura_ini:
+          type: string
+          format: date-time
+          description: Data i hora inici captura
+        fecha_captura_fin:
+          type: string
+          format: date-time
+          nullable: true
+          description: Data i hora fi captura (opcional)
+      required:
+      - fecha_captura_ini
+    Granja:
+      type: object
+      description: Serialitzador per granges
+      properties:
+        codigo_rega:
+          type: string
+          description: Codi REGA de la granja
+          maxLength: 14
+        lugar_descarga:
+          type: string
+          description: Lloc de descàrrega
+          maxLength: 250
+        fecha_produccion:
+          type: string
+          format: date-time
+          description: Data de producció
+      required:
+      - codigo_rega
+      - fecha_produccion
+    IdTipoNifCifCompradorEnum:
+      enum:
+      - 1
+      - 2
+      - 3
+      - 5
+      type: integer
+      description: |-
+        * `1` - NIF
+        * `2` - NIE
+        * `3` - Passaport
+        * `5` - Altres documents
+    Login:
+      type: object
+      description: |-
+        Serializer for user login credentials.
+
+        Accepts username and password for authentication.
+      properties:
+        username:
+          type: string
+          description: Username for authentication
+        password:
+          type: string
+          writeOnly: true
+          description: User password
+      required:
+      - password
+      - username
+    MetodoProduccionEnum:
+      enum:
+      - 1
+      - 2
+      - 3
+      - 4
+      type: integer
+      description: |-
+        * `1` - Pesca extractiva marina
+        * `2` - Aqüicultura marina
+        * `3` - Pesca extractiva aigües interiors
+        * `4` - Aqüicultura aigües interiors
+    NullEnum:
+      enum:
+      - null
+    PaginatedAuthenticationAuditLogList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthenticationAuditLog'
+    PersonaFisicaJuridica:
+      type: object
+      description: Serialitzador per persones físiques/jurídiques
+      properties:
+        nif_persona:
+          type: string
+          description: NIF/NIE/CIF de la persona
+          maxLength: 17
+        lugar_descarga:
+          type: string
+          description: Lloc de descàrrega
+          maxLength: 250
+        fecha_descarga:
+          type: string
+          format: date-time
+          description: Data de descàrrega
+      required:
+      - fecha_descarga
+      - nif_persona
+    SeverityEnum:
+      enum:
+      - INFO
+      - WARNING
+      - ERROR
+      - CRITICAL
+      type: string
+      description: |-
+        * `INFO` - Information
+        * `WARNING` - Warning
+        * `ERROR` - Error
+        * `CRITICAL` - Critical
+    TipoCifNifVendedorEnum:
+      enum:
+      - 1
+      - 2
+      - 3
+      - 5
+      type: integer
+      description: |-
+        * `1` - NIF
+        * `2` - NIE
+        * `3` - Passaport
+        * `5` - Altres documents
+    TipoRespuestaEnum:
+      enum:
+      - 1
+      - 2
+      - 3
+      type: integer
+      description: |-
+        * `1` - Completa
+        * `2` - Media
+        * `3` - Reducida
+    TipoRetiradaEnum:
+      enum:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      type: integer
+      description: |-
+        * `1` - No s'ha retirat
+        * `2` - Retirada per talla
+        * `3` - Retirada per quota
+        * `4` - Retirada sense preu
+        * `5` - Retirada altre
+        * `6` - Desembarcament per sota mínims
+    TokenObtainPair:
+      type: object
+      properties:
+        username:
+          type: string
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - password
+      - refresh
+      - username
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    TokenVerify:
+      type: object
+      properties:
+        token:
+          type: string
+          writeOnly: true
+      required:
+      - token
+    UnidadProductiva:
+      type: object
+      description: |-
+        Serialitzador per unitats productives amb polimorfisme
+        Gestiona Buque, Granja o PersonaFisicaJuridica segons el tipus
+      properties:
+        metodo_produccion:
+          allOf:
+          - $ref: '#/components/schemas/MetodoProduccionEnum'
+          minimum: -2147483648
+          maximum: 2147483647
+        buque:
+          allOf:
+          - $ref: '#/components/schemas/Buque'
+          nullable: true
+        granja:
+          allOf:
+          - $ref: '#/components/schemas/Granja'
+          nullable: true
+        persona:
+          allOf:
+          - $ref: '#/components/schemas/PersonaFisicaJuridica'
+          nullable: true
+        especies:
+          type: array
+          items:
+            $ref: '#/components/schemas/Especie'
+      required:
+      - metodo_produccion
+    User:
+      type: object
+      description: |-
+        Serializer for user details (read-only).
+
+        Provides comprehensive user information excluding sensitive data.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+          title: Nom d'usuari
+          description: Obligatori. 150 o menys caràcters. Només lletres, dígits i
+            @/./+/-/_.
+        email:
+          type: string
+          format: email
+          readOnly: true
+          title: Adreça de correu electrònic
+        organization:
+          type: string
+          readOnly: true
+          description: 'Nom de l''organització (ex: Confraria de pescadors, llotja)'
+        is_active:
+          type: boolean
+          readOnly: true
+          title: Actiu
+          description: Designa si aquest usuari ha de ser tractat com a actiu. Deseleccioneu-ho
+            enlloc d'esborrar comptes d'usuari.
+        is_staff:
+          type: boolean
+          readOnly: true
+          title: Membre del personal
+          description: Designa si l'usuari pot entrar al lloc administratiu.
+        is_superuser:
+          type: boolean
+          readOnly: true
+          title: Estat de superusuari
+          description: Designa que aquest usuari té tots els permisos sense assignar-los
+            explícitament.
+        is_locked:
+          type: boolean
+          readOnly: true
+          description: Indica si el compte està bloquejat per seguretat
+        locked_until:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          description: Data fins quan està bloquejat el compte
+        lock_reason:
+          type: string
+          readOnly: true
+          description: Raó del bloqueig del compte
+        failed_login_attempts:
+          type: integer
+          readOnly: true
+          description: Nombre d'intents de login fallits consecutius
+        last_failed_login:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          description: Data de l'últim intent de login fallit
+        last_login:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Últim inici de sessió
+        last_login_ip:
+          type: string
+          readOnly: true
+          nullable: true
+          description: IP de l'últim login exitós
+        password_changed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          description: Data de l'últim canvi de contrasenya
+        must_change_password:
+          type: boolean
+          readOnly: true
+          description: Indica si l'usuari ha de canviar la contrasenya al proper login
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_account_locked:
+          type: boolean
+          readOnly: true
+      required:
+      - created_at
+      - email
+      - failed_login_attempts
+      - id
+      - is_account_locked
+      - is_active
+      - is_locked
+      - is_staff
+      - is_superuser
+      - last_failed_login
+      - last_login
+      - last_login_ip
+      - lock_reason
+      - locked_until
+      - must_change_password
+      - organization
+      - password_changed_at
+      - updated_at
+      - username
+    UserRegistration:
+      type: object
+      description: |-
+        Serializer for user registration.
+
+        Validates password confirmation and applies Django's password
+        validation policies.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        username:
+          type: string
+          title: Nom d'usuari
+          description: Obligatori. 150 o menys caràcters. Només lletres, dígits i
+            @/./+/-/_.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Adreça de correu electrònic
+          maxLength: 254
+        organization:
+          type: string
+          description: 'Nom de l''organització (ex: Confraria de pescadors, llotja)'
+          maxLength: 200
+        password:
+          type: string
+          writeOnly: true
+          description: Password must meet security requirements
+        password_confirm:
+          type: string
+          writeOnly: true
+          description: Must match password field
+        is_active:
+          type: boolean
+          readOnly: true
+          title: Actiu
+          description: Designa si aquest usuari ha de ser tractat com a actiu. Deseleccioneu-ho
+            enlloc d'esborrar comptes d'usuari.
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - is_active
+      - organization
+      - password
+      - password_confirm
+      - username
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

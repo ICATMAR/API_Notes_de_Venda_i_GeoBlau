@@ -40,9 +40,9 @@ echo -e "${NC}"
 cat > "$CONSOLIDATED_REPORT" << EOF
 # 📋 Report Consolidat de Tests - VCPE API
 
-**Data d'execució:** $(date '+%d/%m/%Y %H:%M:%S')  
-**Projecte:** TFM Ciberseguretat i Privadesa  
-**Institució:** ICATMAR  
+**Data d'execució:** $(date '+%d/%m/%Y %H:%M:%S')
+**Projecte:** TFM Ciberseguretat i Privadesa
+**Institució:** ICATMAR
 **Autor:** Aram Puig Capdevila
 
 ---
@@ -73,21 +73,21 @@ add_section() {
 run_and_capture() {
     local title="$1"
     local command="$2"
-    
+
     echo -e "${YELLOW}▶ $title${NC}"
     add_section "### $title"
-    
+
     local start_time=$(date +%s)
     local output=$(eval "$command" 2>&1)
     local exit_code=$?
     local end_time=$(date +%s)
     local duration=$((end_time - start_time))
-    
+
     add_section "**Temps d'execució:** ${duration}s"
     add_section '```'
     add_section "$output"
     add_section '```'
-    
+
     if [ $exit_code -eq 0 ]; then
         echo -e "${GREEN}  ✓ Completat (${duration}s)${NC}"
         add_section "**Resultat:** ✅ Completat correctament"
@@ -95,7 +95,7 @@ run_and_capture() {
         echo -e "${RED}  ✗ Error (${duration}s)${NC}"
         add_section "**Resultat:** ❌ Ha fallat amb exit code $exit_code"
     fi
-    
+
     echo ""
     return $exit_code
 }
@@ -140,7 +140,7 @@ add_section "## 2. Tests d'Autenticació JWT"
 echo -e "${YELLOW}▶ 2.1 Obtenir Token JWT${NC}"
 TOKEN_RESPONSE=$(curl -s -X POST http://localhost:8000/api/auth/token/ \
   -H "Content-Type: application/json" \
-  -d '{"username": "admin_test", "password": "TestSecure123!"}')
+  -d '{"username": "admin_test", "password": "admin"}')
 
 if echo "$TOKEN_RESPONSE" | grep -q "access"; then
     echo -e "${GREEN}  ✓ Token obtingut correctament${NC}"
@@ -186,11 +186,11 @@ if docker-compose exec -T api pytest --version > /dev/null 2>&1; then
     # 3.1 Tests unitaris
     run_and_capture "3.1 Tests Unitaris" \
         "docker-compose exec -T api pytest tests/unit -v --tb=short" || true
-    
+
     # 3.2 Tests d'integració
     run_and_capture "3.2 Tests d'Integració" \
         "docker-compose exec -T api pytest tests/integration -v --tb=short" || true
-    
+
     # 3.3 Tests de seguretat
     run_and_capture "3.3 Tests de Seguretat" \
         "docker-compose exec -T api pytest tests/security -v --tb=short" || true
@@ -212,7 +212,7 @@ add_section "## 4. Cobertura de Codi"
 if docker-compose exec -T api pytest --version > /dev/null 2>&1; then
     run_and_capture "4.1 Generar Informe de Cobertura" \
         "docker-compose exec -T api pytest --cov --cov-report=term --cov-report=html" || true
-    
+
     add_section "ℹ️ Informe HTML disponible a: \`htmlcov/index.html\`"
 else
     add_section "⚠️ **Cobertura no disponible**"
@@ -274,85 +274,14 @@ echo -e "${MAGENTA}━━━━━━━━━━━━━━━━━━━━�
 echo -e "${MAGENTA}  7. GENERANT RESUM I CONCLUSIONS                          ${NC}"
 echo -e "${MAGENTA}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
-add_section "## 7. Resum Executiu"
+#add_section "## 7. Resum Executiu"
 
 # Taula resum
 cat >> "$CONSOLIDATED_REPORT" << EOF
-
-| Categoria | Estat |
-|-----------|-------|
-| **Connectivitat** | ✅ Operatiu |
-| **Autenticació JWT** | ✅ Implementat |
-| **Tests Automatitzats** | ⚠️ En desenvolupament |
-| **Seguretat (SAST)** | ✅ Analitzat |
-| **Cobertura Codi** | ⚠️ Per completar |
-| **Documentació** | ✅ Accessible |
-
 ---
 
-## 8. Conclusions i Recomanacions
-
-### ✅ Punts Forts
-
-1. **Infraestructura Docker**: Correctament configurada amb docker-compose
-2. **Autenticació JWT**: Sistema implementat i funcional
-3. **Health Checks**: Endpoints de monitoratge operatius
-4. **Documentació API**: Swagger/ReDoc accessibles i actualitzats
-5. **Seguretat**: Headers i configuracions bàsiques implementades
-
-### ⚠️ Àrees de Millora
-
-1. **Tests Automatitzats**: Completar suite de tests pytest (OE5-T5.1)
-2. **Cobertura de Codi**: Incrementar fins >80% (objectiu TFM)
-3. **Base de Dades**: Configurar PostgreSQL/PostGIS (OE3-T3.1)
-4. **Endpoints**: Implementar CRUD de sales_notes (OE2-T2.2)
-5. **Validacions**: Sistema de validació automàtica (OE2-T2.5)
-
-### 📋 Següents Passos per al TFM
-
-**Prioritat Alta (Aquesta setmana):**
-1. Configurar PostgreSQL/PostGIS
-2. Executar migracions
-3. Implementar models de sales_notes
-4. Crear tests unitaris per autenticació
-
-**Prioritat Mitjana (Propera setmana):**
-1. Desenvolupar endpoints CRUD
-2. Implementar validacions
-3. Tests d'integració
-4. Tests de seguretat OWASP
-
-**Prioritat Baixa (Abans de lliurament):**
-1. Tests de performance (Locust)
-2. OWASP ZAP penetration testing
-3. Documentació completa
-4. Anàlisi de riscos MAGERIT
-
----
-
-## 📊 Mètriques del Projecte
-
-| Mètrica | Valor Actual | Objectiu TFM |
-|---------|--------------|--------------|
-| Cobertura Tests | TBD | >80% |
-| Tests Automatitzats | 0 | >50 |
-| Vulnerabilitats High | 0 | 0 |
-| Endpoints Implementats | 3 | >10 |
-| Temps Resposta API | <100ms | <500ms |
-
----
-
-## 📚 Referències per a la Memòria
-
-- OWASP API Security Top 10 2023
-- Django Security Checklist
-- Microsoft Security Development Lifecycle (SDL)
-- MAGERIT v3 - Metodologia de Análisis y Gestión de Riesgos
-
----
-
-*Report generat automàticament per run_all_tests_with_report.sh*  
-*Data: $(date '+%d/%m/%Y %H:%M:%S')*  
+*Report generat automàticament per run_all_tests_with_report.sh*
+*Data: $(date '+%d/%m/%Y %H:%M:%S')*
 *TFM Ciberseguretat i Privadesa - ICATMAR*
 
 EOF
@@ -378,7 +307,7 @@ if command -v pandoc &> /dev/null; then
         --toc-depth=3 \
         --css=https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css \
         --self-contained 2>/dev/null || echo "Error generant HTML"
-    
+
     if [ -f "$HTML_REPORT" ]; then
         echo "📄 Report HTML: $HTML_REPORT"
     fi

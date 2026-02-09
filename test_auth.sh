@@ -34,34 +34,34 @@ run_test() {
     local test_name="$1"
     local test_command="$2"
     local expected="$3"
-    
+
     TOTAL_TESTS=$((TOTAL_TESTS + 1))
-    
+
     echo ""
     echo -e "${BLUE}═══════════════════════════════════════════════════${NC}"
     echo -e "${YELLOW}Test $TOTAL_TESTS: $test_name${NC}"
     echo -e "${BLUE}═══════════════════════════════════════════════════${NC}"
-    
+
     add_to_report ""
     add_to_report "### Test $TOTAL_TESTS: $test_name"
     add_to_report ""
     add_to_report "**Hora d'execució:** $(date '+%H:%M:%S')"
     add_to_report ""
-    
+
     # Executar el test i capturar resultat
     local start_time=$(date +%s%N)
     local result=$(eval "$test_command" 2>&1)
     local exit_code=$?
     local end_time=$(date +%s%N)
     local duration=$(( (end_time - start_time) / 1000000 ))
-    
+
     # Mostrar resultat
     echo "Temps d'execució: ${duration}ms"
     echo ""
     echo "Resultat:"
     echo "$result"
     echo ""
-    
+
     add_to_report "**Temps d'execució:** ${duration}ms"
     add_to_report ""
     add_to_report "**Comanda executada:**"
@@ -69,7 +69,7 @@ run_test() {
     add_to_report "$test_command"
     add_to_report '```'
     add_to_report ""
-    
+
     # Verificar si el test ha passat
     if echo "$result" | grep -q "$expected"; then
         echo -e "${GREEN}✓ PASS${NC}"
@@ -80,7 +80,7 @@ run_test() {
         add_to_report "**Resultat:** ❌ **FAIL**"
         FAILED_TESTS=$((FAILED_TESTS + 1))
     fi
-    
+
     add_to_report ""
     add_to_report "<details>"
     add_to_report "<summary>Resposta completa (clica per veure)</summary>"
@@ -92,7 +92,7 @@ run_test() {
     add_to_report "</details>"
     add_to_report ""
     add_to_report "---"
-    
+
     return $exit_code
 }
 
@@ -129,7 +129,7 @@ TOKEN_RESPONSE=$(curl -s -X POST http://localhost:8000/api/auth/token/ \
   -H "Content-Type: application/json" \
   -d '{
     "username": "admin_test",
-    "password": "TestSecure123!"
+    "password": "admin"
   }')
 
 run_test "Obtenir Token JWT amb credencials vàlides" \
@@ -139,40 +139,40 @@ run_test "Obtenir Token JWT amb credencials vàlides" \
 if echo "$TOKEN_RESPONSE" | grep -q "access"; then
     ACCESS_TOKEN=$(echo $TOKEN_RESPONSE | jq -r '.access' 2>/dev/null || echo "")
     REFRESH_TOKEN=$(echo $TOKEN_RESPONSE | jq -r '.refresh' 2>/dev/null || echo "")
-    
+
     # Guardar tokens
     echo "export ACCESS_TOKEN='$ACCESS_TOKEN'" > .tokens
     echo "export REFRESH_TOKEN='$REFRESH_TOKEN'" >> .tokens
-    
+
     add_to_report ""
     add_to_report "**Tokens obtinguts:**"
     add_to_report "- Access Token: \`${ACCESS_TOKEN:0:50}...\`"
     add_to_report "- Refresh Token: \`${REFRESH_TOKEN:0:50}...\`"
     add_to_report ""
-    
+
     # Test 4: Verificar Token
     run_test "Verificar Token JWT vàlid" \
         "curl -s -X POST http://localhost:8000/api/auth/token/verify/ -H 'Content-Type: application/json' -d '{\"token\": \"$ACCESS_TOKEN\"}'" \
         ""
-    
+
     # Test 5: Refrescar Token
     run_test "Refrescar Token JWT" \
         "curl -s -X POST http://localhost:8000/api/auth/token/refresh/ -H 'Content-Type: application/json' -d '{\"refresh\": \"$REFRESH_TOKEN\"}'" \
         "access"
-    
+
     # Test 6: Accés sense token (ha de fallar)
     run_test "Accés a endpoint protegit sense token (ha de retornar 401)" \
         "curl -s -w '\n%{http_code}' http://localhost:8000/api/sales-notes/ | tail -n 1" \
         "401"
-    
+
     # Test 7: Accés amb token vàlid
     run_test "Accés a endpoint protegit amb token vàlid" \
         "curl -s -w '\n%{http_code}' -H 'Authorization: Bearer $ACCESS_TOKEN' http://localhost:8000/api/sales-notes/ | tail -n 1" \
         "200\|404"
-    
+
     # Test 8: Token manipulat (ha de fallar)
     FAKE_TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U"
-    
+
     run_test "Token JWT manipulat (ha de retornar 401)" \
         "curl -s -w '\n%{http_code}' -H 'Authorization: Bearer $FAKE_TOKEN' http://localhost:8000/api/sales-notes/ | tail -n 1" \
         "401"
@@ -326,34 +326,34 @@ run_test() {
     local test_name="$1"
     local test_command="$2"
     local expected="$3"
-    
+
     TOTAL_TESTS=$((TOTAL_TESTS + 1))
-    
+
     echo ""
     echo -e "${BLUE}═══════════════════════════════════════════════════${NC}"
     echo -e "${YELLOW}Test $TOTAL_TESTS: $test_name${NC}"
     echo -e "${BLUE}═══════════════════════════════════════════════════${NC}"
-    
+
     add_to_report ""
     add_to_report "### Test $TOTAL_TESTS: $test_name"
     add_to_report ""
     add_to_report "**Hora d'execució:** $(date '+%H:%M:%S')"
     add_to_report ""
-    
+
     # Executar el test i capturar resultat
     local start_time=$(date +%s%N)
     local result=$(eval "$test_command" 2>&1)
     local exit_code=$?
     local end_time=$(date +%s%N)
     local duration=$(( (end_time - start_time) / 1000000 ))
-    
+
     # Mostrar resultat
     echo "Temps d'execució: ${duration}ms"
     echo ""
     echo "Resultat:"
     echo "$result"
     echo ""
-    
+
     add_to_report "**Temps d'execució:** ${duration}ms"
     add_to_report ""
     add_to_report "**Comanda executada:**"
@@ -361,7 +361,7 @@ run_test() {
     add_to_report "$test_command"
     add_to_report '```'
     add_to_report ""
-    
+
     # Verificar si el test ha passat
     if echo "$result" | grep -q "$expected"; then
         echo -e "${GREEN}✓ PASS${NC}"
@@ -372,7 +372,7 @@ run_test() {
         add_to_report "**Resultat:** ❌ **FAIL**"
         FAILED_TESTS=$((FAILED_TESTS + 1))
     fi
-    
+
     add_to_report ""
     add_to_report "<details>"
     add_to_report "<summary>Resposta completa (clica per veure)</summary>"
@@ -384,7 +384,7 @@ run_test() {
     add_to_report "</details>"
     add_to_report ""
     add_to_report "---"
-    
+
     return $exit_code
 }
 
@@ -421,7 +421,7 @@ TOKEN_RESPONSE=$(curl -s -X POST http://localhost:8000/api/auth/token/ \
   -H "Content-Type: application/json" \
   -d '{
     "username": "admin_test",
-    "password": "TestSecure123!"
+    "password": "admin"
   }')
 
 run_test "Obtenir Token JWT amb credencials vàlides" \
@@ -431,40 +431,40 @@ run_test "Obtenir Token JWT amb credencials vàlides" \
 if echo "$TOKEN_RESPONSE" | grep -q "access"; then
     ACCESS_TOKEN=$(echo $TOKEN_RESPONSE | jq -r '.access' 2>/dev/null || echo "")
     REFRESH_TOKEN=$(echo $TOKEN_RESPONSE | jq -r '.refresh' 2>/dev/null || echo "")
-    
+
     # Guardar tokens
     echo "export ACCESS_TOKEN='$ACCESS_TOKEN'" > .tokens
     echo "export REFRESH_TOKEN='$REFRESH_TOKEN'" >> .tokens
-    
+
     add_to_report ""
     add_to_report "**Tokens obtinguts:**"
     add_to_report "- Access Token: \`${ACCESS_TOKEN:0:50}...\`"
     add_to_report "- Refresh Token: \`${REFRESH_TOKEN:0:50}...\`"
     add_to_report ""
-    
+
     # Test 4: Verificar Token
     run_test "Verificar Token JWT vàlid" \
         "curl -s -X POST http://localhost:8000/api/auth/token/verify/ -H 'Content-Type: application/json' -d '{\"token\": \"$ACCESS_TOKEN\"}'" \
         ""
-    
+
     # Test 5: Refrescar Token
     run_test "Refrescar Token JWT" \
         "curl -s -X POST http://localhost:8000/api/auth/token/refresh/ -H 'Content-Type: application/json' -d '{\"refresh\": \"$REFRESH_TOKEN\"}'" \
         "access"
-    
+
     # Test 6: Accés sense token (ha de fallar)
     run_test "Accés a endpoint protegit sense token (ha de retornar 401)" \
         "curl -s -w '\n%{http_code}' http://localhost:8000/api/sales-notes/ | tail -n 1" \
         "401"
-    
+
     # Test 7: Accés amb token vàlid
     run_test "Accés a endpoint protegit amb token vàlid" \
         "curl -s -w '\n%{http_code}' -H 'Authorization: Bearer $ACCESS_TOKEN' http://localhost:8000/api/sales-notes/ | tail -n 1" \
         "200\|404"
-    
+
     # Test 8: Token manipulat (ha de fallar)
     FAKE_TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U"
-    
+
     run_test "Token JWT manipulat (ha de retornar 401)" \
         "curl -s -w '\n%{http_code}' -H 'Authorization: Bearer $FAKE_TOKEN' http://localhost:8000/api/sales-notes/ | tail -n 1" \
         "401"
@@ -618,34 +618,34 @@ run_test() {
     local test_name="$1"
     local test_command="$2"
     local expected="$3"
-    
+
     TOTAL_TESTS=$((TOTAL_TESTS + 1))
-    
+
     echo ""
     echo -e "${BLUE}═══════════════════════════════════════════════════${NC}"
     echo -e "${YELLOW}Test $TOTAL_TESTS: $test_name${NC}"
     echo -e "${BLUE}═══════════════════════════════════════════════════${NC}"
-    
+
     add_to_report ""
     add_to_report "### Test $TOTAL_TESTS: $test_name"
     add_to_report ""
     add_to_report "**Hora d'execució:** $(date '+%H:%M:%S')"
     add_to_report ""
-    
+
     # Executar el test i capturar resultat
     local start_time=$(date +%s%N)
     local result=$(eval "$test_command" 2>&1)
     local exit_code=$?
     local end_time=$(date +%s%N)
     local duration=$(( (end_time - start_time) / 1000000 ))
-    
+
     # Mostrar resultat
     echo "Temps d'execució: ${duration}ms"
     echo ""
     echo "Resultat:"
     echo "$result"
     echo ""
-    
+
     add_to_report "**Temps d'execució:** ${duration}ms"
     add_to_report ""
     add_to_report "**Comanda executada:**"
@@ -653,7 +653,7 @@ run_test() {
     add_to_report "$test_command"
     add_to_report '```'
     add_to_report ""
-    
+
     # Verificar si el test ha passat
     if echo "$result" | grep -q "$expected"; then
         echo -e "${GREEN}✓ PASS${NC}"
@@ -664,7 +664,7 @@ run_test() {
         add_to_report "**Resultat:** ❌ **FAIL**"
         FAILED_TESTS=$((FAILED_TESTS + 1))
     fi
-    
+
     add_to_report ""
     add_to_report "<details>"
     add_to_report "<summary>Resposta completa (clica per veure)</summary>"
@@ -676,7 +676,7 @@ run_test() {
     add_to_report "</details>"
     add_to_report ""
     add_to_report "---"
-    
+
     return $exit_code
 }
 
@@ -713,7 +713,7 @@ TOKEN_RESPONSE=$(curl -s -X POST http://localhost:8000/api/auth/token/ \
   -H "Content-Type: application/json" \
   -d '{
     "username": "admin_test",
-    "password": "TestSecure123!"
+    "password": "admin"
   }')
 
 run_test "Obtenir Token JWT amb credencials vàlides" \
@@ -723,40 +723,40 @@ run_test "Obtenir Token JWT amb credencials vàlides" \
 if echo "$TOKEN_RESPONSE" | grep -q "access"; then
     ACCESS_TOKEN=$(echo $TOKEN_RESPONSE | jq -r '.access' 2>/dev/null || echo "")
     REFRESH_TOKEN=$(echo $TOKEN_RESPONSE | jq -r '.refresh' 2>/dev/null || echo "")
-    
+
     # Guardar tokens
     echo "export ACCESS_TOKEN='$ACCESS_TOKEN'" > .tokens
     echo "export REFRESH_TOKEN='$REFRESH_TOKEN'" >> .tokens
-    
+
     add_to_report ""
     add_to_report "**Tokens obtinguts:**"
     add_to_report "- Access Token: \`${ACCESS_TOKEN:0:50}...\`"
     add_to_report "- Refresh Token: \`${REFRESH_TOKEN:0:50}...\`"
     add_to_report ""
-    
+
     # Test 4: Verificar Token
     run_test "Verificar Token JWT vàlid" \
         "curl -s -X POST http://localhost:8000/api/auth/token/verify/ -H 'Content-Type: application/json' -d '{\"token\": \"$ACCESS_TOKEN\"}'" \
         ""
-    
+
     # Test 5: Refrescar Token
     run_test "Refrescar Token JWT" \
         "curl -s -X POST http://localhost:8000/api/auth/token/refresh/ -H 'Content-Type: application/json' -d '{\"refresh\": \"$REFRESH_TOKEN\"}'" \
         "access"
-    
+
     # Test 6: Accés sense token (ha de fallar)
     run_test "Accés a endpoint protegit sense token (ha de retornar 401)" \
         "curl -s -w '\n%{http_code}' http://localhost:8000/api/sales-notes/ | tail -n 1" \
         "401"
-    
+
     # Test 7: Accés amb token vàlid
     run_test "Accés a endpoint protegit amb token vàlid" \
         "curl -s -w '\n%{http_code}' -H 'Authorization: Bearer $ACCESS_TOKEN' http://localhost:8000/api/sales-notes/ | tail -n 1" \
         "200\|404"
-    
+
     # Test 8: Token manipulat (ha de fallar)
     FAKE_TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U"
-    
+
     run_test "Token JWT manipulat (ha de retornar 401)" \
         "curl -s -w '\n%{http_code}' -H 'Authorization: Bearer $FAKE_TOKEN' http://localhost:8000/api/sales-notes/ | tail -n 1" \
         "401"
@@ -910,34 +910,34 @@ run_test() {
     local test_name="$1"
     local test_command="$2"
     local expected="$3"
-    
+
     TOTAL_TESTS=$((TOTAL_TESTS + 1))
-    
+
     echo ""
     echo -e "${BLUE}═══════════════════════════════════════════════════${NC}"
     echo -e "${YELLOW}Test $TOTAL_TESTS: $test_name${NC}"
     echo -e "${BLUE}═══════════════════════════════════════════════════${NC}"
-    
+
     add_to_report ""
     add_to_report "### Test $TOTAL_TESTS: $test_name"
     add_to_report ""
     add_to_report "**Hora d'execució:** $(date '+%H:%M:%S')"
     add_to_report ""
-    
+
     # Executar el test i capturar resultat
     local start_time=$(date +%s%N)
     local result=$(eval "$test_command" 2>&1)
     local exit_code=$?
     local end_time=$(date +%s%N)
     local duration=$(( (end_time - start_time) / 1000000 ))
-    
+
     # Mostrar resultat
     echo "Temps d'execució: ${duration}ms"
     echo ""
     echo "Resultat:"
     echo "$result"
     echo ""
-    
+
     add_to_report "**Temps d'execució:** ${duration}ms"
     add_to_report ""
     add_to_report "**Comanda executada:**"
@@ -945,7 +945,7 @@ run_test() {
     add_to_report "$test_command"
     add_to_report '```'
     add_to_report ""
-    
+
     # Verificar si el test ha passat
     if echo "$result" | grep -q "$expected"; then
         echo -e "${GREEN}✓ PASS${NC}"
@@ -956,7 +956,7 @@ run_test() {
         add_to_report "**Resultat:** ❌ **FAIL**"
         FAILED_TESTS=$((FAILED_TESTS + 1))
     fi
-    
+
     add_to_report ""
     add_to_report "<details>"
     add_to_report "<summary>Resposta completa (clica per veure)</summary>"
@@ -968,7 +968,7 @@ run_test() {
     add_to_report "</details>"
     add_to_report ""
     add_to_report "---"
-    
+
     return $exit_code
 }
 
@@ -1005,7 +1005,7 @@ TOKEN_RESPONSE=$(curl -s -X POST http://localhost:8000/api/auth/token/ \
   -H "Content-Type: application/json" \
   -d '{
     "username": "admin_test",
-    "password": "TestSecure123!"
+    "password": "admin"
   }')
 
 run_test "Obtenir Token JWT amb credencials vàlides" \
@@ -1015,40 +1015,40 @@ run_test "Obtenir Token JWT amb credencials vàlides" \
 if echo "$TOKEN_RESPONSE" | grep -q "access"; then
     ACCESS_TOKEN=$(echo $TOKEN_RESPONSE | jq -r '.access' 2>/dev/null || echo "")
     REFRESH_TOKEN=$(echo $TOKEN_RESPONSE | jq -r '.refresh' 2>/dev/null || echo "")
-    
+
     # Guardar tokens
     echo "export ACCESS_TOKEN='$ACCESS_TOKEN'" > .tokens
     echo "export REFRESH_TOKEN='$REFRESH_TOKEN'" >> .tokens
-    
+
     add_to_report ""
     add_to_report "**Tokens obtinguts:**"
     add_to_report "- Access Token: \`${ACCESS_TOKEN:0:50}...\`"
     add_to_report "- Refresh Token: \`${REFRESH_TOKEN:0:50}...\`"
     add_to_report ""
-    
+
     # Test 4: Verificar Token
     run_test "Verificar Token JWT vàlid" \
         "curl -s -X POST http://localhost:8000/api/auth/token/verify/ -H 'Content-Type: application/json' -d '{\"token\": \"$ACCESS_TOKEN\"}'" \
         ""
-    
+
     # Test 5: Refrescar Token
     run_test "Refrescar Token JWT" \
         "curl -s -X POST http://localhost:8000/api/auth/token/refresh/ -H 'Content-Type: application/json' -d '{\"refresh\": \"$REFRESH_TOKEN\"}'" \
         "access"
-    
+
     # Test 6: Accés sense token (ha de fallar)
     run_test "Accés a endpoint protegit sense token (ha de retornar 401)" \
         "curl -s -w '\n%{http_code}' http://localhost:8000/api/sales-notes/ | tail -n 1" \
         "401"
-    
+
     # Test 7: Accés amb token vàlid
     run_test "Accés a endpoint protegit amb token vàlid" \
         "curl -s -w '\n%{http_code}' -H 'Authorization: Bearer $ACCESS_TOKEN' http://localhost:8000/api/sales-notes/ | tail -n 1" \
         "200\|404"
-    
+
     # Test 8: Token manipulat (ha de fallar)
     FAKE_TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U"
-    
+
     run_test "Token JWT manipulat (ha de retornar 401)" \
         "curl -s -w '\n%{http_code}' -H 'Authorization: Bearer $FAKE_TOKEN' http://localhost:8000/api/sales-notes/ | tail -n 1" \
         "401"
@@ -1202,34 +1202,34 @@ run_test() {
     local test_name="$1"
     local test_command="$2"
     local expected="$3"
-    
+
     TOTAL_TESTS=$((TOTAL_TESTS + 1))
-    
+
     echo ""
     echo -e "${BLUE}═══════════════════════════════════════════════════${NC}"
     echo -e "${YELLOW}Test $TOTAL_TESTS: $test_name${NC}"
     echo -e "${BLUE}═══════════════════════════════════════════════════${NC}"
-    
+
     add_to_report ""
     add_to_report "### Test $TOTAL_TESTS: $test_name"
     add_to_report ""
     add_to_report "**Hora d'execució:** $(date '+%H:%M:%S')"
     add_to_report ""
-    
+
     # Executar el test i capturar resultat
     local start_time=$(date +%s%N)
     local result=$(eval "$test_command" 2>&1)
     local exit_code=$?
     local end_time=$(date +%s%N)
     local duration=$(( (end_time - start_time) / 1000000 ))
-    
+
     # Mostrar resultat
     echo "Temps d'execució: ${duration}ms"
     echo ""
     echo "Resultat:"
     echo "$result"
     echo ""
-    
+
     add_to_report "**Temps d'execució:** ${duration}ms"
     add_to_report ""
     add_to_report "**Comanda executada:**"
@@ -1237,7 +1237,7 @@ run_test() {
     add_to_report "$test_command"
     add_to_report '```'
     add_to_report ""
-    
+
     # Verificar si el test ha passat
     if echo "$result" | grep -q "$expected"; then
         echo -e "${GREEN}✓ PASS${NC}"
@@ -1248,7 +1248,7 @@ run_test() {
         add_to_report "**Resultat:** ❌ **FAIL**"
         FAILED_TESTS=$((FAILED_TESTS + 1))
     fi
-    
+
     add_to_report ""
     add_to_report "<details>"
     add_to_report "<summary>Resposta completa (clica per veure)</summary>"
@@ -1260,7 +1260,7 @@ run_test() {
     add_to_report "</details>"
     add_to_report ""
     add_to_report "---"
-    
+
     return $exit_code
 }
 
@@ -1297,7 +1297,7 @@ TOKEN_RESPONSE=$(curl -s -X POST http://localhost:8000/api/auth/token/ \
   -H "Content-Type: application/json" \
   -d '{
     "username": "admin_test",
-    "password": "TestSecure123!"
+    "password": "admin"
   }')
 
 run_test "Obtenir Token JWT amb credencials vàlides" \
@@ -1307,40 +1307,40 @@ run_test "Obtenir Token JWT amb credencials vàlides" \
 if echo "$TOKEN_RESPONSE" | grep -q "access"; then
     ACCESS_TOKEN=$(echo $TOKEN_RESPONSE | jq -r '.access' 2>/dev/null || echo "")
     REFRESH_TOKEN=$(echo $TOKEN_RESPONSE | jq -r '.refresh' 2>/dev/null || echo "")
-    
+
     # Guardar tokens
     echo "export ACCESS_TOKEN='$ACCESS_TOKEN'" > .tokens
     echo "export REFRESH_TOKEN='$REFRESH_TOKEN'" >> .tokens
-    
+
     add_to_report ""
     add_to_report "**Tokens obtinguts:**"
     add_to_report "- Access Token: \`${ACCESS_TOKEN:0:50}...\`"
     add_to_report "- Refresh Token: \`${REFRESH_TOKEN:0:50}...\`"
     add_to_report ""
-    
+
     # Test 4: Verificar Token
     run_test "Verificar Token JWT vàlid" \
         "curl -s -X POST http://localhost:8000/api/auth/token/verify/ -H 'Content-Type: application/json' -d '{\"token\": \"$ACCESS_TOKEN\"}'" \
         ""
-    
+
     # Test 5: Refrescar Token
     run_test "Refrescar Token JWT" \
         "curl -s -X POST http://localhost:8000/api/auth/token/refresh/ -H 'Content-Type: application/json' -d '{\"refresh\": \"$REFRESH_TOKEN\"}'" \
         "access"
-    
+
     # Test 6: Accés sense token (ha de fallar)
     run_test "Accés a endpoint protegit sense token (ha de retornar 401)" \
         "curl -s -w '\n%{http_code}' http://localhost:8000/api/sales-notes/ | tail -n 1" \
         "401"
-    
+
     # Test 7: Accés amb token vàlid
     run_test "Accés a endpoint protegit amb token vàlid" \
         "curl -s -w '\n%{http_code}' -H 'Authorization: Bearer $ACCESS_TOKEN' http://localhost:8000/api/sales-notes/ | tail -n 1" \
         "200\|404"
-    
+
     # Test 8: Token manipulat (ha de fallar)
     FAKE_TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U"
-    
+
     run_test "Token JWT manipulat (ha de retornar 401)" \
         "curl -s -w '\n%{http_code}' -H 'Authorization: Bearer $FAKE_TOKEN' http://localhost:8000/api/sales-notes/ | tail -n 1" \
         "401"

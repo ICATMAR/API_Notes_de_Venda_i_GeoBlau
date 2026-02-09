@@ -1,0 +1,1745 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Report Consolidat Tests - VCPE API</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="data:text/css; charset=utf-8;charset=utf-8,%40media%20%28prefers%2Dcolor%2Dscheme%3Adark%29%7B%2Emarkdown%2Dbody%7Bcolor%2Dscheme%3Adark%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dcomment%3A%238b949e%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dconstant%3A%2379c0ff%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dentity%3A%23d2a8ff%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dstorage%2Dmodifier%2Dimport%3A%23c9d1d9%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dentity%2Dtag%3A%237ee787%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dkeyword%3A%23ff7b72%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dstring%3A%23a5d6ff%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dvariable%3A%23ffa657%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dbrackethighlighter%2Dunmatched%3A%23f85149%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dinvalid%2Dillegal%2Dtext%3A%23f0f6fc%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dinvalid%2Dillegal%2Dbg%3A%238e1519%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dcarriage%2Dreturn%2Dtext%3A%23f0f6fc%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dcarriage%2Dreturn%2Dbg%3A%23b62324%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dstring%2Dregexp%3A%237ee787%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dlist%3A%23f2cc60%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dheading%3A%231f6feb%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Ditalic%3A%23c9d1d9%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dbold%3A%23c9d1d9%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Ddeleted%2Dtext%3A%23ffdcd7%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Ddeleted%2Dbg%3A%2367060c%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dinserted%2Dtext%3A%23aff5b4%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dinserted%2Dbg%3A%23033a16%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dchanged%2Dtext%3A%23ffdfb6%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dchanged%2Dbg%3A%235a1e02%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dignored%2Dtext%3A%23c9d1d9%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dignored%2Dbg%3A%231158c7%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmeta%2Ddiff%2Drange%3A%23d2a8ff%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dbrackethighlighter%2Dangle%3A%238b949e%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dsublimelinter%2Dgutter%2Dmark%3A%23484f58%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dconstant%2Dother%2Dreference%2Dlink%3A%23a5d6ff%3B%2D%2Dcolor%2Dfg%2Ddefault%3A%23c9d1d9%3B%2D%2Dcolor%2Dfg%2Dmuted%3A%238b949e%3B%2D%2Dcolor%2Dfg%2Dsubtle%3A%236e7681%3B%2D%2Dcolor%2Dcanvas%2Ddefault%3A%230d1117%3B%2D%2Dcolor%2Dcanvas%2Dsubtle%3A%23161b22%3B%2D%2Dcolor%2Dborder%2Ddefault%3A%2330363d%3B%2D%2Dcolor%2Dborder%2Dmuted%3A%2321262d%3B%2D%2Dcolor%2Dneutral%2Dmuted%3Argba%28110%2C118%2C129%2C0%2E4%29%3B%2D%2Dcolor%2Daccent%2Dfg%3A%2358a6ff%3B%2D%2Dcolor%2Daccent%2Demphasis%3A%231f6feb%3B%2D%2Dcolor%2Dattention%2Dsubtle%3Argba%28187%2C128%2C9%2C0%2E15%29%3B%2D%2Dcolor%2Ddanger%2Dfg%3A%23f85149%7D%7D%40media%20%28prefers%2Dcolor%2Dscheme%3Alight%29%7B%2Emarkdown%2Dbody%7Bcolor%2Dscheme%3Alight%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dcomment%3A%236e7781%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dconstant%3A%230550ae%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dentity%3A%238250df%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dstorage%2Dmodifier%2Dimport%3A%2324292f%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dentity%2Dtag%3A%23116329%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dkeyword%3A%23cf222e%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dstring%3A%230a3069%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dvariable%3A%23953800%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dbrackethighlighter%2Dunmatched%3A%2382071e%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dinvalid%2Dillegal%2Dtext%3A%23f6f8fa%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dinvalid%2Dillegal%2Dbg%3A%2382071e%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dcarriage%2Dreturn%2Dtext%3A%23f6f8fa%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dcarriage%2Dreturn%2Dbg%3A%23cf222e%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dstring%2Dregexp%3A%23116329%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dlist%3A%233b2300%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dheading%3A%230550ae%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Ditalic%3A%2324292f%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dbold%3A%2324292f%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Ddeleted%2Dtext%3A%2382071e%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Ddeleted%2Dbg%3A%23ffebe9%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dinserted%2Dtext%3A%23116329%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dinserted%2Dbg%3A%23dafbe1%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dchanged%2Dtext%3A%23953800%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dchanged%2Dbg%3A%23ffd8b5%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dignored%2Dtext%3A%23eaeef2%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dignored%2Dbg%3A%230550ae%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmeta%2Ddiff%2Drange%3A%238250df%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dbrackethighlighter%2Dangle%3A%2357606a%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dsublimelinter%2Dgutter%2Dmark%3A%238c959f%3B%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dconstant%2Dother%2Dreference%2Dlink%3A%230a3069%3B%2D%2Dcolor%2Dfg%2Ddefault%3A%2324292f%3B%2D%2Dcolor%2Dfg%2Dmuted%3A%2357606a%3B%2D%2Dcolor%2Dfg%2Dsubtle%3A%236e7781%3B%2D%2Dcolor%2Dcanvas%2Ddefault%3A%23ffffff%3B%2D%2Dcolor%2Dcanvas%2Dsubtle%3A%23f6f8fa%3B%2D%2Dcolor%2Dborder%2Ddefault%3A%23d0d7de%3B%2D%2Dcolor%2Dborder%2Dmuted%3Ahsla%28210%2C18%25%2C87%25%2C1%29%3B%2D%2Dcolor%2Dneutral%2Dmuted%3Argba%28175%2C184%2C193%2C0%2E2%29%3B%2D%2Dcolor%2Daccent%2Dfg%3A%230969da%3B%2D%2Dcolor%2Daccent%2Demphasis%3A%230969da%3B%2D%2Dcolor%2Dattention%2Dsubtle%3A%23fff8c5%3B%2D%2Dcolor%2Ddanger%2Dfg%3A%23cf222e%7D%7D%2Emarkdown%2Dbody%7B%2Dms%2Dtext%2Dsize%2Dadjust%3A100%25%3B%2Dwebkit%2Dtext%2Dsize%2Dadjust%3A100%25%3Bmargin%3A0%3Bcolor%3Avar%28%2D%2Dcolor%2Dfg%2Ddefault%29%3Bbackground%2Dcolor%3Avar%28%2D%2Dcolor%2Dcanvas%2Ddefault%29%3Bfont%2Dfamily%3A%2Dapple%2Dsystem%2CBlinkMacSystemFont%2C%22Segoe%20UI%22%2C%22Noto%20Sans%22%2CHelvetica%2CArial%2Csans%2Dserif%2C%22Apple%20Color%20Emoji%22%2C%22Segoe%20UI%20Emoji%22%3Bfont%2Dsize%3A16px%3Bline%2Dheight%3A1%2E5%3Bword%2Dwrap%3Abreak%2Dword%7D%2Emarkdown%2Dbody%20%2Eocticon%7Bdisplay%3Ainline%2Dblock%3Bfill%3AcurrentColor%3Bvertical%2Dalign%3Atext%2Dbottom%7D%2Emarkdown%2Dbody%20h1%3Ahover%20%2Eanchor%20%2Eocticon%2Dlink%3Abefore%2C%2Emarkdown%2Dbody%20h2%3Ahover%20%2Eanchor%20%2Eocticon%2Dlink%3Abefore%2C%2Emarkdown%2Dbody%20h3%3Ahover%20%2Eanchor%20%2Eocticon%2Dlink%3Abefore%2C%2Emarkdown%2Dbody%20h4%3Ahover%20%2Eanchor%20%2Eocticon%2Dlink%3Abefore%2C%2Emarkdown%2Dbody%20h5%3Ahover%20%2Eanchor%20%2Eocticon%2Dlink%3Abefore%2C%2Emarkdown%2Dbody%20h6%3Ahover%20%2Eanchor%20%2Eocticon%2Dlink%3Abefore%7Bwidth%3A16px%3Bheight%3A16px%3Bcontent%3A%27%20%27%3Bdisplay%3Ainline%2Dblock%3Bbackground%2Dcolor%3AcurrentColor%3B%2Dwebkit%2Dmask%2Dimage%3Aurl%28%22data%3Aimage%2Fsvg%2Bxml%2C%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww%2Ew3%2Eorg%2F2000%2Fsvg%27%20viewBox%3D%270%200%2016%2016%27%20version%3D%271%2E1%27%20aria%2Dhidden%3D%27true%27%3E%3Cpath%20fill%2Drule%3D%27evenodd%27%20d%3D%27M7%2E775%203%2E275a%2E75%2E75%200%20001%2E06%201%2E06l1%2E25%2D1%2E25a2%202%200%20112%2E83%202%2E83l%2D2%2E5%202%2E5a2%202%200%2001%2D2%2E83%200%20%2E75%2E75%200%2000%2D1%2E06%201%2E06%203%2E5%203%2E5%200%20004%2E95%200l2%2E5%2D2%2E5a3%2E5%203%2E5%200%2000%2D4%2E95%2D4%2E95l%2D1%2E25%201%2E25zm%2D4%2E69%209%2E64a2%202%200%20010%2D2%2E83l2%2E5%2D2%2E5a2%202%200%20012%2E83%200%20%2E75%2E75%200%20001%2E06%2D1%2E06%203%2E5%203%2E5%200%2000%2D4%2E95%200l%2D2%2E5%202%2E5a3%2E5%203%2E5%200%20004%2E95%204%2E95l1%2E25%2D1%2E25a%2E75%2E75%200%2000%2D1%2E06%2D1%2E06l%2D1%2E25%201%2E25a2%202%200%2001%2D2%2E83%200z%27%3E%3C%2Fpath%3E%3C%2Fsvg%3E%22%29%3Bmask%2Dimage%3Aurl%28%22data%3Aimage%2Fsvg%2Bxml%2C%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww%2Ew3%2Eorg%2F2000%2Fsvg%27%20viewBox%3D%270%200%2016%2016%27%20version%3D%271%2E1%27%20aria%2Dhidden%3D%27true%27%3E%3Cpath%20fill%2Drule%3D%27evenodd%27%20d%3D%27M7%2E775%203%2E275a%2E75%2E75%200%20001%2E06%201%2E06l1%2E25%2D1%2E25a2%202%200%20112%2E83%202%2E83l%2D2%2E5%202%2E5a2%202%200%2001%2D2%2E83%200%20%2E75%2E75%200%2000%2D1%2E06%201%2E06%203%2E5%203%2E5%200%20004%2E95%200l2%2E5%2D2%2E5a3%2E5%203%2E5%200%2000%2D4%2E95%2D4%2E95l%2D1%2E25%201%2E25zm%2D4%2E69%209%2E64a2%202%200%20010%2D2%2E83l2%2E5%2D2%2E5a2%202%200%20012%2E83%200%20%2E75%2E75%200%20001%2E06%2D1%2E06%203%2E5%203%2E5%200%2000%2D4%2E95%200l%2D2%2E5%202%2E5a3%2E5%203%2E5%200%20004%2E95%204%2E95l1%2E25%2D1%2E25a%2E75%2E75%200%2000%2D1%2E06%2D1%2E06l%2D1%2E25%201%2E25a2%202%200%2001%2D2%2E83%200z%27%3E%3C%2Fpath%3E%3C%2Fsvg%3E%22%29%7D%2Emarkdown%2Dbody%20details%2C%2Emarkdown%2Dbody%20figcaption%2C%2Emarkdown%2Dbody%20figure%7Bdisplay%3Ablock%7D%2Emarkdown%2Dbody%20summary%7Bdisplay%3Alist%2Ditem%7D%2Emarkdown%2Dbody%20%5Bhidden%5D%7Bdisplay%3Anone%21important%7D%2Emarkdown%2Dbody%20a%7Bbackground%2Dcolor%3Atransparent%3Bcolor%3Avar%28%2D%2Dcolor%2Daccent%2Dfg%29%3Btext%2Ddecoration%3Anone%7D%2Emarkdown%2Dbody%20abbr%5Btitle%5D%7Bborder%2Dbottom%3Anone%3Btext%2Ddecoration%3Aunderline%20dotted%7D%2Emarkdown%2Dbody%20b%2C%2Emarkdown%2Dbody%20strong%7Bfont%2Dweight%3Avar%28%2D%2Dbase%2Dtext%2Dweight%2Dsemibold%2C600%29%7D%2Emarkdown%2Dbody%20dfn%7Bfont%2Dstyle%3Aitalic%7D%2Emarkdown%2Dbody%20h1%7Bmargin%3A%2E67em%200%3Bfont%2Dweight%3Avar%28%2D%2Dbase%2Dtext%2Dweight%2Dsemibold%2C600%29%3Bpadding%2Dbottom%3A%2E3em%3Bfont%2Dsize%3A2em%3Bborder%2Dbottom%3A1px%20solid%20var%28%2D%2Dcolor%2Dborder%2Dmuted%29%7D%2Emarkdown%2Dbody%20mark%7Bbackground%2Dcolor%3Avar%28%2D%2Dcolor%2Dattention%2Dsubtle%29%3Bcolor%3Avar%28%2D%2Dcolor%2Dfg%2Ddefault%29%7D%2Emarkdown%2Dbody%20small%7Bfont%2Dsize%3A90%25%7D%2Emarkdown%2Dbody%20sub%2C%2Emarkdown%2Dbody%20sup%7Bfont%2Dsize%3A75%25%3Bline%2Dheight%3A0%3Bposition%3Arelative%3Bvertical%2Dalign%3Abaseline%7D%2Emarkdown%2Dbody%20sub%7Bbottom%3A%2D%2E25em%7D%2Emarkdown%2Dbody%20sup%7Btop%3A%2D%2E5em%7D%2Emarkdown%2Dbody%20img%7Bborder%2Dstyle%3Anone%3Bmax%2Dwidth%3A100%25%3Bbox%2Dsizing%3Acontent%2Dbox%3Bbackground%2Dcolor%3Avar%28%2D%2Dcolor%2Dcanvas%2Ddefault%29%7D%2Emarkdown%2Dbody%20code%2C%2Emarkdown%2Dbody%20kbd%2C%2Emarkdown%2Dbody%20pre%2C%2Emarkdown%2Dbody%20samp%7Bfont%2Dfamily%3Amonospace%3Bfont%2Dsize%3A1em%7D%2Emarkdown%2Dbody%20figure%7Bmargin%3A1em%2040px%7D%2Emarkdown%2Dbody%20hr%7Bbox%2Dsizing%3Acontent%2Dbox%3Boverflow%3Ahidden%3Bbackground%3A0%200%3Bborder%2Dbottom%3A1px%20solid%20var%28%2D%2Dcolor%2Dborder%2Dmuted%29%3Bheight%3A%2E25em%3Bpadding%3A0%3Bmargin%3A24px%200%3Bbackground%2Dcolor%3Avar%28%2D%2Dcolor%2Dborder%2Ddefault%29%3Bborder%3A0%7D%2Emarkdown%2Dbody%20input%7Bfont%3Ainherit%3Bmargin%3A0%3Boverflow%3Avisible%3Bfont%2Dfamily%3Ainherit%3Bfont%2Dsize%3Ainherit%3Bline%2Dheight%3Ainherit%7D%2Emarkdown%2Dbody%20%5Btype%3Dbutton%5D%2C%2Emarkdown%2Dbody%20%5Btype%3Dreset%5D%2C%2Emarkdown%2Dbody%20%5Btype%3Dsubmit%5D%7B%2Dwebkit%2Dappearance%3Abutton%7D%2Emarkdown%2Dbody%20%5Btype%3Dcheckbox%5D%2C%2Emarkdown%2Dbody%20%5Btype%3Dradio%5D%7Bbox%2Dsizing%3Aborder%2Dbox%3Bpadding%3A0%7D%2Emarkdown%2Dbody%20%5Btype%3Dnumber%5D%3A%3A%2Dwebkit%2Dinner%2Dspin%2Dbutton%2C%2Emarkdown%2Dbody%20%5Btype%3Dnumber%5D%3A%3A%2Dwebkit%2Douter%2Dspin%2Dbutton%7Bheight%3Aauto%7D%2Emarkdown%2Dbody%20%5Btype%3Dsearch%5D%3A%3A%2Dwebkit%2Dsearch%2Dcancel%2Dbutton%2C%2Emarkdown%2Dbody%20%5Btype%3Dsearch%5D%3A%3A%2Dwebkit%2Dsearch%2Ddecoration%7B%2Dwebkit%2Dappearance%3Anone%7D%2Emarkdown%2Dbody%20%3A%3A%2Dwebkit%2Dinput%2Dplaceholder%7Bcolor%3Ainherit%3Bopacity%3A%2E54%7D%2Emarkdown%2Dbody%20%3A%3A%2Dwebkit%2Dfile%2Dupload%2Dbutton%7B%2Dwebkit%2Dappearance%3Abutton%3Bfont%3Ainherit%7D%2Emarkdown%2Dbody%20a%3Ahover%7Btext%2Ddecoration%3Aunderline%7D%2Emarkdown%2Dbody%20%3A%3Aplaceholder%7Bcolor%3Avar%28%2D%2Dcolor%2Dfg%2Dsubtle%29%3Bopacity%3A1%7D%2Emarkdown%2Dbody%20hr%3A%3Abefore%7Bdisplay%3Atable%3Bcontent%3A%22%22%7D%2Emarkdown%2Dbody%20hr%3A%3Aafter%7Bdisplay%3Atable%3Bclear%3Aboth%3Bcontent%3A%22%22%7D%2Emarkdown%2Dbody%20table%7Bborder%2Dspacing%3A0%3Bborder%2Dcollapse%3Acollapse%3Bdisplay%3Ablock%3Bwidth%3Amax%2Dcontent%3Bmax%2Dwidth%3A100%25%3Boverflow%3Aauto%7D%2Emarkdown%2Dbody%20td%2C%2Emarkdown%2Dbody%20th%7Bpadding%3A0%7D%2Emarkdown%2Dbody%20details%20summary%7Bcursor%3Apointer%7D%2Emarkdown%2Dbody%20details%3Anot%28%5Bopen%5D%29%3E%3Anot%28summary%29%7Bdisplay%3Anone%21important%7D%2Emarkdown%2Dbody%20%5Brole%3Dbutton%5D%3Afocus%2C%2Emarkdown%2Dbody%20a%3Afocus%2C%2Emarkdown%2Dbody%20input%5Btype%3Dcheckbox%5D%3Afocus%2C%2Emarkdown%2Dbody%20input%5Btype%3Dradio%5D%3Afocus%7Boutline%3A2px%20solid%20var%28%2D%2Dcolor%2Daccent%2Dfg%29%3Boutline%2Doffset%3A%2D2px%3Bbox%2Dshadow%3Anone%7D%2Emarkdown%2Dbody%20%5Brole%3Dbutton%5D%3Afocus%3Anot%28%3Afocus%2Dvisible%29%2C%2Emarkdown%2Dbody%20a%3Afocus%3Anot%28%3Afocus%2Dvisible%29%2C%2Emarkdown%2Dbody%20input%5Btype%3Dcheckbox%5D%3Afocus%3Anot%28%3Afocus%2Dvisible%29%2C%2Emarkdown%2Dbody%20input%5Btype%3Dradio%5D%3Afocus%3Anot%28%3Afocus%2Dvisible%29%7Boutline%3Asolid%201px%20transparent%7D%2Emarkdown%2Dbody%20%5Brole%3Dbutton%5D%3Afocus%2Dvisible%2C%2Emarkdown%2Dbody%20a%3Afocus%2Dvisible%2C%2Emarkdown%2Dbody%20input%5Btype%3Dcheckbox%5D%3Afocus%2Dvisible%2C%2Emarkdown%2Dbody%20input%5Btype%3Dradio%5D%3Afocus%2Dvisible%7Boutline%3A2px%20solid%20var%28%2D%2Dcolor%2Daccent%2Dfg%29%3Boutline%2Doffset%3A%2D2px%3Bbox%2Dshadow%3Anone%7D%2Emarkdown%2Dbody%20a%3Anot%28%5Bclass%5D%29%3Afocus%2C%2Emarkdown%2Dbody%20a%3Anot%28%5Bclass%5D%29%3Afocus%2Dvisible%2C%2Emarkdown%2Dbody%20input%5Btype%3Dcheckbox%5D%3Afocus%2C%2Emarkdown%2Dbody%20input%5Btype%3Dcheckbox%5D%3Afocus%2Dvisible%2C%2Emarkdown%2Dbody%20input%5Btype%3Dradio%5D%3Afocus%2C%2Emarkdown%2Dbody%20input%5Btype%3Dradio%5D%3Afocus%2Dvisible%7Boutline%2Doffset%3A0%7D%2Emarkdown%2Dbody%20kbd%7Bdisplay%3Ainline%2Dblock%3Bpadding%3A3px%205px%3Bfont%3A11px%20ui%2Dmonospace%2CSFMono%2DRegular%2CSF%20Mono%2CMenlo%2CConsolas%2CLiberation%20Mono%2Cmonospace%3Bline%2Dheight%3A10px%3Bcolor%3Avar%28%2D%2Dcolor%2Dfg%2Ddefault%29%3Bvertical%2Dalign%3Amiddle%3Bbackground%2Dcolor%3Avar%28%2D%2Dcolor%2Dcanvas%2Dsubtle%29%3Bborder%3Asolid%201px%20var%28%2D%2Dcolor%2Dneutral%2Dmuted%29%3Bborder%2Dbottom%2Dcolor%3Avar%28%2D%2Dcolor%2Dneutral%2Dmuted%29%3Bborder%2Dradius%3A6px%3Bbox%2Dshadow%3Ainset%200%20%2D1px%200%20var%28%2D%2Dcolor%2Dneutral%2Dmuted%29%7D%2Emarkdown%2Dbody%20h1%2C%2Emarkdown%2Dbody%20h2%2C%2Emarkdown%2Dbody%20h3%2C%2Emarkdown%2Dbody%20h4%2C%2Emarkdown%2Dbody%20h5%2C%2Emarkdown%2Dbody%20h6%7Bmargin%2Dtop%3A24px%3Bmargin%2Dbottom%3A16px%3Bfont%2Dweight%3Avar%28%2D%2Dbase%2Dtext%2Dweight%2Dsemibold%2C600%29%3Bline%2Dheight%3A1%2E25%7D%2Emarkdown%2Dbody%20h2%7Bfont%2Dweight%3Avar%28%2D%2Dbase%2Dtext%2Dweight%2Dsemibold%2C600%29%3Bpadding%2Dbottom%3A%2E3em%3Bfont%2Dsize%3A1%2E5em%3Bborder%2Dbottom%3A1px%20solid%20var%28%2D%2Dcolor%2Dborder%2Dmuted%29%7D%2Emarkdown%2Dbody%20h3%7Bfont%2Dweight%3Avar%28%2D%2Dbase%2Dtext%2Dweight%2Dsemibold%2C600%29%3Bfont%2Dsize%3A1%2E25em%7D%2Emarkdown%2Dbody%20h4%7Bfont%2Dweight%3Avar%28%2D%2Dbase%2Dtext%2Dweight%2Dsemibold%2C600%29%3Bfont%2Dsize%3A1em%7D%2Emarkdown%2Dbody%20h5%7Bfont%2Dweight%3Avar%28%2D%2Dbase%2Dtext%2Dweight%2Dsemibold%2C600%29%3Bfont%2Dsize%3A%2E875em%7D%2Emarkdown%2Dbody%20h6%7Bfont%2Dweight%3Avar%28%2D%2Dbase%2Dtext%2Dweight%2Dsemibold%2C600%29%3Bfont%2Dsize%3A%2E85em%3Bcolor%3Avar%28%2D%2Dcolor%2Dfg%2Dmuted%29%7D%2Emarkdown%2Dbody%20p%7Bmargin%2Dtop%3A0%3Bmargin%2Dbottom%3A10px%7D%2Emarkdown%2Dbody%20blockquote%7Bmargin%3A0%3Bpadding%3A0%201em%3Bcolor%3Avar%28%2D%2Dcolor%2Dfg%2Dmuted%29%3Bborder%2Dleft%3A%2E25em%20solid%20var%28%2D%2Dcolor%2Dborder%2Ddefault%29%7D%2Emarkdown%2Dbody%20ol%2C%2Emarkdown%2Dbody%20ul%7Bmargin%2Dtop%3A0%3Bmargin%2Dbottom%3A0%3Bpadding%2Dleft%3A2em%7D%2Emarkdown%2Dbody%20ol%20ol%2C%2Emarkdown%2Dbody%20ul%20ol%7Blist%2Dstyle%2Dtype%3Alower%2Droman%7D%2Emarkdown%2Dbody%20ol%20ol%20ol%2C%2Emarkdown%2Dbody%20ol%20ul%20ol%2C%2Emarkdown%2Dbody%20ul%20ol%20ol%2C%2Emarkdown%2Dbody%20ul%20ul%20ol%7Blist%2Dstyle%2Dtype%3Alower%2Dalpha%7D%2Emarkdown%2Dbody%20dd%7Bmargin%2Dleft%3A0%7D%2Emarkdown%2Dbody%20code%2C%2Emarkdown%2Dbody%20samp%2C%2Emarkdown%2Dbody%20tt%7Bfont%2Dfamily%3Aui%2Dmonospace%2CSFMono%2DRegular%2CSF%20Mono%2CMenlo%2CConsolas%2CLiberation%20Mono%2Cmonospace%3Bfont%2Dsize%3A12px%7D%2Emarkdown%2Dbody%20pre%7Bmargin%2Dtop%3A0%3Bmargin%2Dbottom%3A0%3Bfont%2Dfamily%3Aui%2Dmonospace%2CSFMono%2DRegular%2CSF%20Mono%2CMenlo%2CConsolas%2CLiberation%20Mono%2Cmonospace%3Bfont%2Dsize%3A12px%3Bword%2Dwrap%3Anormal%7D%2Emarkdown%2Dbody%20%2Eocticon%7Bdisplay%3Ainline%2Dblock%3Boverflow%3Avisible%21important%3Bvertical%2Dalign%3Atext%2Dbottom%3Bfill%3AcurrentColor%7D%2Emarkdown%2Dbody%20input%3A%3A%2Dwebkit%2Dinner%2Dspin%2Dbutton%2C%2Emarkdown%2Dbody%20input%3A%3A%2Dwebkit%2Douter%2Dspin%2Dbutton%7Bmargin%3A0%3B%2Dwebkit%2Dappearance%3Anone%3Bappearance%3Anone%7D%2Emarkdown%2Dbody%3A%3Abefore%7Bdisplay%3Atable%3Bcontent%3A%22%22%7D%2Emarkdown%2Dbody%3A%3Aafter%7Bdisplay%3Atable%3Bclear%3Aboth%3Bcontent%3A%22%22%7D%2Emarkdown%2Dbody%3E%3Afirst%2Dchild%7Bmargin%2Dtop%3A0%21important%7D%2Emarkdown%2Dbody%3E%3Alast%2Dchild%7Bmargin%2Dbottom%3A0%21important%7D%2Emarkdown%2Dbody%20a%3Anot%28%5Bhref%5D%29%7Bcolor%3Ainherit%3Btext%2Ddecoration%3Anone%7D%2Emarkdown%2Dbody%20%2Eabsent%7Bcolor%3Avar%28%2D%2Dcolor%2Ddanger%2Dfg%29%7D%2Emarkdown%2Dbody%20%2Eanchor%7Bfloat%3Aleft%3Bpadding%2Dright%3A4px%3Bmargin%2Dleft%3A%2D20px%3Bline%2Dheight%3A1%7D%2Emarkdown%2Dbody%20%2Eanchor%3Afocus%7Boutline%3A0%7D%2Emarkdown%2Dbody%20blockquote%2C%2Emarkdown%2Dbody%20details%2C%2Emarkdown%2Dbody%20dl%2C%2Emarkdown%2Dbody%20ol%2C%2Emarkdown%2Dbody%20p%2C%2Emarkdown%2Dbody%20pre%2C%2Emarkdown%2Dbody%20table%2C%2Emarkdown%2Dbody%20ul%7Bmargin%2Dtop%3A0%3Bmargin%2Dbottom%3A16px%7D%2Emarkdown%2Dbody%20blockquote%3E%3Afirst%2Dchild%7Bmargin%2Dtop%3A0%7D%2Emarkdown%2Dbody%20blockquote%3E%3Alast%2Dchild%7Bmargin%2Dbottom%3A0%7D%2Emarkdown%2Dbody%20h1%20%2Eocticon%2Dlink%2C%2Emarkdown%2Dbody%20h2%20%2Eocticon%2Dlink%2C%2Emarkdown%2Dbody%20h3%20%2Eocticon%2Dlink%2C%2Emarkdown%2Dbody%20h4%20%2Eocticon%2Dlink%2C%2Emarkdown%2Dbody%20h5%20%2Eocticon%2Dlink%2C%2Emarkdown%2Dbody%20h6%20%2Eocticon%2Dlink%7Bcolor%3Avar%28%2D%2Dcolor%2Dfg%2Ddefault%29%3Bvertical%2Dalign%3Amiddle%3Bvisibility%3Ahidden%7D%2Emarkdown%2Dbody%20h1%3Ahover%20%2Eanchor%2C%2Emarkdown%2Dbody%20h2%3Ahover%20%2Eanchor%2C%2Emarkdown%2Dbody%20h3%3Ahover%20%2Eanchor%2C%2Emarkdown%2Dbody%20h4%3Ahover%20%2Eanchor%2C%2Emarkdown%2Dbody%20h5%3Ahover%20%2Eanchor%2C%2Emarkdown%2Dbody%20h6%3Ahover%20%2Eanchor%7Btext%2Ddecoration%3Anone%7D%2Emarkdown%2Dbody%20h1%3Ahover%20%2Eanchor%20%2Eocticon%2Dlink%2C%2Emarkdown%2Dbody%20h2%3Ahover%20%2Eanchor%20%2Eocticon%2Dlink%2C%2Emarkdown%2Dbody%20h3%3Ahover%20%2Eanchor%20%2Eocticon%2Dlink%2C%2Emarkdown%2Dbody%20h4%3Ahover%20%2Eanchor%20%2Eocticon%2Dlink%2C%2Emarkdown%2Dbody%20h5%3Ahover%20%2Eanchor%20%2Eocticon%2Dlink%2C%2Emarkdown%2Dbody%20h6%3Ahover%20%2Eanchor%20%2Eocticon%2Dlink%7Bvisibility%3Avisible%7D%2Emarkdown%2Dbody%20h1%20code%2C%2Emarkdown%2Dbody%20h1%20tt%2C%2Emarkdown%2Dbody%20h2%20code%2C%2Emarkdown%2Dbody%20h2%20tt%2C%2Emarkdown%2Dbody%20h3%20code%2C%2Emarkdown%2Dbody%20h3%20tt%2C%2Emarkdown%2Dbody%20h4%20code%2C%2Emarkdown%2Dbody%20h4%20tt%2C%2Emarkdown%2Dbody%20h5%20code%2C%2Emarkdown%2Dbody%20h5%20tt%2C%2Emarkdown%2Dbody%20h6%20code%2C%2Emarkdown%2Dbody%20h6%20tt%7Bpadding%3A0%20%2E2em%3Bfont%2Dsize%3Ainherit%7D%2Emarkdown%2Dbody%20summary%20h1%2C%2Emarkdown%2Dbody%20summary%20h2%2C%2Emarkdown%2Dbody%20summary%20h3%2C%2Emarkdown%2Dbody%20summary%20h4%2C%2Emarkdown%2Dbody%20summary%20h5%2C%2Emarkdown%2Dbody%20summary%20h6%7Bdisplay%3Ainline%2Dblock%7D%2Emarkdown%2Dbody%20summary%20h1%20%2Eanchor%2C%2Emarkdown%2Dbody%20summary%20h2%20%2Eanchor%2C%2Emarkdown%2Dbody%20summary%20h3%20%2Eanchor%2C%2Emarkdown%2Dbody%20summary%20h4%20%2Eanchor%2C%2Emarkdown%2Dbody%20summary%20h5%20%2Eanchor%2C%2Emarkdown%2Dbody%20summary%20h6%20%2Eanchor%7Bmargin%2Dleft%3A%2D40px%7D%2Emarkdown%2Dbody%20summary%20h1%2C%2Emarkdown%2Dbody%20summary%20h2%7Bpadding%2Dbottom%3A0%3Bborder%2Dbottom%3A0%7D%2Emarkdown%2Dbody%20ol%2Eno%2Dlist%2C%2Emarkdown%2Dbody%20ul%2Eno%2Dlist%7Bpadding%3A0%3Blist%2Dstyle%2Dtype%3Anone%7D%2Emarkdown%2Dbody%20ol%5Btype%3Da%5D%7Blist%2Dstyle%2Dtype%3Alower%2Dalpha%7D%2Emarkdown%2Dbody%20ol%5Btype%3DA%5D%7Blist%2Dstyle%2Dtype%3Aupper%2Dalpha%7D%2Emarkdown%2Dbody%20ol%5Btype%3Di%5D%7Blist%2Dstyle%2Dtype%3Alower%2Droman%7D%2Emarkdown%2Dbody%20ol%5Btype%3DI%5D%7Blist%2Dstyle%2Dtype%3Aupper%2Droman%7D%2Emarkdown%2Dbody%20ol%5Btype%3D%221%22%5D%7Blist%2Dstyle%2Dtype%3Adecimal%7D%2Emarkdown%2Dbody%20div%3Eol%3Anot%28%5Btype%5D%29%7Blist%2Dstyle%2Dtype%3Adecimal%7D%2Emarkdown%2Dbody%20ol%20ol%2C%2Emarkdown%2Dbody%20ol%20ul%2C%2Emarkdown%2Dbody%20ul%20ol%2C%2Emarkdown%2Dbody%20ul%20ul%7Bmargin%2Dtop%3A0%3Bmargin%2Dbottom%3A0%7D%2Emarkdown%2Dbody%20li%3Ep%7Bmargin%2Dtop%3A16px%7D%2Emarkdown%2Dbody%20li%2Bli%7Bmargin%2Dtop%3A%2E25em%7D%2Emarkdown%2Dbody%20dl%7Bpadding%3A0%7D%2Emarkdown%2Dbody%20dl%20dt%7Bpadding%3A0%3Bmargin%2Dtop%3A16px%3Bfont%2Dsize%3A1em%3Bfont%2Dstyle%3Aitalic%3Bfont%2Dweight%3Avar%28%2D%2Dbase%2Dtext%2Dweight%2Dsemibold%2C600%29%7D%2Emarkdown%2Dbody%20dl%20dd%7Bpadding%3A0%2016px%3Bmargin%2Dbottom%3A16px%7D%2Emarkdown%2Dbody%20table%20th%7Bfont%2Dweight%3Avar%28%2D%2Dbase%2Dtext%2Dweight%2Dsemibold%2C600%29%7D%2Emarkdown%2Dbody%20table%20td%2C%2Emarkdown%2Dbody%20table%20th%7Bpadding%3A6px%2013px%3Bborder%3A1px%20solid%20var%28%2D%2Dcolor%2Dborder%2Ddefault%29%7D%2Emarkdown%2Dbody%20table%20tr%7Bbackground%2Dcolor%3Avar%28%2D%2Dcolor%2Dcanvas%2Ddefault%29%3Bborder%2Dtop%3A1px%20solid%20var%28%2D%2Dcolor%2Dborder%2Dmuted%29%7D%2Emarkdown%2Dbody%20table%20tr%3Anth%2Dchild%282n%29%7Bbackground%2Dcolor%3Avar%28%2D%2Dcolor%2Dcanvas%2Dsubtle%29%7D%2Emarkdown%2Dbody%20table%20img%7Bbackground%2Dcolor%3Atransparent%7D%2Emarkdown%2Dbody%20img%5Balign%3Dright%5D%7Bpadding%2Dleft%3A20px%7D%2Emarkdown%2Dbody%20img%5Balign%3Dleft%5D%7Bpadding%2Dright%3A20px%7D%2Emarkdown%2Dbody%20%2Eemoji%7Bmax%2Dwidth%3Anone%3Bvertical%2Dalign%3Atext%2Dtop%3Bbackground%2Dcolor%3Atransparent%7D%2Emarkdown%2Dbody%20span%2Eframe%7Bdisplay%3Ablock%3Boverflow%3Ahidden%7D%2Emarkdown%2Dbody%20span%2Eframe%3Espan%7Bdisplay%3Ablock%3Bfloat%3Aleft%3Bwidth%3Aauto%3Bpadding%3A7px%3Bmargin%3A13px%200%200%3Boverflow%3Ahidden%3Bborder%3A1px%20solid%20var%28%2D%2Dcolor%2Dborder%2Ddefault%29%7D%2Emarkdown%2Dbody%20span%2Eframe%20span%20img%7Bdisplay%3Ablock%3Bfloat%3Aleft%7D%2Emarkdown%2Dbody%20span%2Eframe%20span%20span%7Bdisplay%3Ablock%3Bpadding%3A5px%200%200%3Bclear%3Aboth%3Bcolor%3Avar%28%2D%2Dcolor%2Dfg%2Ddefault%29%7D%2Emarkdown%2Dbody%20span%2Ealign%2Dcenter%7Bdisplay%3Ablock%3Boverflow%3Ahidden%3Bclear%3Aboth%7D%2Emarkdown%2Dbody%20span%2Ealign%2Dcenter%3Espan%7Bdisplay%3Ablock%3Bmargin%3A13px%20auto%200%3Boverflow%3Ahidden%3Btext%2Dalign%3Acenter%7D%2Emarkdown%2Dbody%20span%2Ealign%2Dcenter%20span%20img%7Bmargin%3A0%20auto%3Btext%2Dalign%3Acenter%7D%2Emarkdown%2Dbody%20span%2Ealign%2Dright%7Bdisplay%3Ablock%3Boverflow%3Ahidden%3Bclear%3Aboth%7D%2Emarkdown%2Dbody%20span%2Ealign%2Dright%3Espan%7Bdisplay%3Ablock%3Bmargin%3A13px%200%200%3Boverflow%3Ahidden%3Btext%2Dalign%3Aright%7D%2Emarkdown%2Dbody%20span%2Ealign%2Dright%20span%20img%7Bmargin%3A0%3Btext%2Dalign%3Aright%7D%2Emarkdown%2Dbody%20span%2Efloat%2Dleft%7Bdisplay%3Ablock%3Bfloat%3Aleft%3Bmargin%2Dright%3A13px%3Boverflow%3Ahidden%7D%2Emarkdown%2Dbody%20span%2Efloat%2Dleft%20span%7Bmargin%3A13px%200%200%7D%2Emarkdown%2Dbody%20span%2Efloat%2Dright%7Bdisplay%3Ablock%3Bfloat%3Aright%3Bmargin%2Dleft%3A13px%3Boverflow%3Ahidden%7D%2Emarkdown%2Dbody%20span%2Efloat%2Dright%3Espan%7Bdisplay%3Ablock%3Bmargin%3A13px%20auto%200%3Boverflow%3Ahidden%3Btext%2Dalign%3Aright%7D%2Emarkdown%2Dbody%20code%2C%2Emarkdown%2Dbody%20tt%7Bpadding%3A%2E2em%20%2E4em%3Bmargin%3A0%3Bfont%2Dsize%3A85%25%3Bwhite%2Dspace%3Abreak%2Dspaces%3Bbackground%2Dcolor%3Avar%28%2D%2Dcolor%2Dneutral%2Dmuted%29%3Bborder%2Dradius%3A6px%7D%2Emarkdown%2Dbody%20code%20br%2C%2Emarkdown%2Dbody%20tt%20br%7Bdisplay%3Anone%7D%2Emarkdown%2Dbody%20del%20code%7Btext%2Ddecoration%3Ainherit%7D%2Emarkdown%2Dbody%20samp%7Bfont%2Dsize%3A85%25%7D%2Emarkdown%2Dbody%20pre%20code%7Bfont%2Dsize%3A100%25%7D%2Emarkdown%2Dbody%20pre%3Ecode%7Bpadding%3A0%3Bmargin%3A0%3Bword%2Dbreak%3Anormal%3Bwhite%2Dspace%3Apre%3Bbackground%3A0%200%3Bborder%3A0%7D%2Emarkdown%2Dbody%20%2Ehighlight%7Bmargin%2Dbottom%3A16px%7D%2Emarkdown%2Dbody%20%2Ehighlight%20pre%7Bmargin%2Dbottom%3A0%3Bword%2Dbreak%3Anormal%7D%2Emarkdown%2Dbody%20%2Ehighlight%20pre%2C%2Emarkdown%2Dbody%20pre%7Bpadding%3A16px%3Boverflow%3Aauto%3Bfont%2Dsize%3A85%25%3Bline%2Dheight%3A1%2E45%3Bbackground%2Dcolor%3Avar%28%2D%2Dcolor%2Dcanvas%2Dsubtle%29%3Bborder%2Dradius%3A6px%7D%2Emarkdown%2Dbody%20pre%20code%2C%2Emarkdown%2Dbody%20pre%20tt%7Bdisplay%3Ainline%3Bmax%2Dwidth%3Aauto%3Bpadding%3A0%3Bmargin%3A0%3Boverflow%3Avisible%3Bline%2Dheight%3Ainherit%3Bword%2Dwrap%3Anormal%3Bbackground%2Dcolor%3Atransparent%3Bborder%3A0%7D%2Emarkdown%2Dbody%20%2Ecsv%2Ddata%20td%2C%2Emarkdown%2Dbody%20%2Ecsv%2Ddata%20th%7Bpadding%3A5px%3Boverflow%3Ahidden%3Bfont%2Dsize%3A12px%3Bline%2Dheight%3A1%3Btext%2Dalign%3Aleft%3Bwhite%2Dspace%3Anowrap%7D%2Emarkdown%2Dbody%20%2Ecsv%2Ddata%20%2Eblob%2Dnum%7Bpadding%3A10px%208px%209px%3Btext%2Dalign%3Aright%3Bbackground%3Avar%28%2D%2Dcolor%2Dcanvas%2Ddefault%29%3Bborder%3A0%7D%2Emarkdown%2Dbody%20%2Ecsv%2Ddata%20tr%7Bborder%2Dtop%3A0%7D%2Emarkdown%2Dbody%20%2Ecsv%2Ddata%20th%7Bfont%2Dweight%3Avar%28%2D%2Dbase%2Dtext%2Dweight%2Dsemibold%2C600%29%3Bbackground%3Avar%28%2D%2Dcolor%2Dcanvas%2Dsubtle%29%3Bborder%2Dtop%3A0%7D%2Emarkdown%2Dbody%20%5Bdata%2Dfootnote%2Dref%5D%3A%3Abefore%7Bcontent%3A%22%5B%22%7D%2Emarkdown%2Dbody%20%5Bdata%2Dfootnote%2Dref%5D%3A%3Aafter%7Bcontent%3A%22%5D%22%7D%2Emarkdown%2Dbody%20%2Efootnotes%7Bfont%2Dsize%3A12px%3Bcolor%3Avar%28%2D%2Dcolor%2Dfg%2Dmuted%29%3Bborder%2Dtop%3A1px%20solid%20var%28%2D%2Dcolor%2Dborder%2Ddefault%29%7D%2Emarkdown%2Dbody%20%2Efootnotes%20ol%7Bpadding%2Dleft%3A16px%7D%2Emarkdown%2Dbody%20%2Efootnotes%20ol%20ul%7Bdisplay%3Ainline%2Dblock%3Bpadding%2Dleft%3A16px%3Bmargin%2Dtop%3A16px%7D%2Emarkdown%2Dbody%20%2Efootnotes%20li%7Bposition%3Arelative%7D%2Emarkdown%2Dbody%20%2Efootnotes%20li%3Atarget%3A%3Abefore%7Bposition%3Aabsolute%3Btop%3A%2D8px%3Bright%3A%2D8px%3Bbottom%3A%2D8px%3Bleft%3A%2D24px%3Bpointer%2Devents%3Anone%3Bcontent%3A%22%22%3Bborder%3A2px%20solid%20var%28%2D%2Dcolor%2Daccent%2Demphasis%29%3Bborder%2Dradius%3A6px%7D%2Emarkdown%2Dbody%20%2Efootnotes%20li%3Atarget%7Bcolor%3Avar%28%2D%2Dcolor%2Dfg%2Ddefault%29%7D%2Emarkdown%2Dbody%20%2Efootnotes%20%2Edata%2Dfootnote%2Dbackref%20g%2Demoji%7Bfont%2Dfamily%3Amonospace%7D%2Emarkdown%2Dbody%20%2Epl%2Dc%7Bcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dcomment%29%7D%2Emarkdown%2Dbody%20%2Epl%2Dc1%2C%2Emarkdown%2Dbody%20%2Epl%2Ds%20%2Epl%2Dv%7Bcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dconstant%29%7D%2Emarkdown%2Dbody%20%2Epl%2De%2C%2Emarkdown%2Dbody%20%2Epl%2Den%7Bcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dentity%29%7D%2Emarkdown%2Dbody%20%2Epl%2Ds%20%2Epl%2Ds1%2C%2Emarkdown%2Dbody%20%2Epl%2Dsmi%7Bcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dstorage%2Dmodifier%2Dimport%29%7D%2Emarkdown%2Dbody%20%2Epl%2Dent%7Bcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dentity%2Dtag%29%7D%2Emarkdown%2Dbody%20%2Epl%2Dk%7Bcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dkeyword%29%7D%2Emarkdown%2Dbody%20%2Epl%2Dpds%2C%2Emarkdown%2Dbody%20%2Epl%2Ds%2C%2Emarkdown%2Dbody%20%2Epl%2Ds%20%2Epl%2Dpse%20%2Epl%2Ds1%2C%2Emarkdown%2Dbody%20%2Epl%2Dsr%2C%2Emarkdown%2Dbody%20%2Epl%2Dsr%20%2Epl%2Dcce%2C%2Emarkdown%2Dbody%20%2Epl%2Dsr%20%2Epl%2Dsra%2C%2Emarkdown%2Dbody%20%2Epl%2Dsr%20%2Epl%2Dsre%7Bcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dstring%29%7D%2Emarkdown%2Dbody%20%2Epl%2Dsmw%2C%2Emarkdown%2Dbody%20%2Epl%2Dv%7Bcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dvariable%29%7D%2Emarkdown%2Dbody%20%2Epl%2Dbu%7Bcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dbrackethighlighter%2Dunmatched%29%7D%2Emarkdown%2Dbody%20%2Epl%2Dii%7Bcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dinvalid%2Dillegal%2Dtext%29%3Bbackground%2Dcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dinvalid%2Dillegal%2Dbg%29%7D%2Emarkdown%2Dbody%20%2Epl%2Dc2%7Bcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dcarriage%2Dreturn%2Dtext%29%3Bbackground%2Dcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dcarriage%2Dreturn%2Dbg%29%7D%2Emarkdown%2Dbody%20%2Epl%2Dsr%20%2Epl%2Dcce%7Bfont%2Dweight%3A700%3Bcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dstring%2Dregexp%29%7D%2Emarkdown%2Dbody%20%2Epl%2Dml%7Bcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dlist%29%7D%2Emarkdown%2Dbody%20%2Epl%2Dmh%2C%2Emarkdown%2Dbody%20%2Epl%2Dmh%20%2Epl%2Den%2C%2Emarkdown%2Dbody%20%2Epl%2Dms%7Bfont%2Dweight%3A700%3Bcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dheading%29%7D%2Emarkdown%2Dbody%20%2Epl%2Dmi%7Bfont%2Dstyle%3Aitalic%3Bcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Ditalic%29%7D%2Emarkdown%2Dbody%20%2Epl%2Dmb%7Bfont%2Dweight%3A700%3Bcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dbold%29%7D%2Emarkdown%2Dbody%20%2Epl%2Dmd%7Bcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Ddeleted%2Dtext%29%3Bbackground%2Dcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Ddeleted%2Dbg%29%7D%2Emarkdown%2Dbody%20%2Epl%2Dmi1%7Bcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dinserted%2Dtext%29%3Bbackground%2Dcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dinserted%2Dbg%29%7D%2Emarkdown%2Dbody%20%2Epl%2Dmc%7Bcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dchanged%2Dtext%29%3Bbackground%2Dcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dchanged%2Dbg%29%7D%2Emarkdown%2Dbody%20%2Epl%2Dmi2%7Bcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dignored%2Dtext%29%3Bbackground%2Dcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmarkup%2Dignored%2Dbg%29%7D%2Emarkdown%2Dbody%20%2Epl%2Dmdr%7Bfont%2Dweight%3A700%3Bcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dmeta%2Ddiff%2Drange%29%7D%2Emarkdown%2Dbody%20%2Epl%2Dba%7Bcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dbrackethighlighter%2Dangle%29%7D%2Emarkdown%2Dbody%20%2Epl%2Dsg%7Bcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dsublimelinter%2Dgutter%2Dmark%29%7D%2Emarkdown%2Dbody%20%2Epl%2Dcorl%7Btext%2Ddecoration%3Aunderline%3Bcolor%3Avar%28%2D%2Dcolor%2Dprettylights%2Dsyntax%2Dconstant%2Dother%2Dreference%2Dlink%29%7D%2Emarkdown%2Dbody%20g%2Demoji%7Bdisplay%3Ainline%2Dblock%3Bmin%2Dwidth%3A1ch%3Bfont%2Dfamily%3A%22Apple%20Color%20Emoji%22%2C%22Segoe%20UI%20Emoji%22%2C%22Segoe%20UI%20Symbol%22%3Bfont%2Dsize%3A1em%3Bfont%2Dstyle%3Anormal%21important%3Bfont%2Dweight%3Avar%28%2D%2Dbase%2Dtext%2Dweight%2Dnormal%2C400%29%3Bline%2Dheight%3A1%3Bvertical%2Dalign%3A%2D%2E075em%7D%2Emarkdown%2Dbody%20g%2Demoji%20img%7Bwidth%3A1em%3Bheight%3A1em%7D%2Emarkdown%2Dbody%20%2Etask%2Dlist%2Ditem%7Blist%2Dstyle%2Dtype%3Anone%7D%2Emarkdown%2Dbody%20%2Etask%2Dlist%2Ditem%20label%7Bfont%2Dweight%3Avar%28%2D%2Dbase%2Dtext%2Dweight%2Dnormal%2C400%29%7D%2Emarkdown%2Dbody%20%2Etask%2Dlist%2Ditem%2Eenabled%20label%7Bcursor%3Apointer%7D%2Emarkdown%2Dbody%20%2Etask%2Dlist%2Ditem%2B%2Etask%2Dlist%2Ditem%7Bmargin%2Dtop%3A4px%7D%2Emarkdown%2Dbody%20%2Etask%2Dlist%2Ditem%20%2Ehandle%7Bdisplay%3Anone%7D%2Emarkdown%2Dbody%20%2Etask%2Dlist%2Ditem%2Dcheckbox%7Bmargin%3A0%20%2E2em%20%2E25em%20%2D1%2E4em%3Bvertical%2Dalign%3Amiddle%7D%2Emarkdown%2Dbody%20%2Econtains%2Dtask%2Dlist%3Adir%28rtl%29%20%2Etask%2Dlist%2Ditem%2Dcheckbox%7Bmargin%3A0%20%2D1%2E6em%20%2E25em%20%2E2em%7D%2Emarkdown%2Dbody%20%2Econtains%2Dtask%2Dlist%7Bposition%3Arelative%7D%2Emarkdown%2Dbody%20%2Econtains%2Dtask%2Dlist%3Afocus%2Dwithin%20%2Etask%2Dlist%2Ditem%2Dconvert%2Dcontainer%2C%2Emarkdown%2Dbody%20%2Econtains%2Dtask%2Dlist%3Ahover%20%2Etask%2Dlist%2Ditem%2Dconvert%2Dcontainer%7Bdisplay%3Ablock%3Bwidth%3Aauto%3Bheight%3A24px%3Boverflow%3Avisible%3Bclip%3Aauto%7D%2Emarkdown%2Dbody%20%3A%3A%2Dwebkit%2Dcalendar%2Dpicker%2Dindicator%7Bfilter%3Ainvert%2850%25%29%7D" />
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Report Consolidat Tests - VCPE API</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#report-consolidat-de-tests---vcpe-api">📋 Report Consolidat de Tests - VCPE API</a>
+<ul>
+<li><a href="#índex">📑 Índex</a></li>
+<li><a href="#tests-de-connectivitat">1. Tests de Connectivitat</a>
+<ul>
+<li><a href="#estat-dels-contenidors-docker">1.1 Estat dels Contenidors Docker</a></li>
+<li><a href="#health-check-de-lapi">1.2 Health Check de l’API</a></li>
+<li><a href="#vista-root-de-lapi">1.3 Vista Root de l’API</a></li>
+<li><a href="#documentació-swagger-accessible">1.4 Documentació Swagger Accessible</a></li>
+</ul></li>
+<li><a href="#tests-dautenticació-jwt">2. Tests d’Autenticació JWT</a>
+<ul>
+<li><a href="#obtenir-token-jwt">2.1 Obtenir Token JWT</a></li>
+<li><a href="#accés-sense-token-ha-de-fallar-amb-401">2.3 Accés sense Token (ha de fallar amb 401)</a></li>
+</ul></li>
+<li><a href="#tests-automatitzats-pytest">3. Tests Automatitzats (Pytest)</a>
+<ul>
+<li><a href="#tests-unitaris">3.1 Tests Unitaris</a></li>
+<li><a href="#tests-dintegració">3.2 Tests d’Integració</a></li>
+<li><a href="#tests-de-seguretat">3.3 Tests de Seguretat</a></li>
+</ul></li>
+<li><a href="#cobertura-de-codi">4. Cobertura de Codi</a>
+<ul>
+<li><a href="#generar-informe-de-cobertura">4.1 Generar Informe de Cobertura</a></li>
+</ul></li>
+<li><a href="#tests-de-seguretat-sast">5. Tests de Seguretat (SAST)</a>
+<ul>
+<li><a href="#anàlisi-amb-bandit-vulnerabilitats-python">5.1 Anàlisi amb Bandit (Vulnerabilitats Python)</a></li>
+<li><a href="#django-security-check">5.3 Django Security Check</a></li>
+</ul></li>
+<li><a href="#anàlisi-de-qualitat-de-codi">6. Anàlisi de Qualitat de Codi</a>
+<ul>
+<li><a href="#linting-amb-flake8">6.1 Linting amb Flake8</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="report-consolidat-de-tests---vcpe-api">📋 Report Consolidat de Tests - VCPE API</h1>
+<p><strong>Data d’execució:</strong> 15/01/2026 13:21:16 <strong>Projecte:</strong> TFM Ciberseguretat i Privadesa <strong>Institució:</strong> ICATMAR <strong>Autor:</strong> Aram Puig Capdevila</p>
+<hr />
+<h2 id="índex">📑 Índex</h2>
+<ol type="1">
+<li><a href="#resum-executiu">Resum Executiu</a></li>
+<li><a href="#tests-de-connectivitat">Tests de Connectivitat</a></li>
+<li><a href="#tests-dautenticació-jwt">Tests d’Autenticació JWT</a></li>
+<li><a href="#tests-automatitzats-pytest">Tests Automatitzats (Pytest)</a></li>
+<li><a href="#tests-de-seguretat-sast">Tests de Seguretat (SAST)</a></li>
+<li><a href="#cobertura-de-codi">Cobertura de Codi</a></li>
+<li><a href="#anàlisi-de-vulnerabilitats">Anàlisi de Vulnerabilitats</a></li>
+<li><a href="#conclusions-i-recomanacions">Conclusions i Recomanacions</a></li>
+</ol>
+<hr />
+<h2 id="tests-de-connectivitat">1. Tests de Connectivitat</h2>
+<h3 id="estat-dels-contenidors-docker">1.1 Estat dels Contenidors Docker</h3>
+<p><strong>Temps d’execució:</strong> 0s</p>
+<pre><code>
+
+NAME                 IMAGE                    COMMAND                  SERVICE         CREATED      STATUS                PORTS
+vcpe_api             api_dev-api              &quot;python manage.py ru…&quot;   api             9 days ago   Up 3 days (healthy)   0.0.0.0:8000-&gt;8000/tcp, [::]:8000-&gt;8000/tcp
+vcpe_celery_beat     api_dev-celery_beat      &quot;celery -A vcpe_api …&quot;   celery_beat     9 days ago   Up 3 days (healthy)   8000/tcp
+vcpe_celery_worker   api_dev-celery_worker    &quot;celery -A vcpe_api …&quot;   celery_worker   9 days ago   Up 3 days (healthy)   8000/tcp
+vcpe_postgres        postgis/postgis:16-3.4   &quot;docker-entrypoint.s…&quot;   db              9 days ago   Up 3 days (healthy)   0.0.0.0:5433-&gt;5432/tcp, [::]:5433-&gt;5432/tcp
+vcpe_redis           redis:7.4-alpine         &quot;docker-entrypoint.s…&quot;   redis           9 days ago   Up 3 days (healthy)   0.0.0.0:6379-&gt;6379/tcp, [::]:6379-&gt;6379/tcp
+
+</code></pre>
+<p><strong>Resultat:</strong> ✅ Completat correctament</p>
+<h3 id="health-check-de-lapi">1.2 Health Check de l’API</h3>
+<p><strong>Temps d’execució:</strong> 0s</p>
+<pre><code>
+
+{&quot;status&quot;: &quot;healthy&quot;, &quot;service&quot;: &quot;vcpe-api&quot;}
+
+</code></pre>
+<p><strong>Resultat:</strong> ✅ Completat correctament</p>
+<h3 id="vista-root-de-lapi">1.3 Vista Root de l’API</h3>
+<p><strong>Temps d’execució:</strong> 0s</p>
+<pre><code>
+
+{&quot;service&quot;: &quot;VCPE API - Notes de Venda&quot;, &quot;version&quot;: &quot;1.0.0&quot;, &quot;institution&quot;: &quot;ICATMAR&quot;, &quot;documentation&quot;: &quot;/api/docs/&quot;, &quot;endpoints&quot;: {&quot;auth&quot;: &quot;/api/auth/&quot;, &quot;sales_notes&quot;: &quot;/api/sales-notes/&quot;, &quot;admin&quot;: &quot;/admin/&quot;}}
+
+</code></pre>
+<p><strong>Resultat:</strong> ✅ Completat correctament</p>
+<h3 id="documentació-swagger-accessible">1.4 Documentació Swagger Accessible</h3>
+<p><strong>Temps d’execució:</strong> 0s</p>
+<pre><code>
+
+200
+
+</code></pre>
+<p><strong>Resultat:</strong> ✅ Completat correctament</p>
+<h2 id="tests-dautenticació-jwt">2. Tests d’Autenticació JWT</h2>
+<h3 id="obtenir-token-jwt">2.1 Obtenir Token JWT</h3>
+<p><strong>Resultat:</strong> ❌ Error obtenint token</p>
+<p><strong>Error:</strong> Assegura’t que l’usuari admin_test existeix</p>
+<h3 id="accés-sense-token-ha-de-fallar-amb-401">2.3 Accés sense Token (ha de fallar amb 401)</h3>
+<p><strong>Temps d’execució:</strong> 0s</p>
+<pre><code>
+
+{&quot;detail&quot;:&quot;Credencials d&#39;autenticació no disponibles.&quot;}
+401
+
+</code></pre>
+<p><strong>Resultat:</strong> ✅ Completat correctament</p>
+<h2 id="tests-automatitzats-pytest">3. Tests Automatitzats (Pytest)</h2>
+<h3 id="tests-unitaris">3.1 Tests Unitaris</h3>
+<p><strong>Temps d’execució:</strong> 9s</p>
+<pre><code>
+
+============================= test session starts ==============================
+platform linux -- Python 3.12.12, pytest-8.3.3, pluggy-1.6.0 -- /usr/local/bin/python3.12
+cachedir: .pytest_cache
+django: version: 5.1.13, settings: vcpe_api.settings (from env)
+rootdir: /app
+configfile: pyproject.toml
+plugins: django-4.9.0, cov-5.0.0, Faker-38.2.0
+collecting ... collected 103 items
+
+tests/unit/test_audit.py::TestAuditLog::test_audit_log_creation PASSED   [  0%]
+tests/unit/test_audit.py::TestAuditLog::test_audit_log_with_old_new_values PASSED [  1%]
+tests/unit/test_audit.py::TestAuditLog::test_audit_log_without_user PASSED [  2%]
+tests/unit/test_audit.py::TestAuditLog::test_audit_log_ordering PASSED   [  3%]
+tests/unit/test_audit.py::TestSecurityEvent::test_security_event_creation PASSED [  4%]
+tests/unit/test_audit.py::TestSecurityEvent::test_security_event_with_user PASSED [  5%]
+tests/unit/test_audit.py::TestAuditSignals::test_envio_creation_generates_audit_log PASSED [  6%]
+tests/unit/test_audit.py::TestAuditSignals::test_failed_login_generates_audit_log PASSED [  7%]
+tests/unit/test_audit.py::TestAuditSignals::test_successful_login_resets_failures FAILED [  8%]
+tests/unit/test_audit.py::TestAuditSignals::test_failed_login_for_nonexistent_user_logs_warning PASSED [  9%]
+tests/unit/test_audit.py::TestAuditSignals::test_envio_deleted_generates_critical_log PASSED [ 10%]
+tests/unit/test_audit.py::TestAuditTasks::test_cleanup_old_logs_deletes_old_info_logs PASSED [ 11%]
+tests/unit/test_audit.py::TestAuditTasks::test_cleanup_old_logs_keeps_critical_logs PASSED [ 12%]
+tests/unit/test_audit.py::TestAuditTasks::test_check_security_events_detects_brute_force PASSED [ 13%]
+tests/unit/test_audit.py::TestAuditTasks::test_check_security_events_detects_injections PASSED [ 14%]
+tests/unit/test_audit.py::TestAuditTasks::test_check_security_events_no_alerts_when_empty PASSED [ 15%]
+tests/unit/test_authentication.py::TestJWTAuthentication::test_obtain_token_success PASSED [ 16%]
+tests/unit/test_authentication.py::TestJWTAuthentication::test_obtain_token_invalid_credentials PASSED [ 17%]
+tests/unit/test_authentication.py::TestJWTAuthentication::test_refresh_token_success PASSED [ 18%]
+tests/unit/test_authentication.py::TestJWTAuthentication::test_verify_token_success PASSED [ 19%]
+tests/unit/test_authentication.py::TestJWTAuthentication::test_access_protected_endpoint_without_token PASSED [ 20%]
+tests/unit/test_authentication.py::TestJWTAuthentication::test_access_protected_endpoint_with_valid_token PASSED [ 21%]
+tests/unit/test_exception_handler.py::TestCustomExceptionHandler::test_exception_handler_with_none_response PASSED [ 22%]
+tests/unit/test_exception_handler.py::TestCustomExceptionHandler::test_exception_handler_with_validation_error PASSED [ 23%]
+tests/unit/test_exception_handler.py::TestCustomExceptionHandler::test_exception_handler_with_not_found PASSED [ 24%]
+tests/unit/test_exception_handler.py::TestCustomExceptionHandler::test_exception_handler_with_server_error PASSED [ 25%]
+tests/unit/test_exception_handler.py::TestCustomExceptionHandler::test_exception_handler_with_request_id PASSED [ 26%]
+tests/unit/test_exception_handler.py::TestCustomExceptionHandler::test_exception_handler_without_request PASSED [ 27%]
+tests/unit/test_models.py::TestEnvioModel::test_create_envio_valid PASSED [ 28%]
+tests/unit/test_models.py::TestEnvioModel::test_num_envio_unique PASSED  [ 29%]
+tests/unit/test_permissions.py::TestUserPermissions::test_darp_can_create_envio PASSED [ 30%]
+tests/unit/test_permissions.py::TestUserPermissions::test_investigador_cannot_create_envio PASSED [ 31%]
+tests/unit/test_permissions.py::TestUserPermissions::test_darp_can_list_own_envios PASSED [ 32%]
+tests/unit/test_permissions.py::TestUserPermissions::test_investigador_can_list_all_envios PASSED [ 33%]
+tests/unit/test_permissions.py::TestUserPermissions::test_admin_can_list_all_envios PASSED [ 33%]
+tests/unit/test_permissions.py::TestUserPermissions::test_darp_can_retrieve_own_envio PASSED [ 34%]
+tests/unit/test_permissions.py::TestUserPermissions::test_darp_cannot_retrieve_other_envio PASSED [ 35%]
+tests/unit/test_permissions.py::TestUserPermissions::test_investigador_can_retrieve_any_envio PASSED [ 36%]
+tests/unit/test_permissions.py::TestUserPermissions::test_unauthenticated_cannot_access PASSED [ 37%]
+tests/unit/test_sales_notes_permissions.py::TestIsDARP::test_darp_user_has_permission PASSED [ 38%]
+tests/unit/test_sales_notes_permissions.py::TestIsDARP::test_investigador_no_permission PASSED [ 39%]
+tests/unit/test_sales_notes_permissions.py::TestIsDARP::test_unauthenticated_no_permission PASSED [ 40%]
+tests/unit/test_sales_notes_permissions.py::TestIsInvestigador::test_investigador_has_permission PASSED [ 41%]
+tests/unit/test_sales_notes_permissions.py::TestIsInvestigador::test_darp_no_investigador_permission PASSED [ 42%]
+tests/unit/test_sales_notes_permissions.py::TestDARPCanCreateInvestigadorCanRead::test_admin_full_access PASSED [ 43%]
+tests/unit/test_sales_notes_permissions.py::TestDARPCanCreateInvestigadorCanRead::test_darp_can_post PASSED [ 44%]
+tests/unit/test_sales_notes_permissions.py::TestDARPCanCreateInvestigadorCanRead::test_darp_can_get PASSED [ 45%]
+tests/unit/test_sales_notes_permissions.py::TestDARPCanCreateInvestigadorCanRead::test_investigador_can_get PASSED [ 46%]
+tests/unit/test_sales_notes_permissions.py::TestDARPCanCreateInvestigadorCanRead::test_investigador_cannot_post PASSED [ 47%]
+tests/unit/test_sales_notes_permissions.py::TestDARPCanCreateInvestigadorCanRead::test_investigador_cannot_put PASSED [ 48%]
+tests/unit/test_sales_notes_permissions.py::TestDARPCanCreateInvestigadorCanRead::test_darp_can_access_own_envio PASSED [ 49%]
+tests/unit/test_sales_notes_permissions.py::TestDARPCanCreateInvestigadorCanRead::test_darp_cannot_access_other_envio PASSED [ 50%]
+tests/unit/test_sales_notes_permissions.py::TestDARPCanCreateInvestigadorCanRead::test_investigador_can_read_any_envio PASSED [ 51%]
+tests/unit/test_sales_notes_permissions.py::TestDARPCanCreateInvestigadorCanRead::test_investigador_cannot_modify_any_envio PASSED [ 52%]
+tests/unit/test_serializers.py::TestFechaCapturaSerializer::test_valid_fecha_captura PASSED [ 53%]
+tests/unit/test_serializers.py::TestFechaCapturaSerializer::test_fecha_captura_solo_inicio PASSED [ 54%]
+tests/unit/test_serializers.py::TestFechaCapturaSerializer::test_fecha_fin_anterior_a_inicio_error PASSED [ 55%]
+tests/unit/test_serializers.py::TestFechaCapturaSerializer::test_fechas_iguales_valido PASSED [ 56%]
+tests/unit/test_serializers.py::TestEspecieSerializer::test_especie_valida_completa PASSED [ 57%]
+tests/unit/test_serializers.py::TestEspecieSerializer::test_especie_al3_formato_invalido PASSED [ 58%]
+tests/unit/test_serializers.py::TestEspecieSerializer::test_especie_al3_con_numeros_invalido PASSED [ 59%]
+tests/unit/test_serializers.py::TestEspecieSerializer::test_especie_al3_uppercase PASSED [ 60%]
+tests/unit/test_serializers.py::TestEspecieSerializer::test_cantidad_negativa_invalida PASSED [ 61%]
+tests/unit/test_serializers.py::TestEspecieSerializer::test_cantidad_cero_invalida PASSED [ 62%]
+tests/unit/test_serializers.py::TestEspecieSerializer::test_precio_negativo_invalido PASSED [ 63%]
+tests/unit/test_serializers.py::TestEspecieSerializer::test_precio_cero_valido PASSED [ 64%]
+tests/unit/test_serializers.py::TestEspecieSerializer::test_retirada_con_destino_valido PASSED [ 65%]
+tests/unit/test_serializers.py::TestEspecieSerializer::test_especie_con_fechas_captura PASSED [ 66%]
+tests/unit/test_serializers.py::TestBuqueSerializer::test_buque_valido PASSED [ 66%]
+tests/unit/test_serializers.py::TestBuqueSerializer::test_puerto_formato_invalido PASSED [ 67%]
+tests/unit/test_serializers.py::TestGranjaSerializer::test_granja_valida PASSED [ 68%]
+tests/unit/test_serializers.py::TestGranjaSerializer::test_codigo_rega_largo_invalido PASSED [ 69%]
+tests/unit/test_serializers.py::TestPersonaFisicaJuridicaSerializer::test_persona_valida PASSED [ 70%]
+tests/unit/test_serializers.py::TestPersonaFisicaJuridicaSerializer::test_nif_largo_invalido PASSED [ 71%]
+tests/unit/test_serializers.py::TestUnidadProductivaSerializer::test_unidad_con_buque_valida PASSED [ 72%]
+tests/unit/test_serializers.py::TestUnidadProductivaSerializer::test_unidad_con_granja_valida PASSED [ 73%]
+tests/unit/test_serializers.py::TestUnidadProductivaSerializer::test_unidad_con_persona_valida PASSED [ 74%]
+tests/unit/test_serializers.py::TestUnidadProductivaSerializer::test_metodo_1_sin_buque_ni_persona_invalido PASSED [ 75%]
+tests/unit/test_serializers.py::TestEstablecimientoVentaSerializer::test_establecimiento_valido PASSED [ 76%]
+tests/unit/test_serializers.py::TestEstablecimientoVentaSerializer::test_num_identificacion_vacio_invalido PASSED [ 77%]
+tests/unit/test_serializers.py::TestEnvioSerializer::test_num_envio_duplicado_invalido PASSED [ 78%]
+tests/unit/test_serializers.py::TestEnvioSerializer::test_tipo_respuesta_invalido PASSED [ 79%]
+tests/unit/test_serializers.py::TestEnvioSerializer::test_to_representation_respuesta_reducida PASSED [ 80%]
+tests/unit/test_serializers.py::TestEnvioListSerializer::test_list_serializer PASSED [ 81%]
+tests/unit/test_serializers.py::TestEnvioStatusSerializer::test_status_serializer PASSED [ 82%]
+tests/unit/test_serializers.py::TestSerializersEdgeCases::test_especie_talla_no_reglamentaria_sin_observaciones PASSED [ 83%]
+tests/unit/test_serializers.py::TestSerializersEdgeCases::test_buque_puerto_none_valido PASSED [ 84%]
+tests/unit/test_serializers.py::TestSerializersEdgeCases::test_granja_fecha_produccion_future PASSED [ 85%]
+tests/unit/test_serializers.py::TestSerializersEdgeCases::test_envio_sin_establecimientos_warning PASSED [ 86%]
+tests/unit/test_serializers.py::TestSerializersEdgeCases::test_unidad_productiva_metodo_4_con_persona PASSED [ 87%]
+tests/unit/test_serializers.py::TestSerializersEdgeCases::test_especie_precio_decimal_precision PASSED [ 88%]
+tests/unit/test_serializers.py::TestSerializersEdgeCases::test_fecha_captura_formato_iso PASSED [ 89%]
+tests/unit/test_serializers.py::TestSerializersEdgeCases::test_puerto_al5_exactament_5_chars PASSED [ 90%]
+tests/unit/test_tasks.py::TestTasks::test_generate_daily_report_executes PASSED [ 91%]
+tests/unit/test_tasks.py::TestTasks::test_process_pending_envios_executes PASSED [ 92%]
+tests/unit/test_views.py::TestEnvioViewSetCoverage::test_envio_status_endpoint PASSED [ 93%]
+tests/unit/test_views.py::TestEnvioViewSetCoverage::test_list_uses_list_serializer PASSED [ 94%]
+tests/unit/test_views.py::TestEnvioViewSetCoverage::test_retrieve_envio_detail PASSED [ 95%]
+tests/unit/test_views.py::TestSerializersValidation::test_envio_serializer_with_invalid_tipo_respuesta PASSED [ 96%]
+tests/unit/test_views.py::TestSerializersValidation::test_buque_serializer_validation PASSED [ 97%]
+tests/unit/test_views.py::TestModelsEdgeCases::test_envio_str_representation PASSED [ 98%]
+tests/unit/test_views.py::TestPermissionsEdgeCases::test_admin_has_full_access PASSED [ 99%]
+tests/unit/test_views.py::TestPermissionsEdgeCases::test_investigador_can_see_all PASSED [100%]
+
+=================================== FAILURES ===================================
+____________ TestAuditSignals.test_successful_login_resets_failures ____________
+tests/unit/test_audit.py:166: in test_successful_login_resets_failures
+    assert api_user.failed_login_attempts == 0
+E   assert 3 == 0
+E    +  where 3 = &lt;APIUser: apiuser - API Test Org&gt;.failed_login_attempts
+----------------------------- Captured stderr call -----------------------------
+ERROR 2026-01-15 13:21:23,560 signals 44321 128589690088320 Error auditant login: &#39;APIUser&#39; object has no attribute &#39;reset_failed_login&#39;
+Traceback (most recent call last):
+  File &quot;/app/audit/signals.py&quot;, line 93, in audit_user_login
+    user.reset_failed_login()
+    ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: &#39;APIUser&#39; object has no attribute &#39;reset_failed_login&#39;. Did you mean: &#39;last_failed_login&#39;?
+
+---------- coverage: platform linux, python 3.12.12-final-0 ----------
+Name                                                       Stmts   Miss   Cover   Missing
+-----------------------------------------------------------------------------------------
+audit/apps.py                                                  7      0 100.00%
+audit/middleware.py                                           88     26  70.45%   36, 77-78, 84-102, 108, 119-120, 140-141, 152, 166-192
+audit/models.py                                               79      3  96.20%   82, 173, 217
+audit/signals.py                                              77     15  80.52%   36-37, 71-72, 94-96, 104-114, 169-170, 187-188
+audit/tasks.py                                                51      6  88.24%   78-79, 108, 134-141
+authentication/apps.py                                         7      0 100.00%
+authentication/management/commands/create_test_users.py       23     23   0.00%   5-52
+authentication/management/commands/create_user_groups.py      17     17   0.00%   5-33
+authentication/models.py                                     129     29  77.52%   94-99, 103-106, 110-113, 154, 219, 223-227, 231-235, 306-307, 314
+authentication/permissions.py                                  0      0 100.00%
+authentication/serializers.py                                 83     22  73.49%   59-61, 73-75, 123, 152-158, 227-235, 250-253, 310
+authentication/urls.py                                         5      0 100.00%
+authentication/views.py                                      121     84  30.58%   40-45, 58, 82-94, 136-289, 321-360, 394-417, 440, 462-463
+sales_notes/apps.py                                            7      0 100.00%
+sales_notes/encrypted_fields.py                               90     14  84.44%   30, 42, 51-53, 92, 114, 128, 136, 143, 146-149
+sales_notes/exception_handler.py                              19      0 100.00%
+sales_notes/existing_models.py                                87      3  96.55%   31, 72, 112
+sales_notes/models.py                                        201     17  91.54%   93, 135, 192-193, 199, 222, 252, 282, 454-455, 476, 481-483, 509-511
+sales_notes/permissions.py                                    30      5  83.33%   39, 57, 72, 78, 89
+sales_notes/serializers.py                                   273     38  86.08%   116, 122, 128, 136, 140-141, 156, 170, 184, 217, 220, 226, 255-258, 266, 290, 319, 325, 386-392, 415-419, 441, 487-494, 529, 575
+sales_notes/tasks.py                                          27      0 100.00%
+sales_notes/urls.py                                            7      0 100.00%
+sales_notes/views.py                                         104     33  68.27%   85, 105, 116-152, 188-189
+-----------------------------------------------------------------------------------------
+TOTAL                                                       1532    335  78.13%
+Coverage HTML written to dir htmlcov
+
+FAIL Required test coverage of 80% not reached. Total coverage: 78.13%
+=========================== short test summary info ============================
+FAILED tests/unit/test_audit.py::TestAuditSignals::test_successful_login_resets_failures
+======================== 1 failed, 102 passed in 7.07s =========================
+
+</code></pre>
+<p><strong>Resultat:</strong> ✅ Completat correctament</p>
+<h3 id="tests-dintegració">3.2 Tests d’Integració</h3>
+<p><strong>Temps d’execució:</strong> 9s</p>
+<pre><code>
+
+============================= test session starts ==============================
+platform linux -- Python 3.12.12, pytest-8.3.3, pluggy-1.6.0 -- /usr/local/bin/python3.12
+cachedir: .pytest_cache
+django: version: 5.1.13, settings: vcpe_api.settings (from env)
+rootdir: /app
+configfile: pyproject.toml
+plugins: django-4.9.0, cov-5.0.0, Faker-38.2.0
+collecting ... collected 12 items
+
+tests/integration/test_darp_batch.py::TestDARPBatchSubmission::test_batch_submission_success PASSED [  8%]
+tests/integration/test_darp_batch.py::TestDARPBatchSubmission::test_rate_limiting_batch PASSED [ 16%]
+tests/integration/test_darp_batch.py::TestDARPBatchSubmission::test_batch_post_success FAILED [ 25%]
+tests/integration/test_darp_batch.py::TestDARPBatchSubmission::test_batch_post_rollback_on_error FAILED [ 33%]
+tests/integration/test_sales_notes_flow.py::TestSalesNotesCompleteFlow::test_darp_complete_lifecycle PASSED [ 41%]
+tests/integration/test_sales_notes_flow.py::TestSalesNotesCompleteFlow::test_investigador_read_only_flow PASSED [ 50%]
+tests/integration/test_sales_notes_flow.py::TestSalesNotesCompleteFlow::test_filtering_and_search PASSED [ 58%]
+tests/integration/test_sales_notes_flow.py::TestAdvancedSalesNotesFlow::test_envio_lifecycle_with_validation PASSED [ 66%]
+tests/integration/test_sales_notes_flow.py::TestAdvancedSalesNotesFlow::test_multiple_users_isolation PASSED [ 75%]
+tests/integration/test_sales_notes_flow.py::TestAdvancedSalesNotesFlow::test_pagination_and_ordering PASSED [ 83%]
+tests/integration/test_sales_notes_flow.py::TestAdvancedSalesNotesFlow::test_invalid_data_returns_detailed_errors PASSED [ 91%]
+tests/integration/test_darp_batch.py::TestDARPBatchSubmission::test_batch_rollback_on_error PASSED [100%]
+
+=================================== FAILURES ===================================
+_______________ TestDARPBatchSubmission.test_batch_post_success ________________
+/usr/local/lib/python3.12/site-packages/django/db/backends/utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+/usr/local/lib/python3.12/site-packages/psycopg/cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   psycopg.errors.UniqueViolation: duplicate key value violates unique constraint &quot;species_3A_Code_key&quot;
+E   DETAIL:  Key (&quot;3A_Code&quot;)=(HKE) already exists.
+
+The above exception was the direct cause of the following exception:
+tests/integration/test_darp_batch.py:84: in test_batch_post_success
+    Species.objects.create(id=21001, code_3a=&quot;HKE&quot;, scientific_name=&quot;Hake&quot;)
+/usr/local/lib/python3.12/site-packages/django/db/models/manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+/usr/local/lib/python3.12/site-packages/django/db/models/query.py:679: in create
+    obj.save(force_insert=True, using=self.db)
+/usr/local/lib/python3.12/site-packages/django/db/models/base.py:892: in save
+    self.save_base(
+/usr/local/lib/python3.12/site-packages/django/db/models/base.py:998: in save_base
+    updated = self._save_table(
+/usr/local/lib/python3.12/site-packages/django/db/models/base.py:1161: in _save_table
+    results = self._do_insert(
+/usr/local/lib/python3.12/site-packages/django/db/models/base.py:1202: in _do_insert
+    return manager._insert(
+/usr/local/lib/python3.12/site-packages/django/db/models/manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+/usr/local/lib/python3.12/site-packages/django/db/models/query.py:1847: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+/usr/local/lib/python3.12/site-packages/django/db/models/sql/compiler.py:1836: in execute_sql
+    cursor.execute(sql, params)
+/usr/local/lib/python3.12/site-packages/django/db/backends/utils.py:79: in execute
+    return self._execute_with_wrappers(
+/usr/local/lib/python3.12/site-packages/django/db/backends/utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+/usr/local/lib/python3.12/site-packages/django/db/backends/utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+/usr/local/lib/python3.12/site-packages/django/db/utils.py:91: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+/usr/local/lib/python3.12/site-packages/django/db/backends/utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+/usr/local/lib/python3.12/site-packages/psycopg/cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   django.db.utils.IntegrityError: duplicate key value violates unique constraint &quot;species_3A_Code_key&quot;
+E   DETAIL:  Key (&quot;3A_Code&quot;)=(HKE) already exists.
+__________ TestDARPBatchSubmission.test_batch_post_rollback_on_error ___________
+/usr/local/lib/python3.12/site-packages/django/db/backends/utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+/usr/local/lib/python3.12/site-packages/psycopg/cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   psycopg.errors.UniqueViolation: duplicate key value violates unique constraint &quot;species_3A_Code_key&quot;
+E   DETAIL:  Key (&quot;3A_Code&quot;)=(HKE) already exists.
+
+The above exception was the direct cause of the following exception:
+tests/integration/test_darp_batch.py:115: in test_batch_post_rollback_on_error
+    Species.objects.create(id=22001, code_3a=&quot;HKE&quot;, scientific_name=&quot;Hake&quot;)
+/usr/local/lib/python3.12/site-packages/django/db/models/manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+/usr/local/lib/python3.12/site-packages/django/db/models/query.py:679: in create
+    obj.save(force_insert=True, using=self.db)
+/usr/local/lib/python3.12/site-packages/django/db/models/base.py:892: in save
+    self.save_base(
+/usr/local/lib/python3.12/site-packages/django/db/models/base.py:998: in save_base
+    updated = self._save_table(
+/usr/local/lib/python3.12/site-packages/django/db/models/base.py:1161: in _save_table
+    results = self._do_insert(
+/usr/local/lib/python3.12/site-packages/django/db/models/base.py:1202: in _do_insert
+    return manager._insert(
+/usr/local/lib/python3.12/site-packages/django/db/models/manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+/usr/local/lib/python3.12/site-packages/django/db/models/query.py:1847: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+/usr/local/lib/python3.12/site-packages/django/db/models/sql/compiler.py:1836: in execute_sql
+    cursor.execute(sql, params)
+/usr/local/lib/python3.12/site-packages/django/db/backends/utils.py:79: in execute
+    return self._execute_with_wrappers(
+/usr/local/lib/python3.12/site-packages/django/db/backends/utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+/usr/local/lib/python3.12/site-packages/django/db/backends/utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+/usr/local/lib/python3.12/site-packages/django/db/utils.py:91: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+/usr/local/lib/python3.12/site-packages/django/db/backends/utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+/usr/local/lib/python3.12/site-packages/psycopg/cursor.py:97: in execute
+    raise ex.with_traceback(None)
+E   django.db.utils.IntegrityError: duplicate key value violates unique constraint &quot;species_3A_Code_key&quot;
+E   DETAIL:  Key (&quot;3A_Code&quot;)=(HKE) already exists.
+
+---------- coverage: platform linux, python 3.12.12-final-0 ----------
+Name                                                       Stmts   Miss   Cover   Missing
+-----------------------------------------------------------------------------------------
+audit/apps.py                                                  7      0 100.00%
+audit/middleware.py                                           88     19  78.41%   36, 77-78, 84-102, 108, 119-120, 141, 152, 184, 190, 228-229
+audit/models.py                                               79      3  96.20%   82, 173, 217
+audit/signals.py                                              77     40  48.05%   36-37, 49, 71-72, 78-98, 104-114, 120-141, 163-170, 176-188
+audit/tasks.py                                                51     51   0.00%   5-146
+authentication/apps.py                                         7      0 100.00%
+authentication/management/commands/create_test_users.py       23     23   0.00%   5-52
+authentication/management/commands/create_user_groups.py      17     17   0.00%   5-33
+authentication/models.py                                     129     29  77.52%   94-99, 103-106, 110-113, 154, 219, 223-227, 231-235, 306-307, 314
+authentication/permissions.py                                  0      0 100.00%
+authentication/serializers.py                                 83     22  73.49%   59-61, 73-75, 123, 152-158, 227-235, 250-253, 310
+authentication/urls.py                                         5      0 100.00%
+authentication/views.py                                      121     84  30.58%   40-45, 58, 82-94, 136-289, 321-360, 394-417, 440, 462-463
+sales_notes/apps.py                                            7      0 100.00%
+sales_notes/encrypted_fields.py                               90     14  84.44%   30, 42, 51-53, 92, 114, 128, 136, 143, 146-149
+sales_notes/exception_handler.py                              19     19   0.00%   1-62
+sales_notes/existing_models.py                                87      3  96.55%   31, 72, 112
+sales_notes/models.py                                        201     18  91.04%   70, 93, 135, 192-193, 199, 222, 252, 282, 454-455, 476, 481-483, 509-511
+sales_notes/permissions.py                                    30     11  63.33%   19-24, 38-43, 57, 61, 72, 78, 89
+sales_notes/serializers.py                                   273     58  78.75%   38-41, 116, 122, 128, 135-136, 140-141, 156, 169-171, 183-185, 214-220, 226, 233-236, 255-258, 266, 290, 319, 325, 333, 344, 386-392, 407, 415-419, 441, 487-494, 529
+sales_notes/tasks.py                                          27     27   0.00%   5-59
+sales_notes/urls.py                                            7      0 100.00%
+sales_notes/views.py                                         104     34  67.31%   74, 85, 105, 116-152, 188-189
+-----------------------------------------------------------------------------------------
+TOTAL                                                       1532    472  69.19%
+Coverage HTML written to dir htmlcov
+
+FAIL Required test coverage of 80% not reached. Total coverage: 69.19%
+=========================== short test summary info ============================
+FAILED tests/integration/test_darp_batch.py::TestDARPBatchSubmission::test_batch_post_success
+FAILED tests/integration/test_darp_batch.py::TestDARPBatchSubmission::test_batch_post_rollback_on_error
+========================= 2 failed, 10 passed in 6.37s =========================
+
+</code></pre>
+<p><strong>Resultat:</strong> ✅ Completat correctament</p>
+<h3 id="tests-de-seguretat">3.3 Tests de Seguretat</h3>
+<p><strong>Temps d’execució:</strong> 6s</p>
+<pre><code>
+
+============================= test session starts ==============================
+platform linux -- Python 3.12.12, pytest-8.3.3, pluggy-1.6.0 -- /usr/local/bin/python3.12
+cachedir: .pytest_cache
+django: version: 5.1.13, settings: vcpe_api.settings (from env)
+rootdir: /app
+configfile: pyproject.toml
+plugins: django-4.9.0, cov-5.0.0, Faker-38.2.0
+collecting ... collected 14 items
+
+tests/security/test_owasp_api_security.py::TestOWASPAPISecurity::test_access_other_user_data PASSED [  7%]
+tests/security/test_owasp_api_security.py::TestOWASPAPISecurity::test_brute_force_protection PASSED [ 14%]
+tests/security/test_owasp_api_security.py::TestOWASPAPISecurity::test_mass_assignment_vulnerability PASSED [ 21%]
+tests/security/test_owasp_api_security.py::TestOWASPAPISecurity::test_rate_limiting SKIPPED [ 28%]
+tests/security/test_owasp_api_security.py::TestOWASPAPISecurity::test_admin_endpoint_access_control PASSED [ 35%]
+tests/security/test_owasp_api_security.py::TestOWASPAPISecurity::test_prevent_automated_submission SKIPPED [ 42%]
+tests/security/test_owasp_api_security.py::TestOWASPAPISecurity::test_security_headers_present PASSED [ 50%]
+tests/security/test_owasp_api_security.py::TestOWASPAPISecurity::test_api_documentation_access_control SKIPPED [ 57%]
+tests/security/test_owasp_api_security.py::TestOWASPAPISecurity::test_input_validation_sql_injection PASSED [ 64%]
+tests/security/test_owasp_api_security.py::TestAdditionalSecurityControls::test_no_information_disclosure_on_error PASSED [ 71%]
+tests/security/test_owasp_api_security.py::TestAdditionalSecurityControls::test_csrf_protection PASSED [ 78%]
+tests/security/test_owasp_api_security.py::TestAdditionalSecurityControls::test_cors_headers_not_too_permissive PASSED [ 85%]
+tests/security/test_owasp_api_security.py::TestAdditionalSecurityControls::test_audit_log_created_on_envio_creation PASSED [ 92%]
+tests/security/test_owasp_api_security.py::TestAdditionalSecurityControls::test_sensitive_data_not_in_logs PASSED [100%]
+
+---------- coverage: platform linux, python 3.12.12-final-0 ----------
+Name                                                       Stmts   Miss   Cover   Missing
+-----------------------------------------------------------------------------------------
+audit/apps.py                                                  7      0 100.00%
+audit/middleware.py                                           88     19  78.41%   36, 77-78, 84-102, 108, 119-120, 141, 152, 184, 190, 228-229
+audit/models.py                                               79      3  96.20%   82, 173, 217
+audit/signals.py                                              77     40  48.05%   36-37, 49, 71-72, 78-98, 104-114, 120-141, 163-170, 176-188
+audit/tasks.py                                                51     51   0.00%   5-146
+authentication/apps.py                                         7      0 100.00%
+authentication/management/commands/create_test_users.py       23     23   0.00%   5-52
+authentication/management/commands/create_user_groups.py      17     17   0.00%   5-33
+authentication/models.py                                     129     29  77.52%   94-99, 103-106, 110-113, 154, 219, 223-227, 231-235, 306-307, 314
+authentication/permissions.py                                  0      0 100.00%
+authentication/serializers.py                                 83     22  73.49%   59-61, 73-75, 123, 152-158, 227-235, 250-253, 310
+authentication/urls.py                                         5      0 100.00%
+authentication/views.py                                      121     84  30.58%   40-45, 58, 82-94, 136-289, 321-360, 394-417, 440, 462-463
+sales_notes/apps.py                                            7      0 100.00%
+sales_notes/encrypted_fields.py                               90     14  84.44%   30, 42, 51-53, 92, 114, 128, 136, 143, 146-149
+sales_notes/exception_handler.py                              19     19   0.00%   1-62
+sales_notes/existing_models.py                                87      3  96.55%   31, 72, 112
+sales_notes/models.py                                        201     18  91.04%   70, 93, 135, 192-193, 199, 222, 252, 282, 454-455, 476, 481-483, 509-511
+sales_notes/permissions.py                                    30     17  43.33%   19-24, 38-43, 57, 61, 65, 72, 77-89
+sales_notes/serializers.py                                   273     62  77.29%   38-41, 116, 122, 128, 135-136, 140-141, 156, 169-171, 183-185, 214-220, 226, 233-236, 255-258, 266, 290, 319, 325, 386-392, 407, 415-419, 441, 487-494, 529, 567, 572-576
+sales_notes/tasks.py                                          27     27   0.00%   5-59
+sales_notes/urls.py                                            7      0 100.00%
+sales_notes/views.py                                         104     59  43.27%   70-85, 89-93, 105, 116-152, 182-192, 202-207, 221-226
+-----------------------------------------------------------------------------------------
+TOTAL                                                       1532    507  66.91%
+Coverage HTML written to dir htmlcov
+
+FAIL Required test coverage of 80% not reached. Total coverage: 66.91%
+
+======================== 11 passed, 3 skipped in 3.53s =========================
+
+</code></pre>
+<p><strong>Resultat:</strong> ✅ Completat correctament</p>
+<h2 id="cobertura-de-codi">4. Cobertura de Codi</h2>
+<h3 id="generar-informe-de-cobertura">4.1 Generar Informe de Cobertura</h3>
+<p><strong>Temps d’execució:</strong> 14s</p>
+<pre><code>
+
+============================= test session starts ==============================
+platform linux -- Python 3.12.12, pytest-8.3.3, pluggy-1.6.0
+django: version: 5.1.13, settings: vcpe_api.settings (from env)
+rootdir: /app
+configfile: pyproject.toml
+plugins: django-4.9.0, cov-5.0.0, Faker-38.2.0
+collected 129 items
+
+tests/integration/test_darp_batch.py ..FF                                [  3%]
+tests/integration/test_sales_notes_flow.py .......                       [  8%]
+tests/security/test_owasp_api_security.py ...s.s.s......                 [ 19%]
+tests/unit/test_audit.py ........F.......                                [ 31%]
+tests/unit/test_authentication.py ......                                 [ 36%]
+tests/unit/test_exception_handler.py ......                              [ 41%]
+tests/unit/test_models.py ..                                             [ 42%]
+tests/unit/test_permissions.py .........                                 [ 49%]
+tests/unit/test_sales_notes_permissions.py ...............               [ 61%]
+tests/unit/test_serializers.py .......................................   [ 91%]
+tests/unit/test_tasks.py ..                                              [ 93%]
+tests/unit/test_views.py ........                                        [ 99%]
+tests/integration/test_darp_batch.py .                                   [100%]
+
+=================================== FAILURES ===================================
+_______________ TestDARPBatchSubmission.test_batch_post_success ________________
+
+self = &lt;django.db.backends.utils.CursorWrapper object at 0x77eafacd8ef0&gt;
+sql = &#39;INSERT INTO &quot;species&quot; (&quot;Id&quot;, &quot;3A_Code&quot;, &quot;ScientificName&quot;, &quot;CatalanName&quot;, &quot;SpanishName&quot;, &quot;EnglishName&quot;, &quot;Group&quot;, &quot;Grou...&quot;) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)&#39;
+params = (Int4(21001), &#39;HKE&#39;, &#39;Hake&#39;, None, None, None, ...)
+ignored_wrapper_args = (False, {&#39;connection&#39;: &lt;DatabaseWrapper vendor=&#39;postgresql&#39; alias=&#39;default&#39;&gt;, &#39;cursor&#39;: &lt;django.db.backends.utils.CursorWrapper object at 0x77eafacd8ef0&gt;})
+
+    def _execute(self, sql, params, *ignored_wrapper_args):
+        # Raise a warning during app initialization (stored_app_configs is only
+        # ever set during testing).
+        if not apps.ready and not apps.stored_app_configs:
+            warnings.warn(self.APPS_NOT_READY_WARNING_MSG, category=RuntimeWarning)
+        self.db.validate_no_broken_transaction()
+        with self.db.wrap_database_errors:
+            if params is None:
+                # params default might be backend specific.
+                return self.cursor.execute(sql)
+            else:
+&gt;               return self.cursor.execute(sql, params)
+
+/usr/local/lib/python3.12/site-packages/django/db/backends/utils.py:105:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;django.db.backends.postgresql.base.Cursor [closed] [INERROR] (host=db user=vcpe_user database=test_api_segura_bbdd) at 0x77eafb2ad250&gt;
+query = &#39;INSERT INTO &quot;species&quot; (&quot;Id&quot;, &quot;3A_Code&quot;, &quot;ScientificName&quot;, &quot;CatalanName&quot;, &quot;SpanishName&quot;, &quot;EnglishName&quot;, &quot;Group&quot;, &quot;Grou...&quot;) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)&#39;
+params = (Int4(21001), &#39;HKE&#39;, &#39;Hake&#39;, None, None, None, ...)
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -&gt; Self:
+        &quot;&quot;&quot;
+        Execute a query or command to the database.
+        &quot;&quot;&quot;
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           psycopg.errors.UniqueViolation: duplicate key value violates unique constraint &quot;species_3A_Code_key&quot;
+E           DETAIL:  Key (&quot;3A_Code&quot;)=(HKE) already exists.
+
+/usr/local/lib/python3.12/site-packages/psycopg/cursor.py:97: UniqueViolation
+
+The above exception was the direct cause of the following exception:
+
+self = &lt;app.tests.integration.test_darp_batch.TestDARPBatchSubmission object at 0x77eafb2a12b0&gt;
+darp_client = &lt;rest_framework.test.APIClient object at 0x77eafa9229f0&gt;
+sample_sales_note_data = {&#39;EstablecimientosVenta&#39;: {&#39;EstablecimientoVenta&#39;: [{&#39;NombreEstablecimiento&#39;: &#39;Llotja de Test&#39;, &#39;NumIdentificacionEstablec&#39;: &#39;LLOTJA_TEST&#39;, &#39;Ventas&#39;: {&#39;VentasUnidadProductiva&#39;: [{...}]}}]}, &#39;NumEnvio&#39;: &#39;TEST_001&#39;, &#39;TipoRespuesta&#39;: 1}
+
+    def test_batch_post_success(self, darp_client, sample_sales_note_data):
+        &quot;&quot;&quot;Enviar una llista (batch) amb diversos enviaments vàlids en una sola POST&quot;&quot;&quot;
+        from sales_notes.existing_models import Species, Vessel
+        from sales_notes.models import Envio
+
+        # Preparar catàleg mínim
+&gt;       Species.objects.create(id=21001, code_3a=&quot;HKE&quot;, scientific_name=&quot;Hake&quot;)
+
+tests/integration/test_darp_batch.py:84:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/usr/local/lib/python3.12/site-packages/django/db/models/manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+/usr/local/lib/python3.12/site-packages/django/db/models/query.py:679: in create
+    obj.save(force_insert=True, using=self.db)
+/usr/local/lib/python3.12/site-packages/django/db/models/base.py:892: in save
+    self.save_base(
+/usr/local/lib/python3.12/site-packages/django/db/models/base.py:998: in save_base
+    updated = self._save_table(
+/usr/local/lib/python3.12/site-packages/django/db/models/base.py:1161: in _save_table
+    results = self._do_insert(
+/usr/local/lib/python3.12/site-packages/django/db/models/base.py:1202: in _do_insert
+    return manager._insert(
+/usr/local/lib/python3.12/site-packages/django/db/models/manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+/usr/local/lib/python3.12/site-packages/django/db/models/query.py:1847: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+/usr/local/lib/python3.12/site-packages/django/db/models/sql/compiler.py:1836: in execute_sql
+    cursor.execute(sql, params)
+/usr/local/lib/python3.12/site-packages/django/db/backends/utils.py:79: in execute
+    return self._execute_with_wrappers(
+/usr/local/lib/python3.12/site-packages/django/db/backends/utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+/usr/local/lib/python3.12/site-packages/django/db/backends/utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+/usr/local/lib/python3.12/site-packages/django/db/utils.py:91: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+/usr/local/lib/python3.12/site-packages/django/db/backends/utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;django.db.backends.postgresql.base.Cursor [closed] [INERROR] (host=db user=vcpe_user database=test_api_segura_bbdd) at 0x77eafb2ad250&gt;
+query = &#39;INSERT INTO &quot;species&quot; (&quot;Id&quot;, &quot;3A_Code&quot;, &quot;ScientificName&quot;, &quot;CatalanName&quot;, &quot;SpanishName&quot;, &quot;EnglishName&quot;, &quot;Group&quot;, &quot;Grou...&quot;) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)&#39;
+params = (Int4(21001), &#39;HKE&#39;, &#39;Hake&#39;, None, None, None, ...)
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -&gt; Self:
+        &quot;&quot;&quot;
+        Execute a query or command to the database.
+        &quot;&quot;&quot;
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           django.db.utils.IntegrityError: duplicate key value violates unique constraint &quot;species_3A_Code_key&quot;
+E           DETAIL:  Key (&quot;3A_Code&quot;)=(HKE) already exists.
+
+/usr/local/lib/python3.12/site-packages/psycopg/cursor.py:97: IntegrityError
+__________ TestDARPBatchSubmission.test_batch_post_rollback_on_error ___________
+
+self = &lt;django.db.backends.utils.CursorWrapper object at 0x77eafaec18b0&gt;
+sql = &#39;INSERT INTO &quot;species&quot; (&quot;Id&quot;, &quot;3A_Code&quot;, &quot;ScientificName&quot;, &quot;CatalanName&quot;, &quot;SpanishName&quot;, &quot;EnglishName&quot;, &quot;Group&quot;, &quot;Grou...&quot;) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)&#39;
+params = (Int4(22001), &#39;HKE&#39;, &#39;Hake&#39;, None, None, None, ...)
+ignored_wrapper_args = (False, {&#39;connection&#39;: &lt;DatabaseWrapper vendor=&#39;postgresql&#39; alias=&#39;default&#39;&gt;, &#39;cursor&#39;: &lt;django.db.backends.utils.CursorWrapper object at 0x77eafaec18b0&gt;})
+
+    def _execute(self, sql, params, *ignored_wrapper_args):
+        # Raise a warning during app initialization (stored_app_configs is only
+        # ever set during testing).
+        if not apps.ready and not apps.stored_app_configs:
+            warnings.warn(self.APPS_NOT_READY_WARNING_MSG, category=RuntimeWarning)
+        self.db.validate_no_broken_transaction()
+        with self.db.wrap_database_errors:
+            if params is None:
+                # params default might be backend specific.
+                return self.cursor.execute(sql)
+            else:
+&gt;               return self.cursor.execute(sql, params)
+
+/usr/local/lib/python3.12/site-packages/django/db/backends/utils.py:105:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;django.db.backends.postgresql.base.Cursor [closed] [INERROR] (host=db user=vcpe_user database=test_api_segura_bbdd) at 0x77eafaefba10&gt;
+query = &#39;INSERT INTO &quot;species&quot; (&quot;Id&quot;, &quot;3A_Code&quot;, &quot;ScientificName&quot;, &quot;CatalanName&quot;, &quot;SpanishName&quot;, &quot;EnglishName&quot;, &quot;Group&quot;, &quot;Grou...&quot;) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)&#39;
+params = (Int4(22001), &#39;HKE&#39;, &#39;Hake&#39;, None, None, None, ...)
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -&gt; Self:
+        &quot;&quot;&quot;
+        Execute a query or command to the database.
+        &quot;&quot;&quot;
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           psycopg.errors.UniqueViolation: duplicate key value violates unique constraint &quot;species_3A_Code_key&quot;
+E           DETAIL:  Key (&quot;3A_Code&quot;)=(HKE) already exists.
+
+/usr/local/lib/python3.12/site-packages/psycopg/cursor.py:97: UniqueViolation
+
+The above exception was the direct cause of the following exception:
+
+self = &lt;app.tests.integration.test_darp_batch.TestDARPBatchSubmission object at 0x77eafb2e0290&gt;
+darp_client = &lt;rest_framework.test.APIClient object at 0x77eafaec3380&gt;
+sample_sales_note_data = {&#39;EstablecimientosVenta&#39;: {&#39;EstablecimientoVenta&#39;: [{&#39;NombreEstablecimiento&#39;: &#39;Llotja de Test&#39;, &#39;NumIdentificacionEstablec&#39;: &#39;LLOTJA_TEST&#39;, &#39;Ventas&#39;: {&#39;VentasUnidadProductiva&#39;: [{...}]}}]}, &#39;NumEnvio&#39;: &#39;TEST_001&#39;, &#39;TipoRespuesta&#39;: 1}
+
+    def test_batch_post_rollback_on_error(self, darp_client, sample_sales_note_data):
+        &quot;&quot;&quot;Enviar un batch amb una nota invàlida i verificar que tot el batch fa rollback&quot;&quot;&quot;
+        from sales_notes.existing_models import Species, Vessel
+        from sales_notes.models import Envio
+
+        # Preparar catàleg mínim
+&gt;       Species.objects.create(id=22001, code_3a=&quot;HKE&quot;, scientific_name=&quot;Hake&quot;)
+
+tests/integration/test_darp_batch.py:115:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/usr/local/lib/python3.12/site-packages/django/db/models/manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+/usr/local/lib/python3.12/site-packages/django/db/models/query.py:679: in create
+    obj.save(force_insert=True, using=self.db)
+/usr/local/lib/python3.12/site-packages/django/db/models/base.py:892: in save
+    self.save_base(
+/usr/local/lib/python3.12/site-packages/django/db/models/base.py:998: in save_base
+    updated = self._save_table(
+/usr/local/lib/python3.12/site-packages/django/db/models/base.py:1161: in _save_table
+    results = self._do_insert(
+/usr/local/lib/python3.12/site-packages/django/db/models/base.py:1202: in _do_insert
+    return manager._insert(
+/usr/local/lib/python3.12/site-packages/django/db/models/manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+/usr/local/lib/python3.12/site-packages/django/db/models/query.py:1847: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+/usr/local/lib/python3.12/site-packages/django/db/models/sql/compiler.py:1836: in execute_sql
+    cursor.execute(sql, params)
+/usr/local/lib/python3.12/site-packages/django/db/backends/utils.py:79: in execute
+    return self._execute_with_wrappers(
+/usr/local/lib/python3.12/site-packages/django/db/backends/utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+/usr/local/lib/python3.12/site-packages/django/db/backends/utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+/usr/local/lib/python3.12/site-packages/django/db/utils.py:91: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+/usr/local/lib/python3.12/site-packages/django/db/backends/utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;django.db.backends.postgresql.base.Cursor [closed] [INERROR] (host=db user=vcpe_user database=test_api_segura_bbdd) at 0x77eafaefba10&gt;
+query = &#39;INSERT INTO &quot;species&quot; (&quot;Id&quot;, &quot;3A_Code&quot;, &quot;ScientificName&quot;, &quot;CatalanName&quot;, &quot;SpanishName&quot;, &quot;EnglishName&quot;, &quot;Group&quot;, &quot;Grou...&quot;) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)&#39;
+params = (Int4(22001), &#39;HKE&#39;, &#39;Hake&#39;, None, None, None, ...)
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -&gt; Self:
+        &quot;&quot;&quot;
+        Execute a query or command to the database.
+        &quot;&quot;&quot;
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           django.db.utils.IntegrityError: duplicate key value violates unique constraint &quot;species_3A_Code_key&quot;
+E           DETAIL:  Key (&quot;3A_Code&quot;)=(HKE) already exists.
+
+/usr/local/lib/python3.12/site-packages/psycopg/cursor.py:97: IntegrityError
+____________ TestAuditSignals.test_successful_login_resets_failures ____________
+
+self = &lt;app.tests.unit.test_audit.TestAuditSignals object at 0x77eafb355160&gt;
+api_user = &lt;APIUser: apiuser - API Test Org&gt;
+rf = &lt;django.test.client.RequestFactory object at 0x77eafacfd160&gt;
+
+    @pytest.mark.usefixtures(&quot;rf&quot;)
+    def test_successful_login_resets_failures(self, api_user, rf):
+        &quot;&quot;&quot;Test que un login exitós reseteja el comptador de fallades i registra IP.
+        (Cobreix la lògica &#39;user.reset_failed_login()&#39; a audit/signals.py)
+        &quot;&quot;&quot;
+        from django.contrib.auth import login
+        from django.contrib.sessions.middleware import SessionMiddleware
+        from django.urls import reverse  # Cal afegir import
+
+        # 1. Preparar l&#39;usuari amb intents fallits
+        api_user.failed_login_attempts = 3
+        api_user.save()
+
+        # 2. Preparar la request (simulant middleware)
+        request = rf.get(reverse(&quot;authentication:login&quot;))
+        SessionMiddleware(lambda r: r).process_request(request)
+        request.session.save()
+        request.META[&quot;REMOTE_ADDR&quot;] = &quot;192.168.1.50&quot;
+
+        # 3. Executar el signal (simulant el login)
+        # Això dispara el signal user_logged_in
+        login(request, api_user)
+
+        # 4. Verificar el log
+        log = AuditLog.objects.latest(&quot;timestamp&quot;)
+        assert log.action == &quot;LOGIN&quot;
+        assert log.user == api_user
+        assert log.ip_address == &quot;192.168.1.50&quot;
+
+        # 5. Verificar l&#39;usuari
+        api_user.refresh_from_db()
+&gt;       assert api_user.failed_login_attempts == 0
+E       assert 3 == 0
+E        +  where 3 = &lt;APIUser: apiuser - API Test Org&gt;.failed_login_attempts
+
+tests/unit/test_audit.py:166: AssertionError
+----------------------------- Captured stderr call -----------------------------
+ERROR 2026-01-15 13:21:53,803 signals 50759 131851390106496 Error auditant login: &#39;APIUser&#39; object has no attribute &#39;reset_failed_login&#39;
+Traceback (most recent call last):
+  File &quot;/app/audit/signals.py&quot;, line 93, in audit_user_login
+    user.reset_failed_login()
+    ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: &#39;APIUser&#39; object has no attribute &#39;reset_failed_login&#39;. Did you mean: &#39;last_failed_login&#39;?
+
+---------- coverage: platform linux, python 3.12.12-final-0 ----------
+Name                                                       Stmts   Miss   Cover   Missing
+-----------------------------------------------------------------------------------------
+audit/apps.py                                                  7      0 100.00%
+audit/middleware.py                                           88     17  80.68%   36, 77-78, 84-102, 108, 119-120, 141, 152, 184, 190
+audit/models.py                                               79      3  96.20%   82, 173, 217
+audit/signals.py                                              77     15  80.52%   36-37, 71-72, 94-96, 104-114, 169-170, 187-188
+audit/tasks.py                                                51      6  88.24%   78-79, 108, 134-141
+authentication/apps.py                                         7      0 100.00%
+authentication/management/commands/create_test_users.py       23     23   0.00%   5-52
+authentication/management/commands/create_user_groups.py      17     17   0.00%   5-33
+authentication/models.py                                     129     29  77.52%   94-99, 103-106, 110-113, 154, 219, 223-227, 231-235, 306-307, 314
+authentication/permissions.py                                  0      0 100.00%
+authentication/serializers.py                                 83     22  73.49%   59-61, 73-75, 123, 152-158, 227-235, 250-253, 310
+authentication/urls.py                                         5      0 100.00%
+authentication/views.py                                      121     84  30.58%   40-45, 58, 82-94, 136-289, 321-360, 394-417, 440, 462-463
+sales_notes/apps.py                                            7      0 100.00%
+sales_notes/encrypted_fields.py                               90     14  84.44%   30, 42, 51-53, 92, 114, 128, 136, 143, 146-149
+sales_notes/exception_handler.py                              19      0 100.00%
+sales_notes/existing_models.py                                87      3  96.55%   31, 72, 112
+sales_notes/models.py                                        201     17  91.54%   93, 135, 192-193, 199, 222, 252, 282, 454-455, 476, 481-483, 509-511
+sales_notes/permissions.py                                    30      5  83.33%   39, 57, 72, 78, 89
+sales_notes/serializers.py                                   273     37  86.45%   116, 122, 128, 136, 140-141, 156, 170, 184, 217, 220, 226, 255-258, 266, 290, 319, 325, 386-392, 415-419, 441, 487-494, 529
+sales_notes/tasks.py                                          27      0 100.00%
+sales_notes/urls.py                                            7      0 100.00%
+sales_notes/views.py                                         104     33  68.27%   85, 105, 116-152, 188-189
+-----------------------------------------------------------------------------------------
+TOTAL                                                       1532    325  78.79%
+Coverage HTML written to dir htmlcov
+
+FAIL Required test coverage of 80% not reached. Total coverage: 78.79%
+=========================== short test summary info ============================
+FAILED tests/integration/test_darp_batch.py::TestDARPBatchSubmission::test_batch_post_success
+FAILED tests/integration/test_darp_batch.py::TestDARPBatchSubmission::test_batch_post_rollback_on_error
+FAILED tests/unit/test_audit.py::TestAuditSignals::test_successful_login_resets_failures
+================== 3 failed, 123 passed, 3 skipped in 11.53s ===================
+
+</code></pre>
+<p><strong>Resultat:</strong> ✅ Completat correctament</p>
+<p>ℹ️ Informe HTML disponible a: <code>htmlcov/index.html</code></p>
+<h2 id="tests-de-seguretat-sast">5. Tests de Seguretat (SAST)</h2>
+<h3 id="anàlisi-amb-bandit-vulnerabilitats-python">5.1 Anàlisi amb Bandit (Vulnerabilitats Python)</h3>
+<p><strong>Temps d’execució:</strong> 1s</p>
+<pre><code>
+
+[main]  INFO    profile include tests: None
+[main]  INFO    profile exclude tests: None
+[main]  INFO    cli include tests: None
+[main]  INFO    cli exclude tests: None
+[main]  INFO    running on Python 3.12.12
+Working... ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
+Run started:2026-01-15 12:21:59.570424
+
+Test results:
+    No issues identified.
+
+Code scanned:
+    Total lines of code: 7385
+    Total lines skipped (#nosec): 0
+    Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 2
+
+Run metrics:
+    Total issues (by severity):
+        Undefined: 0
+        Low: 274
+        Medium: 0
+        High: 0
+    Total issues (by confidence):
+        Undefined: 0
+        Low: 0
+        Medium: 5
+        High: 269
+Files skipped (0):
+
+</code></pre>
+<p><strong>Resultat:</strong> ✅ Completat correctament</p>
+<p>⚠️ <strong>Safety no disponible</strong></p>
+<h3 id="django-security-check">5.3 Django Security Check</h3>
+<p><strong>Temps d’execució:</strong> 1s</p>
+<pre><code>
+
+System check identified some issues:
+
+WARNINGS:
+?: (django_ratelimit.W001) cache backend django.core.cache.backends.redis.RedisCache is not officially supported
+?: (drf_spectacular.W001) Warning: encountered multiple names for the same choice set (IdTipoNifCifCompradorEnum). This may be unwanted even though the generated schema is technically correct. Add an entry to ENUM_NAME_OVERRIDES to fix the naming.
+?: (drf_spectacular.W002) /app/authentication/views.py: Error [LogoutView]: unable to guess serializer. This is graceful fallback handling for APIViews. Consider using GenericAPIView as view base class, if view is under your control. Either way you may want to add a serializer_class (or method). Ignoring view for now.
+?: (drf_spectacular.W002) /app/authentication/views.py: Error [PasswordChangeView]: unable to guess serializer. This is graceful fallback handling for APIViews. Consider using GenericAPIView as view base class, if view is under your control. Either way you may want to add a serializer_class (or method). Ignoring view for now.
+?: (security.W004) You have not set a value for the SECURE_HSTS_SECONDS setting. If your entire site is served only over SSL, you may want to consider setting a value and enabling HTTP Strict Transport Security. Be sure to read the documentation first; enabling HSTS carelessly can cause serious, irreversible problems.
+?: (security.W008) Your SECURE_SSL_REDIRECT setting is not set to True. Unless your site should be available over both SSL and non-SSL connections, you may want to either set this setting True or configure a load balancer or reverse-proxy server to redirect all connections to HTTPS.
+?: (security.W012) SESSION_COOKIE_SECURE is not set to True. Using a secure-only session cookie makes it more difficult for network traffic sniffers to hijack user sessions.
+?: (security.W016) You have &#39;django.middleware.csrf.CsrfViewMiddleware&#39; in your MIDDLEWARE, but you have not set CSRF_COOKIE_SECURE to True. Using a secure-only CSRF cookie makes it more difficult for network traffic sniffers to steal the CSRF token.
+?: (security.W018) You should not have DEBUG set to True in deployment.
+
+System check identified 9 issues (0 silenced).
+
+</code></pre>
+<p><strong>Resultat:</strong> ✅ Completat correctament</p>
+<h2 id="anàlisi-de-qualitat-de-codi">6. Anàlisi de Qualitat de Codi</h2>
+<h3 id="linting-amb-flake8">6.1 Linting amb Flake8</h3>
+<p><strong>Temps d’execució:</strong> 0s</p>
+<pre><code>
+
+./__init__.py:55:9: F401 &#39;audit.signals&#39; imported but unused
+./audit/middleware.py:75:80: E501 line too long (80 &gt; 79 characters)
+./audit/middleware.py:78:80: E501 line too long (86 &gt; 79 characters)
+./audit/middleware.py:119:13: E722 do not use bare &#39;except&#39;
+./audit/middleware.py:143:80: E501 line too long (82 &gt; 79 characters)
+./audit/middleware.py:202:80: E501 line too long (115 &gt; 79 characters)
+./audit/middleware.py:207:80: E501 line too long (119 &gt; 79 characters)
+./audit/middleware.py:220:80: E501 line too long (113 &gt; 79 characters)
+./audit/middleware.py:226:80: E501 line too long (116 &gt; 79 characters)
+./audit/middleware.py:229:80: E501 line too long (89 &gt; 79 characters)
+./audit/migrations/0001_initial.py:24:80: E501 line too long (112 &gt; 79 characters)
+./audit/migrations/0001_initial.py:43:80: E501 line too long (87 &gt; 79 characters)
+./audit/migrations/0001_initial.py:44:80: E501 line too long (85 &gt; 79 characters)
+./audit/migrations/0001_initial.py:47:80: E501 line too long (110 &gt; 79 characters)
+./audit/migrations/0001_initial.py:51:80: E501 line too long (117 &gt; 79 characters)
+./audit/migrations/0001_initial.py:53:80: E501 line too long (84 &gt; 79 characters)
+./audit/migrations/0001_initial.py:55:80: E501 line too long (91 &gt; 79 characters)
+./audit/migrations/0001_initial.py:70:80: E501 line too long (86 &gt; 79 characters)
+./audit/migrations/0001_initial.py:97:80: E501 line too long (101 &gt; 79 characters)
+./audit/migrations/0001_initial.py:98:80: E501 line too long (100 &gt; 79 characters)
+./audit/migrations/0001_initial.py:99:80: E501 line too long (104 &gt; 79 characters)
+./audit/migrations/0001_initial.py:100:80: E501 line too long (106 &gt; 79 characters)
+./audit/migrations/0001_initial.py:107:80: E501 line too long (112 &gt; 79 characters)
+./audit/migrations/0001_initial.py:108:80: E501 line too long (116 &gt; 79 characters)
+./audit/migrations/0001_initial.py:112:80: E501 line too long (109 &gt; 79 characters)
+./audit/migrations/0001_initial.py:115:80: E501 line too long (91 &gt; 79 characters)
+./audit/migrations/0001_initial.py:116:80: E501 line too long (113 &gt; 79 characters)
+./audit/migrations/0001_initial.py:117:80: E501 line too long (94 &gt; 79 characters)
+./audit/migrations/0001_initial.py:118:80: E501 line too long (119 &gt; 79 characters)
+./audit/migrations/0001_initial.py:121:80: E501 line too long (86 &gt; 79 characters)
+./audit/migrations/0001_initial.py:137:80: E501 line too long (109 &gt; 79 characters)
+./audit/migrations/0001_initial.py:138:80: E501 line too long (106 &gt; 79 characters)
+./audit/migrations/0001_initial.py:145:80: E501 line too long (112 &gt; 79 characters)
+./audit/migrations/0001_initial.py:154:80: E501 line too long (82 &gt; 79 characters)
+./audit/migrations/0001_initial.py:157:80: E501 line too long (85 &gt; 79 characters)
+./audit/migrations/0001_initial.py:169:80: E501 line too long (83 &gt; 79 characters)
+./audit/migrations/0001_initial.py:170:80: E501 line too long (106 &gt; 79 characters)
+./audit/migrations/0001_initial.py:171:80: E501 line too long (108 &gt; 79 characters)
+./audit/migrations/0001_initial.py:175:80: E501 line too long (117 &gt; 79 characters)
+./audit/migrations/0001_initial.py:195:80: E501 line too long (113 &gt; 79 characters)
+./audit/migrations/0001_initial.py:197:80: E501 line too long (86 &gt; 79 characters)
+./audit/migrations/0001_initial.py:226:80: E501 line too long (108 &gt; 79 characters)
+./audit/migrations/0001_initial.py:227:80: E501 line too long (103 &gt; 79 characters)
+./audit/migrations/0001_initial.py:228:80: E501 line too long (108 &gt; 79 characters)
+./audit/migrations/0001_initial.py:229:80: E501 line too long (105 &gt; 79 characters)
+./audit/models.py:32:80: E501 line too long (83 &gt; 79 characters)
+./audit/models.py:36:80: E501 line too long (109 &gt; 79 characters)
+./audit/models.py:40:80: E501 line too long (98 &gt; 79 characters)
+./audit/models.py:48:80: E501 line too long (105 &gt; 79 characters)
+./audit/models.py:49:80: E501 line too long (112 &gt; 79 characters)
+./audit/models.py:64:80: E501 line too long (103 &gt; 79 characters)
+./audit/models.py:104:80: E501 line too long (91 &gt; 79 characters)
+./audit/models.py:108:80: E501 line too long (114 &gt; 79 characters)
+./audit/models.py:121:80: E501 line too long (90 &gt; 79 characters)
+./audit/models.py:123:80: E501 line too long (92 &gt; 79 characters)
+./audit/models.py:133:80: E501 line too long (105 &gt; 79 characters)
+./audit/models.py:142:80: E501 line too long (98 &gt; 79 characters)
+./audit/models.py:145:80: E501 line too long (97 &gt; 79 characters)
+./audit/models.py:173:80: E501 line too long (86 &gt; 79 characters)
+./audit/models.py:183:80: E501 line too long (110 &gt; 79 characters)
+./audit/models.py:186:80: E501 line too long (100 &gt; 79 characters)
+./audit/models.py:188:80: E501 line too long (120 &gt; 79 characters)
+./audit/models.py:193:80: E501 line too long (97 &gt; 79 characters)
+./audit/models.py:198:80: E501 line too long (103 &gt; 79 characters)
+./audit/signals.py:7:80: E501 line too long (90 &gt; 79 characters)
+./audit/signals.py:13:1: F401 &#39;sales_notes.models.Especie&#39; imported but unused
+./audit/signals.py:53:80: E501 line too long (86 &gt; 79 characters)
+./audit/signals.py:64:80: E501 line too long (83 &gt; 79 characters)
+./audit/signals.py:72:80: E501 line too long (82 &gt; 79 characters)
+./audit/signals.py:94:80: E501 line too long (103 &gt; 79 characters)
+./audit/signals.py:128:80: E501 line too long (82 &gt; 79 characters)
+./audit/signals.py:139:80: E501 line too long (81 &gt; 79 characters)
+./audit/signals.py:152:80: E501 line too long (90 &gt; 79 characters)
+./audit/signals.py:162:80: E501 line too long (91 &gt; 79 characters)
+./audit/tasks.py:24:80: E501 line too long (107 &gt; 79 characters)
+./audit/tasks.py:27:80: E501 line too long (92 &gt; 79 characters)
+./audit/tasks.py:32:80: E501 line too long (96 &gt; 79 characters)
+./audit/tasks.py:38:80: E501 line too long (80 &gt; 79 characters)
+./audit/tasks.py:39:80: E501 line too long (80 &gt; 79 characters)
+./audit/tasks.py:50:80: E501 line too long (93 &gt; 79 characters)
+./audit/tasks.py:51:80: E501 line too long (93 &gt; 79 characters)
+./audit/tasks.py:89:80: E501 line too long (85 &gt; 79 characters)
+./audit/tasks.py:90:80: E501 line too long (89 &gt; 79 characters)
+./audit/tasks.py:100:80: E501 line too long (97 &gt; 79 characters)
+./audit/tasks.py:111:80: E501 line too long (93 &gt; 79 characters)
+./audit/tasks.py:117:80: E501 line too long (99 &gt; 79 characters)
+./audit/tasks.py:153:80: E501 line too long (97 &gt; 79 characters)
+./authentication/admin.py:37:80: E501 line too long (87 &gt; 79 characters)
+./authentication/admin.py:53:80: E501 line too long (103 &gt; 79 characters)
+./authentication/admin.py:54:80: E501 line too long (112 &gt; 79 characters)
+./authentication/admin.py:57:80: E501 line too long (115 &gt; 79 characters)
+./authentication/admin.py:61:80: E501 line too long (104 &gt; 79 characters)
+./authentication/admin.py:83:80: E501 line too long (103 &gt; 79 characters)
+./authentication/admin.py:86:80: E501 line too long (82 &gt; 79 characters)
+./authentication/admin.py:89:80: E501 line too long (93 &gt; 79 characters)
+./authentication/admin.py:130:80: E501 line too long (108 &gt; 79 characters)
+./authentication/admin.py:160:80: E501 line too long (80 &gt; 79 characters)
+./authentication/admin.py:161:80: E501 line too long (92 &gt; 79 characters)
+./authentication/admin.py:174:80: E501 line too long (119 &gt; 79 characters)
+./authentication/admin.py:198:80: E501 line too long (82 &gt; 79 characters)
+./authentication/admin.py:201:80: E501 line too long (103 &gt; 79 characters)
+./authentication/admin.py:260:80: E501 line too long (112 &gt; 79 characters)
+./authentication/admin.py:275:80: E501 line too long (116 &gt; 79 characters)
+./authentication/admin.py:279:80: E501 line too long (103 &gt; 79 characters)
+./authentication/admin.py:296:80: E501 line too long (92 &gt; 79 characters)
+./authentication/admin.py:328:80: E501 line too long (104 &gt; 79 characters)
+./authentication/management/commands/create_test_users.py:31:80: E501 line too long (93 &gt; 79 characters)
+./authentication/management/commands/create_test_users.py:33:50: F541 f-string is missing placeholders
+./authentication/management/commands/create_test_users.py:50:80: E501 line too long (100 &gt; 79 characters)
+./authentication/management/commands/create_test_users.py:52:50: F541 f-string is missing placeholders
+./authentication/management/commands/create_test_users.py:52:80: E501 line too long (85 &gt; 79 characters)
+./authentication/management/commands/create_user_groups.py:20:80: E501 line too long (89 &gt; 79 characters)
+./authentication/management/commands/create_user_groups.py:21:80: E501 line too long (87 &gt; 79 characters)
+./authentication/management/commands/create_user_groups.py:26:80: E501 line too long (99 &gt; 79 characters)
+./authentication/management/commands/create_user_groups.py:31:80: E501 line too long (108 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:26:80: E501 line too long (88 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:27:80: E501 line too long (103 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:32:80: E501 line too long (117 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:39:80: E501 line too long (95 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:40:80: E501 line too long (107 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:43:80: E501 line too long (95 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:47:80: E501 line too long (104 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:48:80: E501 line too long (102 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:49:80: E501 line too long (103 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:54:80: E501 line too long (94 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:62:80: E501 line too long (94 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:67:80: E501 line too long (117 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:68:80: E501 line too long (112 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:72:80: E501 line too long (110 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:75:80: E501 line too long (118 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:83:80: E501 line too long (94 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:90:80: E501 line too long (106 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:96:80: E501 line too long (83 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:102:80: E501 line too long (117 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:103:80: E501 line too long (118 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:106:80: E501 line too long (113 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:110:80: E501 line too long (112 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:114:80: E501 line too long (110 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:118:80: E501 line too long (117 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:126:80: E501 line too long (85 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:158:80: E501 line too long (112 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:165:80: E501 line too long (95 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:168:80: E501 line too long (115 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:171:80: E501 line too long (86 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:192:80: E501 line too long (112 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:199:80: E501 line too long (83 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:214:80: E501 line too long (88 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:215:80: E501 line too long (88 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:216:80: E501 line too long (120 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:217:80: E501 line too long (102 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:233:80: E501 line too long (112 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:256:80: E501 line too long (112 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:261:80: E501 line too long (84 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:270:80: E501 line too long (91 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:276:80: E501 line too long (112 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:277:80: E501 line too long (95 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:278:80: E501 line too long (106 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:279:80: E501 line too long (103 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:280:80: E501 line too long (118 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:281:80: E501 line too long (88 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:282:80: E501 line too long (88 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:313:80: E501 line too long (96 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:317:80: E501 line too long (106 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:321:80: E501 line too long (100 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:325:80: E501 line too long (106 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:329:80: E501 line too long (107 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:333:80: E501 line too long (93 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:337:80: E501 line too long (106 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:341:80: E501 line too long (100 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:345:80: E501 line too long (104 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:349:80: E501 line too long (106 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:353:80: E501 line too long (114 &gt; 79 characters)
+./authentication/migrations/0001_initial.py:357:80: E501 line too long (95 &gt; 79 characters)
+./authentication/migrations/0002_remove_apiuser_api_user_cif_org_f8feeb_idx_and_more.py:31:80: E501 line too long (115 &gt; 79 characters)
+./authentication/migrations/0002_remove_apiuser_api_user_cif_org_f8feeb_idx_and_more.py:36:80: E501 line too long (114 &gt; 79 characters)
+./authentication/migrations/0002_remove_apiuser_api_user_cif_org_f8feeb_idx_and_more.py:41:80: E501 line too long (104 &gt; 79 characters)
+./authentication/migrations/0002_remove_apiuser_api_user_cif_org_f8feeb_idx_and_more.py:46:80: E501 line too long (115 &gt; 79 characters)
+./authentication/migrations/0002_remove_apiuser_api_user_cif_org_f8feeb_idx_and_more.py:52:80: E501 line too long (106 &gt; 79 characters)
+./authentication/migrations/0002_remove_apiuser_api_user_cif_org_f8feeb_idx_and_more.py:58:80: E501 line too long (112 &gt; 79 characters)
+./authentication/migrations/0002_remove_apiuser_api_user_cif_org_f8feeb_idx_and_more.py:62:80: E501 line too long (96 &gt; 79 characters)
+./authentication/migrations/0003_alter_apiuser_cif_organization.py:9:80: E501 line too long (87 &gt; 79 characters)
+./authentication/migrations/0003_alter_apiuser_cif_organization.py:16:80: E501 line too long (85 &gt; 79 characters)
+./authentication/migrations/0004_alter_apiuser_groups_alter_apiuser_is_active.py:20:80: E501 line too long (80 &gt; 79 characters)
+./authentication/migrations/0004_alter_apiuser_groups_alter_apiuser_is_active.py:32:80: E501 line too long (86 &gt; 79 characters)
+./authentication/migrations/0005_alter_apiuser_groups_alter_apiuser_is_active.py:10:80: E501 line too long (80 &gt; 79 characters)
+./authentication/migrations/0005_alter_apiuser_groups_alter_apiuser_is_active.py:19:80: E501 line too long (126 &gt; 79 characters)
+./authentication/migrations/0005_alter_apiuser_groups_alter_apiuser_is_active.py:31:80: E501 line too long (130 &gt; 79 characters)
+./authentication/models.py:23:80: E501 line too long (94 &gt; 79 characters)
+./authentication/models.py:26:80: E501 line too long (89 &gt; 79 characters)
+./authentication/models.py:28:80: E501 line too long (112 &gt; 79 characters)
+./authentication/models.py:30:80: E501 line too long (115 &gt; 79 characters)
+./authentication/models.py:32:80: E501 line too long (103 &gt; 79 characters)
+./authentication/models.py:34:80: E501 line too long (119 &gt; 79 characters)
+./authentication/models.py:36:80: E501 line too long (119 &gt; 79 characters)
+./authentication/models.py:39:80: E501 line too long (98 &gt; 79 characters)
+./authentication/models.py:46:80: E501 line too long (99 &gt; 79 characters)
+./authentication/models.py:50:80: E501 line too long (105 &gt; 79 characters)
+./authentication/models.py:53:80: E501 line too long (117 &gt; 79 characters)
+./authentication/models.py:57:80: E501 line too long (101 &gt; 79 characters)
+./authentication/models.py:59:80: E501 line too long (102 &gt; 79 characters)
+./authentication/models.py:62:80: E501 line too long (110 &gt; 79 characters)
+./authentication/models.py:65:80: E501 line too long (111 &gt; 79 characters)
+./authentication/models.py:67:80: E501 line too long (117 &gt; 79 characters)
+./authentication/models.py:70:80: E501 line too long (82 &gt; 79 characters)
+./authentication/models.py:94:80: E501 line too long (84 &gt; 79 characters)
+./authentication/models.py:97:80: E501 line too long (86 &gt; 79 characters)
+./authentication/models.py:105:80: E501 line too long (87 &gt; 79 characters)
+./authentication/models.py:106:80: E501 line too long (82 &gt; 79 characters)
+./authentication/models.py:113:80: E501 line too long (99 &gt; 79 characters)
+./authentication/models.py:122:80: E501 line too long (103 &gt; 79 characters)
+./authentication/models.py:135:80: E501 line too long (118 &gt; 79 characters)
+./authentication/models.py:154:80: E501 line too long (87 &gt; 79 characters)
+./authentication/models.py:165:80: E501 line too long (103 &gt; 79 characters)
+./authentication/models.py:188:80: E501 line too long (86 &gt; 79 characters)
+./authentication/models.py:192:80: E501 line too long (80 &gt; 79 characters)
+./authentication/models.py:202:80: E501 line too long (92 &gt; 79 characters)
+./authentication/models.py:219:80: E501 line too long (89 &gt; 79 characters)
+./authentication/models.py:235:80: E501 line too long (96 &gt; 79 characters)
+./authentication/models.py:270:80: E501 line too long (101 &gt; 79 characters)
+./authentication/models.py:275:80: E501 line too long (94 &gt; 79 characters)
+./authentication/models.py:288:80: E501 line too long (117 &gt; 79 characters)
+./authentication/models.py:291:80: E501 line too long (86 &gt; 79 characters)
+./authentication/models.py:306:80: E501 line too long (92 &gt; 79 characters)
+./authentication/models.py:307:80: E501 line too long (81 &gt; 79 characters)
+./authentication/models.py:311:80: E501 line too long (115 &gt; 79 characters)
+./authentication/serializers.py:37:80: E501 line too long (114 &gt; 79 characters)
+./authentication/serializers.py:42:80: E501 line too long (119 &gt; 79 characters)
+./authentication/serializers.py:60:80: E501 line too long (94 &gt; 79 characters)
+./authentication/serializers.py:133:80: E501 line too long (95 &gt; 79 characters)
+./authentication/serializers.py:136:80: E501 line too long (102 &gt; 79 characters)
+./authentication/serializers.py:156:80: E501 line too long (91 &gt; 79 characters)
+./authentication/serializers.py:168:80: E501 line too long (112 &gt; 79 characters)
+./authentication/serializers.py:171:80: E501 line too long (88 &gt; 79 characters)
+./authentication/serializers.py:174:80: E501 line too long (108 &gt; 79 characters)
+./authentication/serializers.py:176:80: E501 line too long (113 &gt; 79 characters)
+./authentication/serializers.py:178:80: E501 line too long (88 &gt; 79 characters)
+./authentication/serializers.py:188:80: E501 line too long (92 &gt; 79 characters)
+./authentication/serializers.py:199:80: E501 line too long (105 &gt; 79 characters)
+./authentication/serializers.py:211:80: E501 line too long (109 &gt; 79 characters)
+./authentication/serializers.py:228:80: E501 line too long (102 &gt; 79 characters)
+./authentication/serializers.py:232:80: E501 line too long (91 &gt; 79 characters)
+./authentication/serializers.py:252:80: E501 line too long (81 &gt; 79 characters)
+./authentication/serializers.py:264:80: E501 line too long (91 &gt; 79 characters)
+./authentication/serializers.py:276:80: E501 line too long (86 &gt; 79 characters)
+./authentication/serializers.py:279:80: E501 line too long (107 &gt; 79 characters)
+./authentication/serializers.py:321:80: E501 line too long (97 &gt; 79 characters)
+./authentication/serializers.py:325:80: E501 line too long (97 &gt; 79 characters)
+./authentication/serializers.py:329:80: E501 line too long (99 &gt; 79 characters)
+./authentication/urls.py:6:80: E501 line too long (97 &gt; 79 characters)
+./authentication/urls.py:8:80: E501 line too long (117 &gt; 79 characters)
+./authentication/urls.py:14:80: E501 line too long (80 &gt; 79 characters)
+./authentication/urls.py:24:80: E501 line too long (83 &gt; 79 characters)
+./authentication/views.py:91:80: E501 line too long (104 &gt; 79 characters)
+./authentication/views.py:159:80: E501 line too long (101 &gt; 79 characters)
+./authentication/views.py:163:80: E501 line too long (85 &gt; 79 characters)
+./authentication/views.py:166:80: E501 line too long (114 &gt; 79 characters)
+./authentication/views.py:182:80: E501 line too long (86 &gt; 79 characters)
+./authentication/views.py:187:80: E501 line too long (91 &gt; 79 characters)
+./authentication/views.py:203:80: E501 line too long (106 &gt; 79 characters)
+./authentication/views.py:206:80: E501 line too long (118 &gt; 79 characters)
+./authentication/views.py:209:80: E501 line too long (106 &gt; 79 characters)
+./authentication/views.py:235:80: E501 line too long (115 &gt; 79 characters)
+./authentication/views.py:251:80: E501 line too long (116 &gt; 79 characters)
+./authentication/views.py:290:80: E501 line too long (102 &gt; 79 characters)
+./authentication/views.py:337:80: E501 line too long (95 &gt; 79 characters)
+./authentication/views.py:338:80: E501 line too long (95 &gt; 79 characters)
+./authentication/views.py:355:80: E501 line too long (105 &gt; 79 characters)
+./authentication/views.py:361:80: E501 line too long (97 &gt; 79 characters)
+./authentication/views.py:394:80: E501 line too long (94 &gt; 79 characters)
+./authentication/views.py:404:80: E501 line too long (92 &gt; 79 characters)
+./authentication/views.py:418:80: E501 line too long (107 &gt; 79 characters)
+./authentication/views.py:463:80: E501 line too long (92 &gt; 79 characters)
+./sales_notes/exception_handler.py:44:80: E501 line too long (103 &gt; 79 characters)
+./sales_notes/exception_handler.py:58:80: E501 line too long (89 &gt; 79 characters)
+./sales_notes/existing_models.py:14:80: E501 line too long (87 &gt; 79 characters)
+./sales_notes/existing_models.py:15:80: E501 line too long (83 &gt; 79 characters)
+./sales_notes/existing_models.py:16:80: E501 line too long (112 &gt; 79 characters)
+./sales_notes/existing_models.py:17:80: E501 line too long (114 &gt; 79 characters)
+./sales_notes/existing_models.py:20:80: E501 line too long (114 &gt; 79 characters)
+./sales_notes/existing_models.py:21:80: E501 line too long (100 &gt; 79 characters)
+./sales_notes/existing_models.py:38:80: E501 line too long (93 &gt; 79 characters)
+./sales_notes/existing_models.py:39:80: E501 line too long (81 &gt; 79 characters)
+./sales_notes/existing_models.py:40:80: E501 line too long (98 &gt; 79 characters)
+./sales_notes/existing_models.py:41:80: E501 line too long (98 &gt; 79 characters)
+./sales_notes/existing_models.py:42:80: E501 line too long (98 &gt; 79 characters)
+./sales_notes/existing_models.py:43:80: E501 line too long (85 &gt; 79 characters)
+./sales_notes/existing_models.py:44:80: E501 line too long (87 &gt; 79 characters)
+./sales_notes/existing_models.py:45:80: E501 line too long (96 &gt; 79 characters)
+./sales_notes/existing_models.py:46:80: E501 line too long (107 &gt; 79 characters)
+./sales_notes/existing_models.py:47:80: E501 line too long (93 &gt; 79 characters)
+./sales_notes/existing_models.py:48:80: E501 line too long (85 &gt; 79 characters)
+./sales_notes/existing_models.py:49:80: E501 line too long (87 &gt; 79 characters)
+./sales_notes/existing_models.py:50:80: E501 line too long (85 &gt; 79 characters)
+./sales_notes/existing_models.py:51:80: E501 line too long (110 &gt; 79 characters)
+./sales_notes/existing_models.py:52:80: E501 line too long (110 &gt; 79 characters)
+./sales_notes/existing_models.py:53:80: E501 line too long (105 &gt; 79 characters)
+./sales_notes/existing_models.py:54:80: E501 line too long (84 &gt; 79 characters)
+./sales_notes/existing_models.py:55:80: E501 line too long (119 &gt; 79 characters)
+./sales_notes/existing_models.py:56:80: E501 line too long (119 &gt; 79 characters)
+./sales_notes/existing_models.py:57:80: E501 line too long (91 &gt; 79 characters)
+./sales_notes/existing_models.py:59:80: E501 line too long (94 &gt; 79 characters)
+./sales_notes/existing_models.py:60:80: E501 line too long (87 &gt; 79 characters)
+./sales_notes/existing_models.py:61:80: E501 line too long (104 &gt; 79 characters)
+./sales_notes/existing_models.py:62:80: E501 line too long (104 &gt; 79 characters)
+./sales_notes/existing_models.py:79:80: E501 line too long (88 &gt; 79 characters)
+./sales_notes/existing_models.py:80:80: E501 line too long (93 &gt; 79 characters)
+./sales_notes/existing_models.py:81:80: E501 line too long (90 &gt; 79 characters)
+./sales_notes/existing_models.py:82:80: E501 line too long (86 &gt; 79 characters)
+./sales_notes/existing_models.py:83:80: E501 line too long (84 &gt; 79 characters)
+./sales_notes/existing_models.py:84:80: E501 line too long (106 &gt; 79 characters)
+./sales_notes/existing_models.py:85:80: E501 line too long (83 &gt; 79 characters)
+./sales_notes/existing_models.py:86:80: E501 line too long (89 &gt; 79 characters)
+./sales_notes/existing_models.py:87:80: E501 line too long (101 &gt; 79 characters)
+./sales_notes/existing_models.py:88:80: E501 line too long (83 &gt; 79 characters)
+./sales_notes/existing_models.py:90:80: E501 line too long (100 &gt; 79 characters)
+./sales_notes/existing_models.py:91:80: E501 line too long (98 &gt; 79 characters)
+./sales_notes/existing_models.py:92:80: E501 line too long (106 &gt; 79 characters)
+./sales_notes/existing_models.py:93:80: E501 line too long (106 &gt; 79 characters)
+./sales_notes/existing_models.py:94:80: E501 line too long (100 &gt; 79 characters)
+./sales_notes/existing_models.py:95:80: E501 line too long (102 &gt; 79 characters)
+./sales_notes/existing_models.py:97:80: E501 line too long (88 &gt; 79 characters)
+./sales_notes/existing_models.py:99:80: E501 line too long (119 &gt; 79 characters)
+./sales_notes/existing_models.py:100:80: E501 line too long (100 &gt; 79 characters)
+./sales_notes/existing_models.py:101:80: E501 line too long (100 &gt; 79 characters)
+./sales_notes/existing_models.py:102:80: E501 line too long (90 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:26:80: E501 line too long (87 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:28:80: E501 line too long (112 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:44:80: E501 line too long (117 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:60:80: E501 line too long (87 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:62:80: E501 line too long (112 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:65:80: E501 line too long (120 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:78:80: E501 line too long (100 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:80:80: E501 line too long (103 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:81:80: E501 line too long (99 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:84:80: E501 line too long (118 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:88:80: E501 line too long (119 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:99:80: E501 line too long (108 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:101:80: E501 line too long (116 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:102:80: E501 line too long (93 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:114:80: E501 line too long (95 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:115:80: E501 line too long (109 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:116:80: E501 line too long (97 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:117:80: E501 line too long (114 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:118:80: E501 line too long (114 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:119:80: E501 line too long (114 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:120:80: E501 line too long (101 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:121:80: E501 line too long (103 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:122:80: E501 line too long (112 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:125:80: E501 line too long (105 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:127:80: E501 line too long (109 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:128:80: E501 line too long (101 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:129:80: E501 line too long (103 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:130:80: E501 line too long (101 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:133:80: E501 line too long (117 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:137:80: E501 line too long (117 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:141:80: E501 line too long (103 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:143:80: E501 line too long (100 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:147:80: E501 line too long (103 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:153:80: E501 line too long (103 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:156:80: E501 line too long (107 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:157:80: E501 line too long (94 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:158:80: E501 line too long (110 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:159:80: E501 line too long (103 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:160:80: E501 line too long (120 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:161:80: E501 line too long (120 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:162:80: E501 line too long (94 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:174:80: E501 line too long (95 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:175:80: E501 line too long (104 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:176:80: E501 line too long (109 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:177:80: E501 line too long (106 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:178:80: E501 line too long (102 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:179:80: E501 line too long (100 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:182:80: E501 line too long (104 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:184:80: E501 line too long (99 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:185:80: E501 line too long (105 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:186:80: E501 line too long (117 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:187:80: E501 line too long (99 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:188:80: E501 line too long (85 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:189:80: E501 line too long (116 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:190:80: E501 line too long (114 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:193:80: E501 line too long (115 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:197:80: E501 line too long (115 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:199:80: E501 line too long (116 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:200:80: E501 line too long (118 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:204:80: E501 line too long (104 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:210:80: E501 line too long (103 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:213:80: E501 line too long (116 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:214:80: E501 line too long (116 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:215:80: E501 line too long (106 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:216:80: E501 line too long (85 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:238:80: E501 line too long (116 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:239:80: E501 line too long (113 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:240:80: E501 line too long (90 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:261:80: E501 line too long (119 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:262:80: E501 line too long (113 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:263:80: E501 line too long (89 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:274:80: E501 line too long (87 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:276:80: E501 line too long (112 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:279:80: E501 line too long (117 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:284:80: E501 line too long (81 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:289:80: E501 line too long (108 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:290:80: E501 line too long (81 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:291:80: E501 line too long (81 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:294:80: E501 line too long (83 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:298:80: E501 line too long (119 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:312:80: E501 line too long (87 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:314:80: E501 line too long (112 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:317:80: E501 line too long (109 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:327:80: E501 line too long (103 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:333:80: E501 line too long (81 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:334:80: E501 line too long (106 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:343:80: E501 line too long (103 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:350:80: E501 line too long (110 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:354:80: E501 line too long (117 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:359:80: E501 line too long (107 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:364:80: E501 line too long (102 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:368:80: E501 line too long (106 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:370:80: E501 line too long (116 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:371:80: E501 line too long (84 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:372:80: E501 line too long (112 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:373:80: E501 line too long (111 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:374:80: E501 line too long (103 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:375:80: E501 line too long (97 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:378:80: E501 line too long (103 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:382:80: E501 line too long (106 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:386:80: E501 line too long (105 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:388:80: E501 line too long (114 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:392:80: E501 line too long (100 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:396:80: E501 line too long (114 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:397:80: E501 line too long (99 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:398:80: E501 line too long (119 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:399:80: E501 line too long (117 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:403:80: E501 line too long (100 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:415:80: E501 line too long (101 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:420:80: E501 line too long (102 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:423:80: E501 line too long (101 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:431:80: E501 line too long (95 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:442:80: E501 line too long (106 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:453:80: E501 line too long (96 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:462:80: E501 line too long (81 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:471:80: E501 line too long (81 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:474:80: E501 line too long (114 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:493:80: E501 line too long (109 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:497:80: E501 line too long (100 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:499:80: E501 line too long (102 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:502:80: E501 line too long (103 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:545:80: E501 line too long (116 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:551:80: E501 line too long (112 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:552:80: E501 line too long (99 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:555:80: E501 line too long (111 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:588:80: E501 line too long (109 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:599:80: E501 line too long (107 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:607:80: E501 line too long (106 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:608:80: E501 line too long (102 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:641:80: E501 line too long (105 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:645:80: E501 line too long (98 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:649:80: E501 line too long (115 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:658:80: E501 line too long (104 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:663:80: E501 line too long (105 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:667:80: E501 line too long (105 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:671:80: E501 line too long (95 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:675:80: E501 line too long (106 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:679:80: E501 line too long (107 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:683:80: E501 line too long (87 &gt; 79 characters)
+./sales_notes/migrations/0001_initial.py:687:80: E501 line too long (85 &gt; 79 characters)
+./sales_notes/migrations/0002_alter_buque_armador_alter_buque_capitan_and_more.py:26:80: E501 line too long (100 &gt; 79 characters)
+./sales_notes/migrations/0002_alter_buque_armador_alter_buque_capitan_and_more.py:31:80: E501 line too long (107 &gt; 79 characters)
+./sales_notes/migrations/0003_remove_especie_especie_nif_ven_bace9e_idx_and_more.py:14:80: E501 line too long (81 &gt; 79 characters)
+./sales_notes/migrations/0003_remove_especie_especie_nif_ven_bace9e_idx_and_more.py:31:80: E501 line too long (88 &gt; 79 characters)
+./sales_notes/migrations/0003_remove_especie_especie_nif_ven_bace9e_idx_and_more.py:51:80: E501 line too long (110 &gt; 79 characters)
+./sales_notes/migrations/0003_remove_especie_especie_nif_ven_bace9e_idx_and_more.py:56:80: E501 line too long (108 &gt; 79 characters)
+./sales_notes/migrations/0003_remove_especie_especie_nif_ven_bace9e_idx_and_more.py:62:80: E501 line too long (119 &gt; 79 characters)
+./sales_notes/models.py:35:80: E501 line too long (112 &gt; 79 characters)
+./sales_notes/models.py:43:80: E501 line too long (101 &gt; 79 characters)
+./sales_notes/models.py:57:80: E501 line too long (112 &gt; 79 characters)
+./sales_notes/models.py:79:80: E501 line too long (95 &gt; 79 characters)
+./sales_notes/models.py:82:80: E501 line too long (89 &gt; 79 characters)
+./sales_notes/models.py:103:80: E501 line too long (91 &gt; 79 characters)
+./sales_notes/models.py:112:80: E501 line too long (93 &gt; 79 characters)
+./sales_notes/models.py:135:80: E501 line too long (84 &gt; 79 characters)
+./sales_notes/models.py:144:80: E501 line too long (90 &gt; 79 characters)
+./sales_notes/models.py:147:80: E501 line too long (107 &gt; 79 characters)
+./sales_notes/models.py:160:80: E501 line too long (120 &gt; 79 characters)
+./sales_notes/models.py:163:80: E501 line too long (119 &gt; 79 characters)
+./sales_notes/models.py:178:80: E501 line too long (90 &gt; 79 characters)
+./sales_notes/models.py:180:80: E501 line too long (97 &gt; 79 characters)
+./sales_notes/models.py:193:80: E501 line too long (94 &gt; 79 characters)
+./sales_notes/models.py:196:80: E501 line too long (87 &gt; 79 characters)
+./sales_notes/models.py:231:80: E501 line too long (91 &gt; 79 characters)
+./sales_notes/models.py:234:80: E501 line too long (100 &gt; 79 characters)
+./sales_notes/models.py:236:80: E501 line too long (97 &gt; 79 characters)
+./sales_notes/models.py:261:80: E501 line too long (92 &gt; 79 characters)
+./sales_notes/models.py:264:80: E501 line too long (103 &gt; 79 characters)
+./sales_notes/models.py:266:80: E501 line too long (97 &gt; 79 characters)
+./sales_notes/models.py:297:80: E501 line too long (112 &gt; 79 characters)
+./sales_notes/models.py:300:80: E501 line too long (108 &gt; 79 characters)
+./sales_notes/models.py:303:80: E501 line too long (115 &gt; 79 characters)
+./sales_notes/models.py:314:80: E501 line too long (117 &gt; 79 characters)
+./sales_notes/models.py:321:80: E501 line too long (90 &gt; 79 characters)
+./sales_notes/models.py:324:80: E501 line too long (100 &gt; 79 characters)
+./sales_notes/models.py:327:80: E501 line too long (105 &gt; 79 characters)
+./sales_notes/models.py:330:80: E501 line too long (111 &gt; 79 characters)
+./sales_notes/models.py:332:80: E501 line too long (117 &gt; 79 characters)
+./sales_notes/models.py:335:80: E501 line too long (112 &gt; 79 characters)
+./sales_notes/models.py:337:80: E501 line too long (116 &gt; 79 characters)
+./sales_notes/models.py:339:80: E501 line too long (100 &gt; 79 characters)
+./sales_notes/models.py:343:80: E501 line too long (96 &gt; 79 characters)
+./sales_notes/models.py:345:80: E501 line too long (95 &gt; 79 characters)
+./sales_notes/models.py:348:80: E501 line too long (87 &gt; 79 characters)
+./sales_notes/models.py:350:80: E501 line too long (81 &gt; 79 characters)
+./sales_notes/models.py:352:80: E501 line too long (106 &gt; 79 characters)
+./sales_notes/models.py:355:80: E501 line too long (110 &gt; 79 characters)
+./sales_notes/models.py:357:80: E501 line too long (112 &gt; 79 characters)
+./sales_notes/models.py:359:80: E501 line too long (98 &gt; 79 characters)
+./sales_notes/models.py:370:80: E501 line too long (82 &gt; 79 characters)
+./sales_notes/models.py:373:80: E501 line too long (94 &gt; 79 characters)
+./sales_notes/models.py:374:80: E501 line too long (83 &gt; 79 characters)
+./sales_notes/models.py:376:80: E501 line too long (114 &gt; 79 characters)
+./sales_notes/models.py:378:80: E501 line too long (97 &gt; 79 characters)
+./sales_notes/models.py:381:80: E501 line too long (84 &gt; 79 characters)
+./sales_notes/models.py:384:80: E501 line too long (117 &gt; 79 characters)
+./sales_notes/models.py:386:80: E501 line too long (114 &gt; 79 characters)
+./sales_notes/models.py:389:80: E501 line too long (86 &gt; 79 characters)
+./sales_notes/models.py:391:80: E501 line too long (117 &gt; 79 characters)
+./sales_notes/models.py:400:80: E501 line too long (118 &gt; 79 characters)
+./sales_notes/models.py:402:80: E501 line too long (104 &gt; 79 characters)
+./sales_notes/models.py:414:80: E501 line too long (96 &gt; 79 characters)
+./sales_notes/models.py:418:80: E501 line too long (94 &gt; 79 characters)
+./sales_notes/models.py:421:80: E501 line too long (98 &gt; 79 characters)
+./sales_notes/models.py:434:80: E501 line too long (91 &gt; 79 characters)
+./sales_notes/models.py:437:80: E501 line too long (115 &gt; 79 characters)
+./sales_notes/models.py:440:80: E501 line too long (106 &gt; 79 characters)
+./sales_notes/models.py:442:80: E501 line too long (86 &gt; 79 characters)
+./sales_notes/models.py:444:80: E501 line too long (108 &gt; 79 characters)
+./sales_notes/models.py:455:80: E501 line too long (109 &gt; 79 characters)
+./sales_notes/models.py:476:80: E501 line too long (80 &gt; 79 characters)
+./sales_notes/models.py:493:80: E501 line too long (97 &gt; 79 characters)
+./sales_notes/models.py:495:80: E501 line too long (83 &gt; 79 characters)
+./sales_notes/models.py:497:80: E501 line too long (114 &gt; 79 characters)
+./sales_notes/permissions.py:24:80: E501 line too long (100 &gt; 79 characters)
+./sales_notes/permissions.py:65:80: E501 line too long (83 &gt; 79 characters)
+./sales_notes/permissions.py:68:80: E501 line too long (97 &gt; 79 characters)
+./sales_notes/permissions.py:85:80: E501 line too long (97 &gt; 79 characters)
+./sales_notes/serializers.py:40:80: E501 line too long (110 &gt; 79 characters)
+./sales_notes/serializers.py:49:80: E501 line too long (84 &gt; 79 characters)
+./sales_notes/serializers.py:51:80: E501 line too long (99 &gt; 79 characters)
+./sales_notes/serializers.py:54:80: E501 line too long (105 &gt; 79 characters)
+./sales_notes/serializers.py:57:80: E501 line too long (82 &gt; 79 characters)
+./sales_notes/serializers.py:58:80: E501 line too long (85 &gt; 79 characters)
+./sales_notes/serializers.py:60:80: E501 line too long (83 &gt; 79 characters)
+./sales_notes/serializers.py:63:80: E501 line too long (85 &gt; 79 characters)
+./sales_notes/serializers.py:116:80: E501 line too long (103 &gt; 79 characters)
+./sales_notes/serializers.py:122:80: E501 line too long (84 &gt; 79 characters)
+./sales_notes/serializers.py:136:80: E501 line too long (104 &gt; 79 characters)
+./sales_notes/serializers.py:138:80: E501 line too long (81 &gt; 79 characters)
+./sales_notes/serializers.py:141:80: E501 line too long (114 &gt; 79 characters)
+./sales_notes/serializers.py:151:80: E501 line too long (106 &gt; 79 characters)
+./sales_notes/serializers.py:156:80: E501 line too long (117 &gt; 79 characters)
+./sales_notes/serializers.py:170:80: E501 line too long (89 &gt; 79 characters)
+./sales_notes/serializers.py:184:80: E501 line too long (83 &gt; 79 characters)
+./sales_notes/serializers.py:201:80: E501 line too long (80 &gt; 79 characters)
+./sales_notes/serializers.py:214:80: E501 line too long (115 &gt; 79 characters)
+./sales_notes/serializers.py:217:80: E501 line too long (111 &gt; 79 characters)
+./sales_notes/serializers.py:220:80: E501 line too long (112 &gt; 79 characters)
+./sales_notes/serializers.py:223:80: E501 line too long (108 &gt; 79 characters)
+./sales_notes/serializers.py:227:80: E501 line too long (99 &gt; 79 characters)
+./sales_notes/serializers.py:258:80: E501 line too long (90 &gt; 79 characters)
+./sales_notes/serializers.py:263:80: E501 line too long (86 &gt; 79 characters)
+./sales_notes/serializers.py:281:80: E501 line too long (115 &gt; 79 characters)
+./sales_notes/serializers.py:290:80: E501 line too long (105 &gt; 79 characters)
+./sales_notes/serializers.py:300:80: E501 line too long (113 &gt; 79 characters)
+./sales_notes/serializers.py:314:80: E501 line too long (88 &gt; 79 characters)
+./sales_notes/serializers.py:319:80: E501 line too long (96 &gt; 79 characters)
+./sales_notes/serializers.py:325:80: E501 line too long (119 &gt; 79 characters)
+./sales_notes/serializers.py:333:80: E501 line too long (92 &gt; 79 characters)
+./sales_notes/serializers.py:344:80: E501 line too long (95 &gt; 79 characters)
+./sales_notes/serializers.py:361:80: E501 line too long (96 &gt; 79 characters)
+./sales_notes/serializers.py:363:80: E501 line too long (85 &gt; 79 characters)
+./sales_notes/serializers.py:368:80: E501 line too long (84 &gt; 79 characters)
+./sales_notes/serializers.py:370:80: E501 line too long (106 &gt; 79 characters)
+./sales_notes/serializers.py:372:80: E501 line too long (99 &gt; 79 characters)
+./sales_notes/serializers.py:383:80: E501 line too long (119 &gt; 79 characters)
+./sales_notes/serializers.py:387:80: E501 line too long (94 &gt; 79 characters)
+./sales_notes/serializers.py:389:80: E501 line too long (92 &gt; 79 characters)
+./sales_notes/serializers.py:439:80: E501 line too long (89 &gt; 79 characters)
+./sales_notes/serializers.py:447:80: E501 line too long (92 &gt; 79 characters)
+./sales_notes/serializers.py:457:80: E501 line too long (84 &gt; 79 characters)
+./sales_notes/serializers.py:484:80: E501 line too long (83 &gt; 79 characters)
+./sales_notes/serializers.py:502:80: E501 line too long (80 &gt; 79 characters)
+./sales_notes/serializers.py:527:80: E501 line too long (81 &gt; 79 characters)
+./sales_notes/serializers.py:530:80: E501 line too long (116 &gt; 79 characters)
+./sales_notes/serializers.py:584:80: E501 line too long (104 &gt; 79 characters)
+./sales_notes/tasks.py:27:80: E501 line too long (112 &gt; 79 characters)
+./sales_notes/tasks.py:33:80: E501 line too long (90 &gt; 79 characters)
+./sales_notes/tasks.py:49:80: E501 line too long (106 &gt; 79 characters)
+./sales_notes/views.py:14:80: E501 line too long (106 &gt; 79 characters)
+./sales_notes/views.py:81:80: E501 line too long (81 &gt; 79 characters)
+./sales_notes/views.py:95:80: E501 line too long (90 &gt; 79 characters)
+./sales_notes/views.py:100:80: E501 line too long (100 &gt; 79 characters)
+./sales_notes/views.py:104:80: E501 line too long (107 &gt; 79 characters)
+./sales_notes/views.py:106:80: E501 line too long (114 &gt; 79 characters)
+./sales_notes/views.py:118:80: E501 line too long (85 &gt; 79 characters)
+./sales_notes/views.py:128:80: E501 line too long (81 &gt; 79 characters)
+./sales_notes/views.py:137:80: E501 line too long (140 &gt; 79 characters)
+./sales_notes/views.py:141:80: E501 line too long (87 &gt; 79 characters)
+./sales_notes/views.py:158:80: E501 line too long (87 &gt; 79 characters)
+./sales_notes/views.py:163:80: E501 line too long (86 &gt; 79 characters)
+./sales_notes/views.py:166:80: E501 line too long (89 &gt; 79 characters)
+./sales_notes/views.py:204:80: E501 line too long (81 &gt; 79 characters)
+./sales_notes/views.py:223:80: E501 line too long (86 &gt; 79 characters)
+./tests/conftest.py:9:1: F401 &#39;django.conf.settings&#39; imported but unused
+./tests/conftest.py:184:27: F811 redefinition of unused &#39;settings&#39; from line 9
+./tests/conftest.py:219:80: E501 line too long (86 &gt; 79 characters)
+./tests/conftest.py:370:80: E501 line too long (101 &gt; 79 characters)
+./tests/conftest.py:373:80: E501 line too long (101 &gt; 79 characters)
+./tests/conftest.py:378:80: E501 line too long (102 &gt; 79 characters)
+./tests/conftest.py:381:80: E501 line too long (85 &gt; 79 characters)
+./tests/conftest.py:391:80: E501 line too long (82 &gt; 79 characters)
+./tests/conftest.py:412:80: E501 line too long (97 &gt; 79 characters)
+./tests/conftest.py:450:80: E501 line too long (81 &gt; 79 characters)
+./tests/conftest.py:457:80: E501 line too long (81 &gt; 79 characters)
+./tests/conftest.py:465:80: E501 line too long (83 &gt; 79 characters)
+./tests/conftest.py:479:36: F811 redefinition of unused &#39;settings&#39; from line 9
+./tests/conftest.py:490:26: F811 redefinition of unused &#39;settings&#39; from line 9
+./tests/integration/test_darp_batch.py:6:1: F401 &#39;django.db.transaction&#39; imported but unused
+./tests/integration/test_darp_batch.py:14:80: E501 line too long (100 &gt; 79 characters)
+./tests/integration/test_darp_batch.py:25:80: E501 line too long (120 &gt; 79 characters)
+./tests/integration/test_darp_batch.py:42:80: E501 line too long (80 &gt; 79 characters)
+./tests/integration/test_darp_batch.py:61:80: E501 line too long (108 &gt; 79 characters)
+./tests/integration/test_darp_batch.py:64:80: E501 line too long (99 &gt; 79 characters)
+./tests/integration/test_darp_batch.py:79:80: E501 line too long (87 &gt; 79 characters)
+./tests/integration/test_darp_batch.py:96:80: E501 line too long (84 &gt; 79 characters)
+./tests/integration/test_darp_batch.py:97:80: E501 line too long (117 &gt; 79 characters)
+./tests/integration/test_darp_batch.py:99:80: E501 line too long (132 &gt; 79 characters)
+./tests/integration/test_darp_batch.py:107:80: E501 line too long (81 &gt; 79 characters)
+./tests/integration/test_darp_batch.py:109:80: E501 line too long (85 &gt; 79 characters)
+./tests/integration/test_darp_batch.py:110:80: E501 line too long (92 &gt; 79 characters)
+./tests/integration/test_darp_batch.py:126:80: E501 line too long (84 &gt; 79 characters)
+./tests/integration/test_darp_batch.py:127:80: E501 line too long (132 &gt; 79 characters)
+./tests/integration/test_darp_batch.py:128:80: E501 line too long (127 &gt; 79 characters)
+./tests/integration/test_darp_batch.py:136:80: E501 line too long (114 &gt; 79 characters)
+./tests/integration/test_darp_batch.py:137:80: E501 line too long (123 &gt; 79 characters)
+./tests/integration/test_sales_notes_flow.py:13:80: E501 line too long (91 &gt; 79 characters)
+./tests/integration/test_sales_notes_flow.py:19:80: E501 line too long (93 &gt; 79 characters)
+./tests/integration/test_sales_notes_flow.py:40:80: E501 line too long (96 &gt; 79 characters)
+./tests/integration/test_sales_notes_flow.py:56:80: E501 line too long (105 &gt; 79 characters)
+./tests/integration/test_sales_notes_flow.py:61:80: E501 line too long (101 &gt; 79 characters)
+./tests/integration/test_sales_notes_flow.py:66:80: E501 line too long (91 &gt; 79 characters)
+./tests/integration/test_sales_notes_flow.py:112:80: E501 line too long (99 &gt; 79 characters)
+./tests/integration/test_sales_notes_flow.py:115:80: E501 line too long (102 &gt; 79 characters)
+./tests/integration/test_sales_notes_flow.py:120:80: E501 line too long (81 &gt; 79 characters)
+./tests/integration/test_sales_notes_flow.py:126:80: E501 line too long (88 &gt; 79 characters)
+./tests/integration/test_sales_notes_flow.py:131:80: E501 line too long (102 &gt; 79 characters)
+./tests/integration/test_sales_notes_flow.py:132:80: E501 line too long (91 &gt; 79 characters)
+./tests/integration/test_sales_notes_flow.py:136:80: E501 line too long (86 &gt; 79 characters)
+./tests/integration/test_sales_notes_flow.py:163:80: E501 line too long (96 &gt; 79 characters)
+./tests/integration/test_sales_notes_flow.py:173:80: E501 line too long (92 &gt; 79 characters)
+./tests/integration/test_sales_notes_flow.py:175:80: E501 line too long (84 &gt; 79 characters)
+./tests/security/test_owasp_api_security.py:16:80: E501 line too long (87 &gt; 79 characters)
+./tests/security/test_owasp_api_security.py:23:80: E501 line too long (93 &gt; 79 characters)
+./tests/security/test_owasp_api_security.py:33:13: F841 local variable &#39;response&#39; is assigned to but never used
+./tests/security/test_owasp_api_security.py:54:54: E712 comparison to False should be &#39;if cond is False:&#39; or &#39;if not cond:&#39;
+./tests/security/test_owasp_api_security.py:55:50: E712 comparison to False should be &#39;if cond is False:&#39; or &#39;if not cond:&#39;
+./tests/security/test_owasp_api_security.py:71:80: E501 line too long (114 &gt; 79 characters)
+./tests/security/test_owasp_api_security.py:81:80: E501 line too long (89 &gt; 79 characters)
+./tests/security/test_owasp_api_security.py:85:80: E501 line too long (107 &gt; 79 characters)
+./tests/security/test_owasp_api_security.py:99:80: E501 line too long (120 &gt; 79 characters)
+./tests/security/test_owasp_api_security.py:107:80: E501 line too long (114 &gt; 79 characters)
+./tests/security/test_owasp_api_security.py:130:80: E501 line too long (82 &gt; 79 characters)
+./tests/security/test_owasp_api_security.py:134:80: E501 line too long (117 &gt; 79 characters)
+./tests/security/test_owasp_api_security.py:148:80: E501 line too long (80 &gt; 79 characters)
+./tests/security/test_owasp_api_security.py:185:9: F841 local variable &#39;client&#39; is assigned to but never used
+./tests/security/test_owasp_api_security.py:197:80: E501 line too long (103 &gt; 79 characters)
+./tests/security/test_owasp_api_security.py:203:80: E501 line too long (102 &gt; 79 characters)
+./tests/security/test_owasp_api_security.py:209:80: E501 line too long (91 &gt; 79 characters)
+./tests/security/test_owasp_api_security.py:214:13: F841 local variable &#39;response&#39; is assigned to but never used
+./tests/security/test_owasp_api_security.py:214:80: E501 line too long (106 &gt; 79 characters)
+./tests/unit/test_audit.py:23:80: E501 line too long (116 &gt; 79 characters)
+./tests/unit/test_audit.py:58:80: E501 line too long (109 &gt; 79 characters)
+./tests/unit/test_audit.py:60:80: E501 line too long (108 &gt; 79 characters)
+./tests/unit/test_audit.py:109:80: E501 line too long (93 &gt; 79 characters)
+./tests/unit/test_audit.py:125:80: E501 line too long (103 &gt; 79 characters)
+./tests/unit/test_audit.py:129:80: E501 line too long (90 &gt; 79 characters)
+./tests/unit/test_audit.py:131:80: E501 line too long (80 &gt; 79 characters)
+./tests/unit/test_audit.py:137:80: E501 line too long (84 &gt; 79 characters)
+./tests/unit/test_audit.py:170:80: E501 line too long (94 &gt; 79 characters)
+./tests/unit/test_audit.py:175:80: E501 line too long (89 &gt; 79 characters)
+./tests/unit/test_audit.py:182:80: E501 line too long (90 &gt; 79 characters)
+./tests/unit/test_audit.py:184:80: E501 line too long (80 &gt; 79 characters)
+./tests/unit/test_audit.py:189:80: E501 line too long (101 &gt; 79 characters)
+./tests/unit/test_audit.py:191:80: E501 line too long (104 &gt; 79 characters)
+./tests/unit/test_audit.py:216:80: E501 line too long (115 &gt; 79 characters)
+./tests/unit/test_audit.py:221:80: E501 line too long (119 &gt; 79 characters)
+./tests/unit/test_audit.py:241:80: E501 line too long (97 &gt; 79 characters)
+./tests/unit/test_audit.py:261:80: E501 line too long (112 &gt; 79 characters)
+./tests/unit/test_audit.py:267:80: E501 line too long (91 &gt; 79 characters)
+./tests/unit/test_audit.py:273:80: E501 line too long (108 &gt; 79 characters)
+./tests/unit/test_audit.py:275:80: E501 line too long (106 &gt; 79 characters)
+./tests/unit/test_audit.py:280:80: E501 line too long (88 &gt; 79 characters)
+./tests/unit/test_authentication.py:47:80: E501 line too long (81 &gt; 79 characters)
+./tests/unit/test_authentication.py:65:80: E501 line too long (81 &gt; 79 characters)
+./tests/unit/test_authentication.py:84:80: E501 line too long (84 &gt; 79 characters)
+./tests/unit/test_authentication.py:91:80: E501 line too long (86 &gt; 79 characters)
+./tests/unit/test_exception_handler.py:78:80: E501 line too long (91 &gt; 79 characters)
+./tests/unit/test_models.py:3:1: F401 &#39;django.core.exceptions.ValidationError&#39; imported but unused
+./tests/unit/test_models.py:5:1: F401 &#39;sales_notes.models.Buque&#39; imported but unused
+./tests/unit/test_models.py:12:80: E501 line too long (99 &gt; 79 characters)
+./tests/unit/test_models.py:14:32: E712 comparison to False should be &#39;if cond is False:&#39; or &#39;if not cond:&#39;
+./tests/unit/test_models.py:18:80: E501 line too long (91 &gt; 79 characters)
+./tests/unit/test_models.py:21:80: E501 line too long (95 &gt; 79 characters)
+./tests/unit/test_permissions.py:30:80: E501 line too long (97 &gt; 79 characters)
+./tests/unit/test_permissions.py:34:80: E501 line too long (87 &gt; 79 characters)
+./tests/unit/test_permissions.py:48:80: E501 line too long (90 &gt; 79 characters)
+./tests/unit/test_permissions.py:58:80: E501 line too long (90 &gt; 79 characters)
+./tests/unit/test_permissions.py:78:80: E501 line too long (82 &gt; 79 characters)
+./tests/unit/test_permissions.py:88:80: E501 line too long (93 &gt; 79 characters)
+./tests/unit/test_sales_notes_permissions.py:2:1: F401 &#39;django.contrib.auth.models.Group&#39; imported but unused
+./tests/unit/test_sales_notes_permissions.py:6:80: E501 line too long (92 &gt; 79 characters)
+./tests/unit/test_sales_notes_permissions.py:116:80: E501 line too long (99 &gt; 79 characters)
+./tests/unit/test_sales_notes_permissions.py:125:80: E501 line too long (99 &gt; 79 characters)
+./tests/unit/test_sales_notes_permissions.py:132:80: E501 line too long (81 &gt; 79 characters)
+./tests/unit/test_sales_notes_permissions.py:134:80: E501 line too long (99 &gt; 79 characters)
+./tests/unit/test_sales_notes_permissions.py:141:80: E501 line too long (86 &gt; 79 characters)
+./tests/unit/test_sales_notes_permissions.py:143:80: E501 line too long (99 &gt; 79 characters)
+./tests/unit/test_serializers.py:257:80: E501 line too long (106 &gt; 79 characters)
+./tests/unit/test_serializers.py:299:80: E501 line too long (120 &gt; 79 characters)
+./tests/unit/test_serializers.py:320:80: E501 line too long (116 &gt; 79 characters)
+./tests/unit/test_serializers.py:418:80: E501 line too long (91 &gt; 79 characters)
+./tests/unit/test_serializers.py:430:80: E501 line too long (82 &gt; 79 characters)
+./tests/unit/test_serializers.py:446:80: E501 line too long (82 &gt; 79 characters)
+./tests/unit/test_serializers.py:452:80: E501 line too long (99 &gt; 79 characters)
+./tests/unit/test_serializers.py:471:80: E501 line too long (99 &gt; 79 characters)
+./tests/unit/test_serializers.py:472:80: E501 line too long (94 &gt; 79 characters)
+./tests/unit/test_serializers.py:473:80: E501 line too long (94 &gt; 79 characters)
+./tests/unit/test_serializers.py:490:80: E501 line too long (104 &gt; 79 characters)
+./tests/unit/test_serializers.py:508:80: E501 line too long (90 &gt; 79 characters)
+./tests/unit/test_serializers.py:538:80: E501 line too long (103 &gt; 79 characters)
+./tests/unit/test_serializers.py:571:80: E501 line too long (105 &gt; 79 characters)
+./tests/unit/test_serializers.py:573:80: E501 line too long (82 &gt; 79 characters)
+./tests/unit/test_tasks.py:19:80: E501 line too long (94 &gt; 79 characters)
+./tests/unit/test_tasks.py:36:80: E501 line too long (107 &gt; 79 characters)
+./tests/unit/test_views.py:19:80: E501 line too long (109 &gt; 79 characters)
+./tests/unit/test_views.py:33:80: E501 line too long (94 &gt; 79 characters)
+./tests/unit/test_views.py:45:80: E501 line too long (106 &gt; 79 characters)
+./tests/unit/test_views.py:62:80: E501 line too long (115 &gt; 79 characters)
+./tests/unit/test_views.py:88:80: E501 line too long (101 &gt; 79 characters)
+./tests/unit/test_views.py:98:80: E501 line too long (81 &gt; 79 characters)
+./tests/unit/test_views.py:105:80: E501 line too long (87 &gt; 79 characters)
+./tests/unit/test_views.py:106:80: E501 line too long (82 &gt; 79 characters)
+./tests/unit/test_views.py:110:80: E501 line too long (95 &gt; 79 characters)
+./tests/unit/test_views.py:111:80: E501 line too long (95 &gt; 79 characters)
+./validate_vcpe_schema.py:12:1: F401 &#39;jsonschema&#39; imported but unused
+./validate_vcpe_schema.py:13:1: F401 &#39;jsonschema.validate&#39; imported but unused
+./validate_vcpe_schema.py:32:80: E501 line too long (82 &gt; 79 characters)
+./validate_vcpe_schema.py:84:80: E501 line too long (90 &gt; 79 characters)
+./validate_vcpe_schema.py:85:80: E501 line too long (87 &gt; 79 characters)
+./validate_vcpe_schema.py:86:80: E501 line too long (80 &gt; 79 characters)
+./validate_vcpe_schema.py:90:80: E501 line too long (97 &gt; 79 characters)
+./validate_vcpe_schema.py:98:80: E501 line too long (111 &gt; 79 characters)
+./validate_vcpe_schema.py:104:80: E501 line too long (111 &gt; 79 characters)
+./validate_vcpe_schema.py:110:80: E501 line too long (114 &gt; 79 characters)
+./validate_vcpe_schema.py:142:80: E501 line too long (80 &gt; 79 characters)
+./validate_vcpe_schema.py:152:80: E501 line too long (104 &gt; 79 characters)
+./validate_vcpe_schema.py:189:80: E501 line too long (94 &gt; 79 characters)
+./validate_vcpe_schema.py:205:80: E501 line too long (120 &gt; 79 characters)
+./validate_vcpe_schema.py:224:80: E501 line too long (110 &gt; 79 characters)
+./validate_vcpe_schema.py:241:80: E501 line too long (102 &gt; 79 characters)
+./validate_vcpe_schema.py:311:11: F541 f-string is missing placeholders
+./validate_vcpe_schema.py:312:11: F541 f-string is missing placeholders
+./vcpe_api/settings.py:3:80: E501 line too long (84 &gt; 79 characters)
+./vcpe_api/settings.py:33:80: E501 line too long (120 &gt; 79 characters)
+./vcpe_api/settings.py:76:80: E501 line too long (81 &gt; 79 characters)
+./vcpe_api/settings.py:139:80: E501 line too long (91 &gt; 79 characters)
+./vcpe_api/settings.py:142:80: E501 line too long (81 &gt; 79 characters)
+./vcpe_api/settings.py:148:80: E501 line too long (82 &gt; 79 characters)
+./vcpe_api/settings.py:151:80: E501 line too long (83 &gt; 79 characters)
+./vcpe_api/settings.py:187:80: E501 line too long (81 &gt; 79 characters)
+./vcpe_api/settings.py:190:80: E501 line too long (81 &gt; 79 characters)
+./vcpe_api/settings.py:200:80: E501 line too long (97 &gt; 79 characters)
+./vcpe_api/settings.py:201:80: E501 line too long (92 &gt; 79 characters)
+./vcpe_api/settings.py:217:80: E501 line too long (81 &gt; 79 characters)
+./vcpe_api/settings.py:247:80: E501 line too long (88 &gt; 79 characters)
+./vcpe_api/settings.py:285:80: E501 line too long (93 &gt; 79 characters)
+./vcpe_api/settings_production.py:89:80: E501 line too long (86 &gt; 79 characters)
+./vcpe_api/settings_production.py:92:80: E501 line too long (82 &gt; 79 characters)
+./vcpe_api/settings_production.py:224:80: E501 line too long (84 &gt; 79 characters)
+./vcpe_api/urls.py:7:80: E501 line too long (98 &gt; 79 characters)
+./vcpe_api/urls.py:19:80: E501 line too long (82 &gt; 79 characters)
+./vcpe_api/urls.py:23:80: E501 line too long (92 &gt; 79 characters)
+./vcpe_api/urls.py:24:80: E501 line too long (86 &gt; 79 characters)
+767   E501 line too long (80 &gt; 79 characters)
+3     E712 comparison to False should be &#39;if cond is False:&#39; or &#39;if not cond:&#39;
+1     E722 do not use bare &#39;except&#39;
+9     F401 &#39;audit.signals&#39; imported but unused
+4     F541 f-string is missing placeholders
+3     F811 redefinition of unused &#39;settings&#39; from line 9
+3     F841 local variable &#39;response&#39; is assigned to but never used
+790
+
+</code></pre>
+<p><strong>Resultat:</strong> ✅ Completat correctament</p>
+<hr />
+<p><em>Report generat automàticament per run_all_tests_with_report.sh</em> <em>Data: 15/01/2026 13:22:02</em> <em>TFM Ciberseguretat i Privadesa - ICATMAR</em></p>
+</body>
+</html>
