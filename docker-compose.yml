@@ -152,15 +152,6 @@ volumes:
   static_volume:
   media_volume:
 
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
-    healthcheck:
-      test: [ "CMD-SHELL", "celery -A vcpe_api inspect ping" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
 networks:
   vcpe_network:
