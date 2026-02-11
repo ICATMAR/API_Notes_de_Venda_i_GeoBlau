@@ -6,37 +6,31 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-      # 1. Connectar-se al servidor via SSH i executar comandes
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.HOST_IP }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            # Aturar el script si qualsevol comanda falla
-            set -e
+      - name: Deploy to Docker
+        run: |
+          # Aturar el script si qualsevol comanda falla
+          set -e
 
-            # Anar al directori del projecte
-            cd /opt/vcpe_api
+          # Anar al directori del projecte
+          cd /opt/vcpe_api
 
-            echo "📥 1. Baixant últims canvis del codi..."
-            git pull origin main
+          echo "📥 1. Baixant últims canvis del codi..."
+          git pull origin main
 
-            echo "🐳 2. Reconstruint i reiniciant contenidors..."
-            # --build: Assegura que si hem canviat requirements.txt o Dockerfile es regeneri la imatge
-            # -d: Executa en segon pla (detached)
-            docker compose up -d --build
+          echo "🐳 2. Reconstruint i reiniciant contenidors..."
+          # --build: Assegura que si hem canviat requirements.txt o Dockerfile es regeneri la imatge
+          # -d: Executa en segon pla (detached)
+          sudo docker compose up -d --build
 
-            echo "🧹 3. Netejant imatges antigues..."
-            docker image prune -f
+          echo "🧹 3. Netejant imatges antigues..."
+          sudo docker image prune -f
 
-            echo "🛠️ 4. Executant tasques de manteniment Django..."
-            # Recollir fitxers estàtics (perquè Nginx els pugui servir)
-            docker compose exec api python manage.py collectstatic --noinput
-            # Aplicar migracions de base de dades pendents
-            docker compose exec api python manage.py migrate --noinput
+          echo "🛠️ 4. Executant tasques de manteniment Django..."
+          # Recollir fitxers estàtics (perquè Nginx els pugui servir)
+          sudo docker compose exec -T api python manage.py collectstatic --noinput
+          # Aplicar migracions de base de dades pendents
+          sudo docker compose exec -T api python manage.py migrate --noinput
 
-            echo "✅ Desplegament completat amb èxit!"
+          echo "✅ Desplegament completat amb èxit!"
