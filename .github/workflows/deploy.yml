@@ -22,15 +22,15 @@ jobs:
           echo "🐳 2. Reconstruint i reiniciant contenidors..."
           # --build: Assegura que si hem canviat requirements.txt o Dockerfile es regeneri la imatge
           # -d: Executa en segon pla (detached)
-          sudo docker compose up -d --build
+          docker compose up -d --build
 
           echo "🧹 3. Netejant imatges antigues..."
-          sudo docker image prune -f
+          docker image prune -f
 
           echo "🛠️ 4. Executant tasques de manteniment Django..."
           # Recollir fitxers estàtics (perquè Nginx els pugui servir)
-          sudo docker compose exec -T api python manage.py collectstatic --noinput
+          docker compose exec -T api python manage.py collectstatic --noinput
           # Aplicar migracions de base de dades pendents
-          sudo docker compose exec -T api python manage.py migrate --noinput
+          docker compose exec -T api python manage.py migrate --noinput
 
           echo "✅ Desplegament completat amb èxit!"
