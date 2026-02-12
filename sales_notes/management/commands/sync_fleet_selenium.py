@@ -240,6 +240,9 @@ class Command(BaseCommand):
             df = df.replace({pd.NaT: None})
             df = df.where(pd.notnull(df), None)
 
+            # Assegurar que la connexió a la BBDD està viva després de l'espera de Selenium
+            connection.close_if_unusable_or_obsolete()
+
             with connection.cursor() as cursor:
                 cursor.execute('SELECT "Code", "EventStartDate", "EventEndDate" FROM public.vessel')
                 existing_data = cursor.fetchall()
@@ -323,6 +326,10 @@ class Command(BaseCommand):
 
     def load_to_staging(self, df):
         logger.info("Inserint a vessel_auto_download...")
+
+        # Assegurar connexió viva abans d'inserir
+        connection.close_if_unusable_or_obsolete()
+
         with connection.cursor() as cursor:
             # Ampliar columna BasePortName a 50 caràcters si cal
             try:

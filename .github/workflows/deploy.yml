@@ -28,6 +28,9 @@ jobs:
           docker image prune -f
 
           echo "🛠️ 4. Executant tasques de manteniment Django..."
+          # Arreglar permisos del volum static (necessari perquè el contenidor corre com usuari 1001)
+          docker run --rm -v vcpe_api_static_volume:/data alpine chown -R 1001:1001 /data
+
           # Recollir fitxers estàtics (perquè Nginx els pugui servir)
           docker compose exec -T api python manage.py collectstatic --noinput
           # Aplicar migracions de base de dades pendents
