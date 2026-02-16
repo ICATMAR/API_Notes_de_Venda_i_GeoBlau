@@ -104,7 +104,7 @@ class EnvioViewSet(
 
                 # --- NOU: Guardar còpia JSON en disc ---
                 try:
-                    backup_dir = "/app/data_backups/envios_json"
+                    backup_dir = "/app/fitxers_enviaments/vcpe_json"
                     os.makedirs(backup_dir, exist_ok=True)
 
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
