@@ -1,4 +1,7 @@
+import json
 import logging
+import os
+from datetime import datetime
 
 from django.db import transaction
 from django.utils.decorators import method_decorator
@@ -99,6 +102,23 @@ class EnvioViewSet(
                 # Això assegura que tenim el JSON original encara que no tingui vendes individuals
                 RawSalesNote.objects.create(envio=envio, raw_data=request.data)
 
+                # --- NOU: Guardar còpia JSON en disc ---
+                try:
+                    backup_dir = "/app/data_backups/envios_json"
+                    os.makedirs(backup_dir, exist_ok=True)
+
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    filename = f"envio_{envio.num_envio}_{timestamp}.json"
+                    filepath = os.path.join(backup_dir, filename)
+
+                    with open(filepath, "w", encoding="utf-8") as f:
+                        json.dump(request.data, f, ensure_ascii=False, indent=4)
+
+                    logger.info(f"Backup JSON d'enviament guardat a: {filepath}")
+                except Exception as e:
+                    # No volem que falli la petició si falla el backup en disc, només loguejar-ho
+                    logger.error(f"❌ Error guardant backup JSON en disc: {e}")
+
                 logger.info(f"Envio {envio.num_envio} created successfully by {request.user}")
                 headers = self.get_success_headers(serializer.data)
                 return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
@@ -165,4 +185,5 @@ class EnvioViewSet(
         logger.info(f"User {request.user} checking status of envio {envio.num_envio}")
 
         serializer = self.get_serializer(envio)
+        return Response(serializer.data)
         return Response(serializer.data)

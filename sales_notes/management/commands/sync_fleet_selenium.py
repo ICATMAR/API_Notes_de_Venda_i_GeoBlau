@@ -142,7 +142,7 @@ class Command(BaseCommand):
 
             # Enviar mail d'èxit (Test)
             send_email_robust(
-                f"✅ Èxit Sync Fleet Selenium ({datetime.now().strftime('%Y-%m-%d')})",
+                f"Èxit Sync UE Fleet Rregister diari ({datetime.now().strftime('%Y-%m-%d')}) ✅",
                 f"Procés completat correctament.\nRegistres nous: "
                 f"{len(df_new) if 'df_new' in locals() and df_new is not None else 0}",
                 ["arampuig.work@gmail.com"],
