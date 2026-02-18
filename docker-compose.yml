@@ -26,7 +26,7 @@ services:
     container_name: vcpe_postgres
     environment:
       POSTGRES_DB: ${DB_NAME:-api_segura_bbdd}
-      POSTGRES_USER: ${DB_USER:-vcpe_user}
+      POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme_postgres}
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:

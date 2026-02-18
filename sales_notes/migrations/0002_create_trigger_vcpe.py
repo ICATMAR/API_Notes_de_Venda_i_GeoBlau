@@ -132,9 +132,12 @@ class Migration(migrations.Migration):
                             )
                             LOOP
                                 v_buque_code := venta_element -> 'DatosUnidadProductiva' ->> 'CodigoBuque';
-                                -- Acceptar NIFPersona si CodigoBuque és NULL (Polimorfisme)
-                                IF v_buque_code IS NULL THEN
+                                -- Acceptar NIFPersona si CodigoBuque és NULL o Buit (Polimorfisme)
+                                IF v_buque_code IS NULL OR v_buque_code = '' THEN
                                     v_buque_code := venta_element -> 'DatosUnidadProductiva' ->> 'NIFPersona';
+                                    IF v_buque_code IS NOT NULL AND v_buque_code != '' THEN
+                                        RAISE WARNING '[DEBUG] Usant NIFPersona com a identificador: %', v_buque_code;
+                                    END IF;
                                 END IF;
 
                                 v_puerto_al5 := venta_element -> 'DatosUnidadProductiva' ->> 'PuertoAL5';
