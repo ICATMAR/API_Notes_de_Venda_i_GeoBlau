@@ -1,5 +1,5 @@
 """
-Views per al sistema d'autenticació TFM
+Views per al sistema d'autenticació
 Implementa autenticació JWT amb auditoria completa
 """
 

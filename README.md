@@ -401,7 +401,7 @@ Aquest projecte és propietat d'ICATMAR. Tots els drets reservats.
 
 ## 📞 Contacte
 
-- **Projecte**: TFM Ciberseguretat i Privadesa
+- **Projecte**: API d'ingesta de dades d'ICATMAR
 - **Institució**: ICATMAR
 - **Seguretat**: security@icatmar.cat
 - **Web**: https://icatmar.cat

@@ -1,4 +1,4 @@
-# /home/apuig/Documentos/TFM/API_dev/sales_notes/migrations/0002_create_trigger_vcpe.py
+# /API_dev/sales_notes/migrations/0002_create_trigger_vcpe.py
 
 from django.db import migrations
 

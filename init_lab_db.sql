@@ -1,6 +1,6 @@
 -- init_db.sql
 -- Script d'inicialització de la base de dades PostgreSQL/PostGIS
--- per l'API de notes de venda VCPE - TFM Ciberseguretat
+-- per l'API de notes de venda VCPE ¡
 
 -- Crear extensions necessàries
 CREATE EXTENSION IF NOT EXISTS postgis;
@@ -12,7 +12,7 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;  -- Per cerca de text
 ALTER DATABASE vcpe_db SET timezone TO 'Europe/Madrid';
 
 -- Comentaris de la base de dades
-COMMENT ON DATABASE vcpe_db IS 'Base de dades pel TFM Ciberseguretat - API Segura Notes de Venda ICATMAR';
+COMMENT ON DATABASE vcpe_db IS 'Base de dades per API Segura Notes de Venda ICATMAR';
 
 -- Configurar permisos per l'usuari vcpe_user
 GRANT CONNECT ON DATABASE vcpe_db TO vcpe_user;

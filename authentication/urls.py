@@ -1,5 +1,5 @@
 """
-URLs per al sistema d'autenticació TFM
+URLs per al sistema d'autenticació
 """
 
 from django.urls import path

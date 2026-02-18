@@ -29,8 +29,8 @@ echo -e "${CYAN}"
 cat << "EOF"
 ╔═══════════════════════════════════════════════════════════════╗
 ║                                                               ║
-║          VCPE API - Suite Completa de Tests                  ║
-║          TFM Ciberseguretat i Privadesa - ICATMAR            ║
+║          VCPE API - Suite Completa de Tests                   ║
+║                       ICATMAR                                 ║
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝
 EOF
@@ -41,7 +41,7 @@ cat > "$CONSOLIDATED_REPORT" << EOF
 # 📋 Report Consolidat de Tests - VCPE API
 
 **Data d'execució:** $(date '+%d/%m/%Y %H:%M:%S')
-**Projecte:** TFM Ciberseguretat i Privadesa
+**Projecte:** API d'ingesta de dades d'ICATMAR
 **Institució:** ICATMAR
 **Autor:** Aram Puig Capdevila
 
@@ -282,7 +282,7 @@ cat >> "$CONSOLIDATED_REPORT" << EOF
 
 *Report generat automàticament per run_all_tests_with_report.sh*
 *Data: $(date '+%d/%m/%Y %H:%M:%S')*
-*TFM Ciberseguretat i Privadesa - ICATMAR*
+*API d'ingesta de dades d'ICATMAR*
 
 EOF
 

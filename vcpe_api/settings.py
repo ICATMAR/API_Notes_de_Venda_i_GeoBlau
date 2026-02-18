@@ -124,9 +124,8 @@ CACHES = {
     }
 }
 
-# Password hashing amb Argon2 (més segur que PBKDF2)
+# Password hashing amb PBKDF2 (Estàndard Django)
 PASSWORD_HASHERS = [
-    "django.contrib.auth.hashers.Argon2PasswordHasher",
     "django.contrib.auth.hashers.PBKDF2PasswordHasher",
     "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
     # Afegim hashers antics per compatibilitat amb la BD legacy
