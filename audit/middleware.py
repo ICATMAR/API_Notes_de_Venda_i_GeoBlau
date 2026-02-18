@@ -3,9 +3,12 @@ Middleware per auditoria automàtica de peticions
 """
 
 import hashlib
+import json
 import logging
 import time
 
+import jwt
+from django.contrib.auth import get_user_model
 from django.http.request import RawPostDataException
 from django.utils import timezone
 from django.utils.deprecation import MiddlewareMixin
@@ -14,6 +17,7 @@ from audit.models import SecurityEvent
 from authentication.models import APIAccessLog
 
 logger = logging.getLogger("audit")
+User = get_user_model()
 
 
 class AuditMiddleware(MiddlewareMixin):
@@ -36,7 +40,16 @@ class AuditMiddleware(MiddlewareMixin):
             response_time = 0
 
         # Obtenir informació de la petició
-        user = request.user if request.user.is_authenticated else None
+        user = request.user if hasattr(request, "user") and request.user.is_authenticated else None
+
+        # Si no tenim usuari, intentem extreure'l de la capçalera (per endpoints públics amb token)
+        if not user:
+            user = self._try_extract_user_from_request_header(request)
+
+        # Si encara no tenim usuari i és un 200 OK, intentem extreure'l de la resposta (Login)
+        if not user and response.status_code == 200:
+            user = self._try_extract_user_from_response(response)
+
         ip_address = self.get_client_ip(request)
         user_agent = request.META.get("HTTP_USER_AGENT", "")[:500]
         request_id = request.META.get("HTTP_X_REQUEST_ID", "")
@@ -100,6 +113,58 @@ class AuditMiddleware(MiddlewareMixin):
             logger.error(f"Error registrant excepció: {str(e)}", exc_info=True)
 
         return None
+
+    def _try_extract_user_from_request_header(self, request):
+        """Intenta obtenir l'usuari del header Authorization si existeix"""
+        try:
+            auth_header = request.META.get("HTTP_AUTHORIZATION", "")
+            if auth_header.startswith("Bearer "):
+                token = auth_header.split(" ")[1]
+                return self._get_user_from_jwt(token)
+        except Exception as e:
+            logger.debug(f"Error extracting user from header: {e}")
+        return None
+
+    def _try_extract_user_from_response(self, response):
+        """
+        Intenta extreure l'usuari de les dades de resposta (JSON).
+        Útil per endpoints de Login on l'usuari s'autentica en aquell moment.
+        """
+        try:
+            # DRF sol guardar les dades a response.data
+            data = getattr(response, "data", None)
+
+            if not data and hasattr(response, "content"):
+                try:
+                    data = json.loads(response.content)
+                except Exception:
+                    return None
+
+            if not isinstance(data, dict):
+                return None
+
+            # 1. Cas LoginView personalitzat (retorna objecte 'user')
+            if "user" in data and isinstance(data["user"], dict) and "id" in data["user"]:
+                return User.objects.filter(id=data["user"]["id"]).first()
+
+            # 2. Cas Standard SimpleJWT (retorna 'access' token)
+            if "access" in data:
+                return self._get_user_from_jwt(data["access"])
+
+        except Exception as e:
+            logger.debug(f"No s'ha pogut extreure usuari de la resposta: {e}")
+
+        return None
+
+    def _get_user_from_jwt(self, token):
+        """Descodifica el token JWT per trobar l'ID d'usuari sense validar signatura"""
+        try:
+            # Descodifiquem sense verificar signatura per rapidesa
+            payload = jwt.decode(token, options={"verify_signature": False})
+            user_id = payload.get("user_id")
+            return User.objects.filter(id=user_id).first()
+        except Exception:
+            return None
 
     def get_client_ip(self, request):
         """Obtenir la IP real del client (considerant proxies)"""

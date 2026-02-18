@@ -37,7 +37,7 @@ services:
     networks:
       - vcpe_network
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER:-vcpe_user} -d ${DB_NAME:-api_segura_bbdd}" ]
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
       interval: 10s
       timeout: 5s
       retries: 5

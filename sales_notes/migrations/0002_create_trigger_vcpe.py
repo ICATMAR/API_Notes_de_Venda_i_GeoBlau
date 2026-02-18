@@ -329,7 +329,8 @@ class Migration(migrations.Migration):
 
                 -- Actualitzar l'estat de l'enviament pare a 'procesado_en_db = True'
                 UPDATE public.envio_staging
-                SET procesado_en_db = true
+                SET procesado_en_db = true,
+                    fecha_procesado_en_db = NOW()
                 WHERE id = NEW.envio_id;
 
                 RETURN NEW;
