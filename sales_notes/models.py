@@ -31,7 +31,9 @@ class Envio(TimeStampedModel):
 
     # IP i usuari per auditoria
     ip_origen = models.GenericIPAddressField(null=True, blank=True)
-    usuario_envio = models.ForeignKey("authentication.User", on_delete=models.PROTECT, related_name="envios")
+    usuario_envio = models.ForeignKey(
+        "authentication.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="envios"
+    )
 
     # Estat del processament que es farà a la base de dades (fora de l'API)
     procesado_en_db = models.BooleanField(

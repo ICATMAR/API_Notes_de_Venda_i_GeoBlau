@@ -14,9 +14,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import AuthenticationAuditLog, AuthenticationToken, User
+from .models import User
 from .serializers import (
-    AuthenticationAuditLogSerializer,
     LoginSerializer,
     LogoutSerializer,
     PasswordChangeSerializer,
@@ -81,16 +80,6 @@ class UserRegistrationView(generics.CreateAPIView):
         """
         user = serializer.save()
 
-        # Log account creation event
-        AuthenticationAuditLog.log_event(
-            event_type="ACCOUNT_CREATED",
-            user=user,
-            ip_address=get_client_ip(self.request),
-            user_agent=get_user_agent(self.request),
-            severity="INFO",
-            details={"username": user.username, "email": user.email, "organization": user.organization},
-        )
-
         logger.info(f"New user registered: {user.username}")
 
 
@@ -140,26 +129,12 @@ class LoginView(APIView):
         password = serializer.validated_data["password"]
 
         ip_address = get_client_ip(request)
-        user_agent = get_user_agent(request)
 
         try:
             user = User.objects.get(username=username)
 
             # Check if account is locked
             if user.is_account_locked():
-                AuthenticationAuditLog.log_event(
-                    event_type="LOGIN_BLOCKED",
-                    user=user,
-                    username_attempted=username,
-                    ip_address=ip_address,
-                    user_agent=user_agent,
-                    severity="WARNING",
-                    details={
-                        "reason": user.lock_reason,
-                        "locked_until": user.locked_until.isoformat() if user.locked_until else None,
-                    },
-                )
-
                 logger.warning(f"Login blocked for user {username} - account locked")
 
                 return Response(
@@ -169,16 +144,6 @@ class LoginView(APIView):
 
             # Check if account is active
             if not user.is_active:
-                AuthenticationAuditLog.log_event(
-                    event_type="LOGIN_FAILED",
-                    user=user,
-                    username_attempted=username,
-                    ip_address=ip_address,
-                    user_agent=user_agent,
-                    severity="WARNING",
-                    details={"reason": "Account inactive"},
-                )
-
                 logger.warning(f"Login failed for user {username} - account inactive")
 
                 return Response(
@@ -192,16 +157,6 @@ class LoginView(APIView):
             # Verify password
             if not user.check_password(password):
                 user.record_failed_login()
-
-                AuthenticationAuditLog.log_event(
-                    event_type="LOGIN_FAILED",
-                    user=user,
-                    username_attempted=username,
-                    ip_address=ip_address,
-                    user_agent=user_agent,
-                    severity="WARNING",
-                    details={"reason": "Invalid password"},
-                )
 
                 logger.warning(f"Failed login attempt for user {username}")
 
@@ -220,51 +175,8 @@ class LoginView(APIView):
                 "ACCESS_TOKEN_LIFETIME", timedelta(minutes=30)
             )
 
-            expires_at = timezone.now() + access_token_lifetime
-
-            # Store tokens in database
-            AuthenticationToken.objects.create(  # nosec B106
-                jti=str(refresh.access_token["jti"]),
-                user=user,
-                token_type="access",
-                expires_at=expires_at,
-                ip_address=ip_address,
-                user_agent=user_agent,
-            )
-
-            refresh_lifetime = getattr(settings, "SIMPLE_JWT", {}).get("REFRESH_TOKEN_LIFETIME", timedelta(days=7))
-
-            AuthenticationToken.objects.create(  # nosec B106
-                jti=str(refresh["jti"]),
-                user=user,
-                token_type="refresh",
-                expires_at=timezone.now() + refresh_lifetime,
-                ip_address=ip_address,
-                user_agent=user_agent,
-            )
-
             # Update last login information
             user.record_successful_login(ip_address=ip_address)
-
-            # Log successful authentication
-            AuthenticationAuditLog.log_event(
-                event_type="LOGIN_SUCCESS",
-                user=user,
-                ip_address=ip_address,
-                user_agent=user_agent,
-                severity="INFO",
-                username_attempted=username,
-            )
-
-            AuthenticationAuditLog.log_event(
-                event_type="TOKEN_ISSUED",
-                user=user,
-                ip_address=ip_address,
-                user_agent=user_agent,
-                severity="INFO",
-                details={"token_type": "access+refresh"},
-                username_attempted=username,
-            )
 
             logger.info(f"Successful login for user {username}")
 
@@ -281,15 +193,6 @@ class LoginView(APIView):
 
         except User.DoesNotExist:
             # User not found
-            AuthenticationAuditLog.log_event(
-                event_type="LOGIN_FAILED",
-                username_attempted=username,
-                ip_address=ip_address,
-                user_agent=user_agent,
-                severity="WARNING",
-                details={"reason": "User not found"},
-            )
-
             logger.warning(f"Login failed - user not found: {username}")
 
             return Response(
@@ -328,8 +231,6 @@ class LogoutView(APIView):
         serializer.is_valid(raise_exception=True)
 
         user = request.user
-        ip_address = get_client_ip(request)
-        user_agent = get_user_agent(request)
 
         refresh_token = serializer.validated_data.get("refresh_token")
 
@@ -337,29 +238,11 @@ class LogoutView(APIView):
         if refresh_token:
             try:
                 token = RefreshToken(refresh_token)
-                jti = str(token["jti"])
-
-                # Revoke in database
-                tokens_revoked = AuthenticationToken.objects.filter(jti=jti, user=user).update(
-                    is_revoked=True, revoked_at=timezone.now(), revocation_reason="User logout"
-                )
-
                 # Blacklist token if simplejwt blacklist is enabled
-                try:
-                    token.blacklist()
-                except Exception as e:
-                    logger.debug(f"Token blacklist not available: {e}")
-
-                if tokens_revoked:
-                    logger.info(f"Token revoked for user {user.username}")
-
+                token.blacklist()
+                logger.info(f"Token blacklisted for user {user.username}")
             except Exception as e:
-                logger.error(f"Error revoking token: {e}")
-
-        # Log logout event
-        AuthenticationAuditLog.log_event(
-            event_type="LOGOUT", user=user, ip_address=ip_address, user_agent=user_agent, severity="INFO"
-        )
+                logger.debug(f"Error revoking token (blacklist might be disabled): {e}")
 
         logger.info(f"User logged out: {user.username}")
 
@@ -409,15 +292,6 @@ class PasswordChangeView(APIView):
         user.must_change_password = False
         user.save(update_fields=["password", "password_changed_at", "must_change_password"])
 
-        # Log password change event
-        AuthenticationAuditLog.log_event(
-            event_type="PASSWORD_CHANGED",
-            user=user,
-            ip_address=get_client_ip(request),
-            user_agent=get_user_agent(request),
-            severity="INFO",
-        )
-
         logger.info(f"Password changed for user {user.username}")
 
         return Response(
@@ -444,44 +318,3 @@ class UserProfileView(generics.RetrieveAPIView):
             User: Current authenticated user
         """
         return self.request.user
-
-
-class AuditLogListView(generics.ListAPIView):
-    """
-    API endpoint to retrieve authentication audit logs for all or selected user.
-
-    Returns the most recent 100 audit log entries.
-
-    GET /api/auth/audit-logs/
-    """
-
-    serializer_class = AuthenticationAuditLogSerializer
-    # Only administrators may query audit logs for any user
-    permission_classes = [permissions.IsAdminUser]
-
-    def get_queryset(self):
-        """
-        Return audit logs.
-
-        - If `?user_id=<uuid>` is provided, return the most recent 100 logs for that user.
-        - Otherwise return the most recent 100 logs across all users.
-
-        Only accessible to admin users.
-        """
-        # Accept user id either as a path parameter or a query parameter for flexibility
-        user_id = self.kwargs.get("user_id") or self.request.query_params.get("user_id")
-
-        qs = AuthenticationAuditLog.objects.all()
-
-        if user_id:
-            try:
-                # Import here to avoid circular imports at module load
-                from .models import User
-
-                target_user = User.objects.get(id=user_id)
-                qs = qs.filter(user=target_user)
-            except Exception:
-                # If user not found or id invalid, return empty queryset
-                return AuthenticationAuditLog.objects.none()
-
-        return qs.order_by("-timestamp")[:100]

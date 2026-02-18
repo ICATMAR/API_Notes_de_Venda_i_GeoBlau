@@ -106,7 +106,7 @@ class Migration(migrations.Migration):
                 v_fishing_art_name text;
             BEGIN
                 v_num_envio := NEW.raw_data ->> 'NumEnvio';
-                RAISE WARNING '🚀 [DEBUG] Iniciant parseig enviament: %', v_num_envio;
+                RAISE WARNING '[DEBUG] Iniciant parseig enviament: %', v_num_envio;
 
                 -- Validar que hi ha establiments
                 IF NEW.raw_data -> 'EstablecimientosVenta' -> 'EstablecimientoVenta' IS NOT NULL THEN
@@ -132,28 +132,41 @@ class Migration(migrations.Migration):
                             )
                             LOOP
                                 v_buque_code := venta_element -> 'DatosUnidadProductiva' ->> 'CodigoBuque';
+                                -- Acceptar NIFPersona si CodigoBuque és NULL (Polimorfisme)
+                                IF v_buque_code IS NULL THEN
+                                    v_buque_code := venta_element -> 'DatosUnidadProductiva' ->> 'NIFPersona';
+                                END IF;
+
                                 v_puerto_al5 := venta_element -> 'DatosUnidadProductiva' ->> 'PuertoAL5';
+                                -- Acceptar LugarDescarga si PuertoAL5 és NULL
+                                IF v_puerto_al5 IS NULL THEN
+                                    v_puerto_al5 := venta_element -> 'DatosUnidadProductiva' ->> 'LugarDescarga';
+                                END IF;
+
                                 v_owner_code := venta_element -> 'DatosUnidadProductiva' ->> 'CodigoArmador';
 
                                 -- ---------------------------------------------------------
                                 -- ZONA DE LOOKUPS (Traducció Codis -> IDs)
                                 -- ---------------------------------------------------------
 
-                                -- Lookup Port: Usem port_all que té el camp AL5 (verificat amb esquema)
+                                -- Lookup Port: Usem port.Name creuant amb NombreEstablecimiento (Peticio usuari)
                                 SELECT "Id", "Name" INTO v_port_id, v_port_name_real
-                                FROM public.port_all
-                                WHERE "AL5" = v_puerto_al5 LIMIT 1;
+                                FROM public.port
+                                WHERE "Name" = v_est_name LIMIT 1;
 
                                 IF v_port_id IS NULL THEN
-                                    RAISE WARNING '⚠️ [DEBUG] Port no trobat. AL5 rebut: "%"', v_puerto_al5;
+                                    RAISE WARNING '[DEBUG] Port no trobat per nom: "%"', v_est_name;
                                 END IF;
 
+                                -- Reset variables opcionals
+                                v_base_port_name := NULL;
+
                                 -- Lookup Vessel: Usem Code de la taula vessel (verificat amb esquema)
-                                -- Recuperem també Port Base i Art de Pesca (GearMainCode)
+                                -- Recuperem BasePortCode per buscar el nom a port_all després
                                 -- INTENT 1: Coincidència per Codi i Data (Històric)
-                                SELECT "Id", "Name", "BasePortId", "BasePortName", "BasePortCode",
+                                SELECT "Id", "Name", "BasePortId", "BasePortCode",
                                 "GearMainCode", "GearSecCode"
-                                INTO v_vessel_id, v_vessel_name, v_base_port_id, v_base_port_name,
+                                INTO v_vessel_id, v_vessel_name, v_base_port_id,
                                      v_base_port_code,
                                      v_fishing_art_code, v_other_fishing_arts
                                 FROM public.vessel
@@ -162,11 +175,11 @@ class Migration(migrations.Migration):
                                   AND v_fecha_venta::date <= "EventEndDate"
                                 LIMIT 1;
 
-                                -- INTENT 2: Fallback només per Codi (si no trobem per data, agafem el més recent)
+                                -- INTENT 2: Fallback només per Codi
                                 IF v_vessel_id IS NULL THEN
-                                    SELECT "Id", "Name", "BasePortId", "BasePortName", "BasePortCode",
+                                    SELECT "Id", "Name", "BasePortId", "BasePortCode",
                                     "GearMainCode", "GearSecCode"
-                                    INTO v_vessel_id, v_vessel_name, v_base_port_id, v_base_port_name,
+                                    INTO v_vessel_id, v_vessel_name, v_base_port_id,
                                          v_base_port_code,
                                          v_fishing_art_code, v_other_fishing_arts
                                     FROM public.vessel
@@ -176,7 +189,14 @@ class Migration(migrations.Migration):
                                 END IF;
 
                                 IF v_vessel_id IS NULL THEN
-                                    RAISE WARNING '⚠️ [DEBUG] Vaixell no trobat. Code rebut: "%"', v_buque_code;
+                                    RAISE WARNING '[DEBUG] Vaixell no trobat. Code rebut: "%"', v_buque_code;
+                                END IF;
+
+                                -- Lookup Base Port Name: Creuant port_all.Code amb vessel.BasePortCode
+                                IF v_base_port_code IS NOT NULL THEN
+                                    SELECT "Name" INTO v_base_port_name
+                                    FROM public.port_all
+                                    WHERE "Code" = v_base_port_code;
                                 END IF;
 
                                 -- Lookup Gear Name (Art de Pesca)
@@ -235,7 +255,7 @@ class Migration(migrations.Migration):
                                         END IF;
 
                                         IF v_specie_id IS NULL THEN
-                                            RAISE WARNING '⚠️ [DEBUG] Especie no trobada. Code rebut: "%"',
+                                            RAISE WARNING '[DEBUG] Especie no trobada. Code rebut: "%"',
                                             v_especie_code;
                                         END IF;
 
@@ -306,6 +326,11 @@ class Migration(migrations.Migration):
                         END IF;
                     END LOOP;
                 END IF;
+
+                -- Actualitzar l'estat de l'enviament pare a 'procesado_en_db = True'
+                UPDATE public.envio_staging
+                SET procesado_en_db = true
+                WHERE id = NEW.envio_id;
 
                 RETURN NEW;
             END;

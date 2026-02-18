@@ -10,10 +10,9 @@ Date: October 2025
 
 from django.contrib.auth.password_validation import validate_password
 from django.utils.translation import gettext_lazy as _
-from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from .models import AuthenticationAuditLog, AuthenticationToken, User
+from .models import User
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -236,86 +235,3 @@ class LogoutSerializer(serializers.Serializer):
     refresh_token = serializers.CharField(
         required=False, allow_blank=True, help_text=_("Refresh token to revoke (optional)")
     )
-
-
-class AuthenticationTokenSerializer(serializers.ModelSerializer):
-    """
-    Serializer for authentication token details.
-
-    Provides information about JWT tokens including validity status.
-    """
-
-    user_username = serializers.CharField(
-        source="user.username", read_only=True, help_text=_("Username of token owner")
-    )
-
-    is_valid_token = serializers.SerializerMethodField(help_text=_("Whether the token is currently valid"))
-
-    class Meta:
-        model = AuthenticationToken
-        fields = [
-            "id",
-            "user",
-            "user_username",
-            "jti",
-            "token_type",
-            "issued_at",
-            "expires_at",
-            "is_revoked",
-            "revoked_at",
-            "revocation_reason",
-            "ip_address",
-            "is_valid_token",
-        ]
-        read_only_fields = fields
-
-    @extend_schema_field(serializers.BooleanField())
-    def get_is_valid_token(self, obj) -> bool:
-        """
-        Check if token is currently valid.
-
-        Args:
-            obj (AuthenticationToken): Token instance
-
-        Returns:
-            bool: True if token is valid
-        """
-        return obj.is_valid()
-
-
-class AuthenticationAuditLogSerializer(serializers.ModelSerializer):
-    """
-    Serializer for authentication audit log entries.
-
-    Provides detailed information about authentication events.
-    """
-
-    user_username = serializers.CharField(
-        source="user.username", read_only=True, help_text=_("Username associated with the event")
-    )
-
-    event_type_display = serializers.CharField(
-        source="get_event_type_display", read_only=True, help_text=_("Human-readable event type")
-    )
-
-    severity_display = serializers.CharField(
-        source="get_severity_display", read_only=True, help_text=_("Human-readable severity level")
-    )
-
-    class Meta:
-        model = AuthenticationAuditLog
-        fields = [
-            "id",
-            "user",
-            "user_username",
-            "event_type",
-            "event_type_display",
-            "severity",
-            "severity_display",
-            "ip_address",
-            "user_agent",
-            "username_attempted",
-            "details",
-            "timestamp",
-        ]
-        read_only_fields = fields

@@ -132,6 +132,12 @@ class Command(BaseCommand):
             # 6. Processar ZIP i CSV
             self.current_step = "Processar ZIP i CSV"
             csv_content = self.extract_zip(zip_path)
+
+            # Neteja: Eliminar el fitxer ZIP un cop llegit
+            if os.path.exists(zip_path):
+                os.remove(zip_path)
+                logger.info(f"🗑️ Fitxer ZIP eliminat per alliberar espai: {zip_path}")
+
             if csv_content:
                 self.current_step = "Carregar a Staging"
                 df_new = self.process_csv(csv_content)
