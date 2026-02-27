@@ -31,9 +31,9 @@ app.conf.beat_schedule = {
         "task": "audit.tasks.cleanup_old_logs",
         "schedule": crontab(hour=3, minute=0),
     },
-    # Generar informe diari d'estadístiques
-    "daily-statistics-report": {
-        "task": "sales_notes.tasks.generate_daily_report",
+    # Comprovar anomalies diàries (ex: falta d'enviaments) i notificar si cal
+    "daily-anomaly-check": {
+        "task": "sales_notes.tasks.check_daily_activity_and_report_anomalies",
         "schedule": crontab(hour=7, minute=30),
     },
     # Comprovar events de seguretat no resolts cada hora
