@@ -37,6 +37,7 @@ if not ENCRYPTION_KEY:
 DEBUG = env("DJANGO_DEBUG")
 
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
+ALLOWED_API_IPS = env.list("ALLOWED_API_IPS", default=[])
 
 # Application definition
 INSTALLED_APPS = [
@@ -74,6 +75,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "log_request_id.middleware.RequestIDMiddleware",
+    "sales_notes.middleware.IPRestrictionMiddleware",
     "audit.middleware.AuditMiddleware",  # Middleware personalitzat per auditoria
 ]
 

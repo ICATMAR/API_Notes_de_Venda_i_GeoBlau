@@ -26,6 +26,8 @@ class IPRestrictionMiddleware:
             if client_ip not in allowed_ips:
                 logger.warning(f"Accés denegat IP: {client_ip} a {request.path}")
                 return HttpResponseForbidden("Access denied: IP not allowed")
+            else:
+                logger.info(f"✅ Accés permès IP: {client_ip} (a la whitelist)")
 
         return self.get_response(request)
 
