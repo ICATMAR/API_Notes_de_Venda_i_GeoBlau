@@ -250,14 +250,6 @@ class Migration(migrations.Migration):
                                         WHERE "3A_Code" = v_especie_code LIMIT 1;
 
                                         IF v_specie_id IS NULL THEN
-                                            -- Fallback: Intentem amb GeneralitatCode (com feia l'importació legacy)
-                                            SELECT "Id", "CatalanName"
-                                            INTO v_specie_id, v_specie_name
-                                            FROM public.species
-                                            WHERE "GeneralitatCode" = v_specie_code LIMIT 1;
-                                        END IF;
-
-                                        IF v_specie_id IS NULL THEN
                                             RAISE WARNING '[DEBUG] Especie no trobada. Code rebut: "%"',
                                             v_especie_code;
                                         END IF;
