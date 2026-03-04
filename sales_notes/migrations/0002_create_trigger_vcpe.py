@@ -244,15 +244,20 @@ class Migration(migrations.Migration):
                                         v_track_code := v_buque_code || '_' || to_char(v_fecha_venta, 'YYYY-MM-DD');
 
                                         -- Lookup Especie: Usem 3A_Code de la taula species (verificat amb esquema)
-                                        SELECT "Id", "CatalanName"
-                                        INTO v_specie_id, v_specie_name
-                                        FROM public.species
-                                        WHERE "3A_Code" = v_especie_code LIMIT 1;
-
-                                        IF v_specie_id IS NULL THEN
-                                            RAISE WARNING '[DEBUG] Especie no trobada. Code rebut: "%"',
-                                            v_especie_code;
-                                        END IF;
+                                        -- Controlem si l'espècie no es troba per evitar errors.
+                                        BEGIN
+                                            SELECT "Id", "CatalanName"
+                                            INTO v_specie_id, v_specie_name
+                                            FROM public.species
+                                            WHERE "3A_Code" = v_especie_code
+                                            LIMIT 1;
+                                        EXCEPTION
+                                            WHEN NO_DATA_FOUND THEN
+                                                v_specie_id := NULL;
+                                                v_specie_name := NULL;
+                                                RAISE WARNING '[ALERTA] Especie no trobada al fer l''inserció.
+                                                Code rebut: "%". S''ha inserit amb SpecieId NULL.', v_especie_code;
+                                        END;
 
                                         -- INSERT a la taula plana
                                         INSERT INTO public.vcpe_auto_download (
