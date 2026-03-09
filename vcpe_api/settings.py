@@ -75,7 +75,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "log_request_id.middleware.RequestIDMiddleware",
-    "sales_notes.middleware.IPRestrictionMiddleware",
+    "authentication.middleware.IPWhitelistMiddleware",  # Middleware personalitzat per IP Whitelist
     "audit.middleware.AuditMiddleware",  # Middleware personalitzat per auditoria
 ]
 
