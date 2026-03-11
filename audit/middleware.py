@@ -187,10 +187,24 @@ class AuditMiddleware(MiddlewareMixin):
 
     def detect_security_issues(self, request, response, user, ip_address):
         """
-        Detectar possibles problemes de seguretat basats en patrons
+        Detectar possibles problemes de seguretat basats en patrons de resposta i petició.
         """
-        # Intent d'accés no autoritzat
-        if response.status_code == 401 or response.status_code == 403:
+        is_suspicious = self.looks_suspicious(request)
+
+        # 1. Intent de reconeixement (peticions a URLs sospitoses que no existeixen)
+        if response.status_code == 404 and is_suspicious:
+            self.log_security_event(
+                event_type="RECONNAISSANCE_ATTEMPT",
+                description=f"Intent de reconeixement a URL inexistent: {request.path}",
+                request=request,
+                user=user,
+                ip_address=ip_address,
+                severity="HIGH",
+            )
+            return  # Aturem aquí per no generar soroll amb altres esdeveniments
+
+        # 2. Intent d'accés no autoritzat
+        if response.status_code in [401, 403]:
             self.log_security_event(
                 event_type="UNAUTHORIZED_ACCESS",
                 description=f"Intent d'accés no autoritzat a {request.path}",
@@ -200,19 +214,18 @@ class AuditMiddleware(MiddlewareMixin):
                 severity="MEDIUM",
             )
 
-        # Petició mal formada (possible intent d'atac)
-        if response.status_code == 400:
-            if self.looks_suspicious(request):
-                self.log_security_event(
-                    event_type="MALFORMED_REQUEST",
-                    description=f"Petició mal formada sospitosa a {request.path}",
-                    request=request,
-                    user=user,
-                    ip_address=ip_address,
-                    severity="LOW",
-                )
+        # 3. Petició mal formada (possible intent d'atac a un endpoint que existeix)
+        if response.status_code == 400 and is_suspicious:
+            self.log_security_event(
+                event_type="MALFORMED_REQUEST",
+                description=f"Petició mal formada sospitosa a {request.path}",
+                request=request,
+                user=user,
+                ip_address=ip_address,
+                severity="MEDIUM",
+            )
 
-        # Massa peticions des de la mateixa IP
+        # 4. Massa peticions des de la mateixa IP (possible DoS)
         if self.check_rate_limit_exceeded(ip_address):
             self.log_security_event(
                 event_type="RATE_LIMIT_EXCEEDED",
@@ -220,38 +233,52 @@ class AuditMiddleware(MiddlewareMixin):
                 request=request,
                 user=user,
                 ip_address=ip_address,
-                severity="MEDIUM",
+                severity="HIGH",  # Pujat a HIGH per més visibilitat
                 blocked=True,
             )
 
     def looks_suspicious(self, request):
         """
-        Detectar patrons sospitosos en la petició
+        Detectar patrons sospitosos en la petició (URL i query params)
         """
         suspicious_patterns = [
-            "script",
-            "<script>",
-            "javascript:",
-            "SELECT",
-            "UNION",
-            "DROP",
-            "INSERT",
+            # Path Traversal
             "../",
             "..\\",
+            "..%2f",
+            "%2e%2e/",
+            # File/Configuration exposure
+            ".env",
+            ".git",
+            "credentials",
+            "htpasswd",
+            # Common script/tool probing
+            "phpinfo",
+            "phpmyadmin",
+            "wp-admin",
+            "adminer",
+            # Basic XSS
+            "<script>",
+            "javascript:",
             "eval(",
             "exec(",
+            # Basic SQLi
+            "select",
+            "union",
+            "drop",
+            "insert",
         ]
 
         # Comprovar URL
         path = request.path.lower()
         for pattern in suspicious_patterns:
-            if pattern.lower() in path:
+            if pattern in path:
                 return True
 
         # Comprovar query params
         query = request.GET.urlencode().lower()
         for pattern in suspicious_patterns:
-            if pattern.lower() in query:
+            if pattern in query:
                 return True
 
         return False

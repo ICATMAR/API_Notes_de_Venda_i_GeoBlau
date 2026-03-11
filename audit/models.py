@@ -96,6 +96,7 @@ class SecurityEvent(models.Model):
         ("INVALID_TOKEN", "Token invàlid"),
         ("RATE_LIMIT_EXCEEDED", "Límit de peticions excedit"),
         ("UNAUTHORIZED_ACCESS", "Accés no autoritzat"),
+        ("RECONNAISSANCE_ATTEMPT", "Intent de reconeixement"),
         ("SUSPICIOUS_ACTIVITY", "Activitat sospitosa"),
         ("DATA_BREACH_ATTEMPT", "Intent de filtrament de dades"),
         ("MALFORMED_REQUEST", "Petició mal formada"),

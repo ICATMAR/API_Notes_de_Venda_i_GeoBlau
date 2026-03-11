@@ -14,21 +14,19 @@ class IPWhitelistMiddleware:
 
     def __init__(self, get_response):
         self.get_response = get_response
-        # Llista d'IPs permeses (White List)
+        # Llista base d'IPs permeses (només per a desenvolupament local)
         self.allowed_ips = [
-            "127.0.0.1",  # Localhost
+            "127.0.0.1",  # Localhost IPv4
             "::1",  # Localhost IPv6
-            "77.227.4.18",  # IP Externa sol·licitada
-            "172.26.86.205",  # La teva IP local (wlp0s20f3)
-            "172.28.136.24",  # La teva IP de VPN/PPP (per si de cas)
         ]
 
-        # Afegim les IPs definides a les variables d'entorn (settings.py)
+        # Afegim les IPs definides a les variables d'entorn (settings.ALLOWED_API_IPS)
+        # Aquest és el mètode preferit per a entorns de producció.
         settings_ips = getattr(settings, "ALLOWED_API_IPS", [])
         if settings_ips:
             self.allowed_ips.extend(settings_ips)
 
-        # Eliminar duplicats
+        # Eliminar duplicats per si de cas
         self.allowed_ips = list(set(self.allowed_ips))
 
     def __call__(self, request):

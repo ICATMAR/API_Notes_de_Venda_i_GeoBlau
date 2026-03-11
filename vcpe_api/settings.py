@@ -198,7 +198,7 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.AnonRateThrottle",
         "rest_framework.throttling.UserRateThrottle",
     ],
-    "DEFAULT_THROTTLE_RATES": {"anon": "100/hour", "user": "1000/hour"},
+    "DEFAULT_THROTTLE_RATES": {"anon": "30/hour", "user": "100/hour"},
 }
 
 # JWT Settings
@@ -244,7 +244,7 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
 
-# Logging configuration (només consola, sense fitxers)
+# Logging configuration (consola i email per a errors)
 LOG_LEVEL = env("LOG_LEVEL", default="INFO")
 LOGGING = {
     "version": 1,
@@ -261,6 +261,11 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
         },
+        "mail_admins": {
+            "level": "ERROR",  # Capturarà ERROR i CRITICAL
+            "class": "django.utils.log.AdminEmailHandler",
+            "include_html": True,
+        },
     },
     "loggers": {
         "django": {
@@ -269,7 +274,7 @@ LOGGING = {
             "propagate": False,
         },
         "django.security": {
-            "handlers": ["console"],
+            "handlers": ["console", "mail_admins"],
             "level": "WARNING",
             "propagate": False,
         },
@@ -279,12 +284,16 @@ LOGGING = {
             "propagate": False,
         },
         "audit": {
-            "handlers": ["console"],
+            "handlers": ["console", "mail_admins"],  # Notificació per email
             "level": "INFO",
             "propagate": False,
         },
     },
 }
+
+# Definim els administradors per rebre els correus d'error.
+# Assegura't de definir la variable d'entorn NOTIFICATION_EMAIL.
+ADMINS = [("ICATMAR Admin", env("NOTIFICATION_EMAIL"))]
 
 # DRF Spectacular (documentació OpenAPI)
 SPECTACULAR_SETTINGS = {
