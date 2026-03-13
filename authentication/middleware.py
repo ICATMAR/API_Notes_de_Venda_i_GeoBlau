@@ -24,10 +24,12 @@ class IPWhitelistMiddleware:
         # Aquest és el mètode preferit per a entorns de producció.
         settings_ips = getattr(settings, "ALLOWED_API_IPS", [])
         if settings_ips:
-            self.allowed_ips.extend(settings_ips)
+            # Assegurem que no hi ha espais en blanc a les IPs llegides del .env
+            self.allowed_ips.extend([ip.strip() for ip in settings_ips if ip])
 
         # Eliminar duplicats per si de cas
         self.allowed_ips = list(set(self.allowed_ips))
+        logger.info(f"🔒 IP Whitelist inicialitzada: {self.allowed_ips}")
 
     def __call__(self, request):
         # Obtenir la IP del client
