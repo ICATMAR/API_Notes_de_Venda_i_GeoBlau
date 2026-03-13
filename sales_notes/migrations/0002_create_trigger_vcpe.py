@@ -151,14 +151,26 @@ class Migration(migrations.Migration):
                                 -- ---------------------------------------------------------
                                 -- ZONA DE LOOKUPS (Traducció Codis -> IDs)
                                 -- ---------------------------------------------------------
+                                v_port_id := NULL;
+                                v_port_name_real := NULL;
 
-                                -- Lookup Port: Usem port.Name creuant amb NombreEstablecimiento (Peticio usuari)
-                                SELECT "Id", "Name" INTO v_port_id, v_port_name_real
-                                FROM public.port
-                                WHERE "Name" = v_est_name LIMIT 1;
+                                -- PRIORITAT 1: Buscar per PuertoAL5 (Codi) o LugarDescarga (Nom) - Port de Descarrega
+                                IF v_puerto_al5 IS NOT NULL AND v_puerto_al5 != '' THEN
+                                    SELECT "Id", "Name" INTO v_port_id, v_port_name_real
+                                    FROM public.port
+                                    WHERE "Code" = v_puerto_al5 OR "Name" = v_puerto_al5 LIMIT 1;
+                                END IF;
+
+                                -- PRIORITAT 2: Si no hem trobat port, provem per Nom Establiment (Port de Venda)
+                                IF v_port_id IS NULL AND v_est_name IS NOT NULL THEN
+                                    SELECT "Id", "Name" INTO v_port_id, v_port_name_real
+                                    FROM public.port
+                                    WHERE "Name" = v_est_name LIMIT 1;
+                                END IF;
 
                                 IF v_port_id IS NULL THEN
-                                    RAISE WARNING '[DEBUG] Port no trobat per nom: "%"', v_est_name;
+                                    RAISE WARNING '[DEBUG] Port no trobat. Establiment: "%", PuertoAL5: "%"',
+                                    v_est_name, v_puerto_al5;
                                 END IF;
 
                                 -- Reset variables opcionals
