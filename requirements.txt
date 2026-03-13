@@ -40,7 +40,7 @@ pytest-django==4.9.0
 pytest-cov==5.0.0
 factory-boy==3.3.1
 bandit==1.7.10  # Anàlisi seguretat codi
-safety==3.2.8  # Comprovació vulnerabilitats dependències
+safety==4.1.0  # Comprovació vulnerabilitats dependències
 
 # Documentació API
 drf-spectacular==0.27.2
