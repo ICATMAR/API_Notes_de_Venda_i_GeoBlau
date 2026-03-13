@@ -157,8 +157,8 @@ class Migration(migrations.Migration):
                                 -- PRIORITAT 1: Buscar per PuertoAL5 (Codi) o LugarDescarga (Nom) - Port de Descarrega
                                 IF v_puerto_al5 IS NOT NULL AND v_puerto_al5 != '' THEN
                                     SELECT "Id", "Name" INTO v_port_id, v_port_name_real
-                                    FROM public.port
-                                    WHERE "Code"::text = v_puerto_al5 OR "Name" = v_puerto_al5 LIMIT 1;
+                                    FROM public.port_all
+                                    WHERE "AL5" = v_puerto_al5 OR "Name" = v_puerto_al5 LIMIT 1;
                                 END IF;
 
                                 -- PRIORITAT 2: Si no hem trobat port, provem per Nom Establiment (Port de Venda)
