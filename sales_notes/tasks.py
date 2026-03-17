@@ -37,7 +37,11 @@ def check_daily_activity_and_report_anomalies():
         from django.conf import settings
         from django.core.mail import get_connection, send_mail
 
-        recipients = [a[1] for a in settings.ADMINS] if getattr(settings, "ADMINS", None) else ["apuig@icatmar.cat"]
+        recipients = (
+            [a[1] for a in settings.NOTIFICATION_EMAIL]
+            if getattr(settings, "NOTIFICATION_EMAIL", None)
+            else ["arampuig.work@gmail.com"]
+        )
 
         try:
             with get_connection(fail_silently=False) as connection:

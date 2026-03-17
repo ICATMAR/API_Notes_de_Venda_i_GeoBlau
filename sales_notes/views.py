@@ -3,6 +3,8 @@ import logging
 import os
 from datetime import datetime
 
+from django.conf import settings
+from django.core.mail import send_mail
 from django.db import transaction
 from django.utils.decorators import method_decorator
 from django_filters.rest_framework import DjangoFilterBackend
@@ -116,8 +118,23 @@ class EnvioViewSet(
 
                     logger.info(f"Backup JSON d'enviament guardat a: {filepath}")
                 except Exception as e:
-                    # No volem que falli la petició si falla el backup en disc, només loguejar-ho
-                    logger.error(f"❌ Error guardant backup JSON en disc: {e}")
+                    # No volem que falli la petició si falla el backup, però sí notificar-ho.
+                    error_message = (
+                        f"❌ Error CRÍTIC guardant backup JSON en disc per a l'enviament {envio.num_envio}: {e}"
+                    )
+                    logger.error(error_message)
+
+                    # Enviar correu d'alerta als administradors
+                    try:
+                        send_mail(
+                            subject="[VCPE API ALERTA] Error guardant backup d'enviament",
+                            message=error_message,
+                            from_email=settings.DEFAULT_FROM_EMAIL,
+                            recipient_list=[settings.NOTIFICATION_EMAIL],
+                            fail_silently=False,
+                        )
+                    except Exception as mail_e:
+                        logger.error(f"❌ Error enviant el correu d'alerta per backup fallit: {mail_e}")
 
                 logger.info(f"Envio {envio.num_envio} created successfully by {request.user}")
                 headers = self.get_success_headers(serializer.data)
@@ -185,5 +202,4 @@ class EnvioViewSet(
         logger.info(f"User {request.user} checking status of envio {envio.num_envio}")
 
         serializer = self.get_serializer(envio)
-        return Response(serializer.data)
         return Response(serializer.data)

@@ -14,15 +14,15 @@ ALTER DATABASE vcpe_db SET timezone TO 'Europe/Madrid';
 -- Comentaris de la base de dades
 COMMENT ON DATABASE vcpe_db IS 'Base de dades per API Segura Notes de Venda ICATMAR';
 
--- Configurar permisos per l'usuari vcpe_user
-GRANT CONNECT ON DATABASE vcpe_db TO vcpe_user;
-GRANT ALL PRIVILEGES ON SCHEMA public TO vcpe_user;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO vcpe_user;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO vcpe_user;
+-- Configurar permisos per l'usuari arampuig
+GRANT CONNECT ON DATABASE vcpe_db TO arampuig;
+GRANT ALL PRIVILEGES ON SCHEMA public TO arampuig;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO arampuig;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO arampuig;
 
 -- Permisos per taules futures (que crearà Django)
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO vcpe_user;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO vcpe_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO arampuig;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO arampuig;
 
 -- Missatge de confirmació
 DO $$
@@ -33,6 +33,6 @@ BEGIN
     RAISE NOTICE 'Extensions: postgis, postgis_topology, uuid-ossp, pg_trgm';
     RAISE NOTICE 'Schema: public (per defecte)';
     RAISE NOTICE 'Timezone: Europe/Madrid';
-    RAISE NOTICE 'Usuari: vcpe_user amb tots els permisos';
+    RAISE NOTICE 'Usuari: arampuig amb tots els permisos';
     RAISE NOTICE '====================================================';
 END $$;
