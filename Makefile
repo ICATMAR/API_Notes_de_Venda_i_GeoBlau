@@ -25,7 +25,7 @@ shell:  ## Obre una shell dins el contenidor de l'API
 	docker compose exec api /bin/bash
 
 shell-db:  ## Obre una shell PostgreSQL
-	docker compose exec db psql -U vcpe_user -d vcpe_db
+	docker compose exec db psql -U arampuig -d vcpe_db
 
 migrate:  ## Executa les migracions
 	docker compose exec api python manage.py migrate
@@ -111,11 +111,11 @@ init-dev:  ## Inicialitza entorn de desenvolupament
 	@echo "Crea un superusuari amb: make createsuperuser"
 
 backup-db:  ## Fa backup de la base de dades
-	docker compose exec -T db pg_dump -U vcpe_user vcpe_db > backup_$(shell date +%Y%m%d_%H%M%S).sql
+	docker compose exec -T db pg_dump -U arampuig vcpe_db > backup_$(shell date +%Y%m%d_%H%M%S).sql
 	@echo "Backup creat: backup_$(shell date +%Y%m%d_%H%M%S).sql"
 
 restore-db:  ## Restaura un backup (usa: make restore-db FILE=backup.sql)
-	docker compose exec -T db psql -U vcpe_user vcpe_db < $(FILE)
+	docker compose exec -T db psql -U arampuig vcpe_db < $(FILE)
 
 check-security:  ## Executa Django security check
 	docker compose exec api python manage.py check --deploy

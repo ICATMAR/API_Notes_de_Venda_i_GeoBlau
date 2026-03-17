@@ -36,12 +36,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . /app/
 
 # Creació d'usuari no-root per seguretat
-RUN useradd -m -u 1000 vcpe_user && \
+RUN useradd -m -u 1001 arampuig && \
     mkdir -p /app/staticfiles /app/mediafiles /app/logs && \
-    chown -R vcpe_user:vcpe_user /app
+    chown -R arampuig:arampuig /app
 
 # Canvi a usuari no-root
-USER vcpe_user
+USER arampuig
 
 # Port d'exposició
 EXPOSE 8000
