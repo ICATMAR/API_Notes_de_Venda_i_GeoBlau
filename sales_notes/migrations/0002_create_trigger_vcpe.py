@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
                 v_fishing_art_name text;
             BEGIN
                 v_num_envio := NEW.raw_data ->> 'NumEnvio';
-                RAISE WARNING '[DEBUG] Iniciant parseig enviament: %', v_num_envio;
+                RAISE LOG '[DEBUG] Iniciant parseig enviament: %', v_num_envio;
 
                 IF NEW.raw_data -> 'EstablecimientosVenta' -> 'EstablecimientoVenta' IS NOT NULL THEN
                     FOR estab_element IN SELECT * FROM jsonb_array_elements(
@@ -165,7 +165,7 @@ class Migration(migrations.Migration):
                                             FROM public.species
                                             WHERE "3A_Code" = v_especie_code LIMIT 1;
                                         EXCEPTION WHEN NO_DATA_FOUND THEN
-                                            RAISE WARNING
+                                            RAISE LOG
                                             '[ALERTA] Especie no trobada. Code: "%"', v_especie_code;
                                         END;
 
@@ -209,14 +209,14 @@ class Migration(migrations.Migration):
                         UPDATE public.envio_staging
                         SET procesado_en_db = true, fecha_procesado_en_db = NOW()
                         WHERE id = NEW.envio_id;
-                        RAISE WARNING '[INFO] OK. Enviament %. Notes inserides: %/%',
+                        RAISE LOG '[INFO] OK. Enviament %. Notes inserides: %/%',
                             NEW.envio_id, v_total_inserted_notes, v_total_expected_notes;
                     ELSE
-                        RAISE WARNING '[ERROR] INCOMPLET. Enviament %. Notes inserides: %/%',
+                        RAISE LOG '[ERROR] INCOMPLET. Enviament %. Notes inserides: %/%',
                             NEW.envio_id, v_total_inserted_notes, v_total_expected_notes;
                     END IF;
                 ELSE
-                    RAISE WARNING '[ALERTA] No hi ha notes a l''enviament %.', NEW.envio_id;
+                    RAISE LOG '[ALERTA] No hi ha notes a l''enviament %.', NEW.envio_id;
                 END IF;
 
                 RETURN NEW;
