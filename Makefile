@@ -62,7 +62,7 @@ format:  ## Formata el codi amb black i isort
 
 security-check:  ## Comprova vulnerabilitats de seguretat
 	docker compose exec api bandit -r . -c pyproject.toml
-	docker compose exec api safety check
+	docker compose exec api safety scan
 
 pre-commit-install:  ## Instal·la els hooks de pre-commit
 	pre-commit install

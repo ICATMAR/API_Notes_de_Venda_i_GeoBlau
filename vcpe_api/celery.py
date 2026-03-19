@@ -21,11 +21,6 @@ app.autodiscover_tasks()
 
 # Configuració de tasques periòdiques
 app.conf.beat_schedule = {
-    # Processar enviaments pendents cada 5 minuts
-    "process-pending-envios": {
-        "task": "sales_notes.tasks.process_pending_envios",
-        "schedule": crontab(minute="*/5"),
-    },
     # Netejar logs antics cada dia a les 3 AM
     "cleanup-old-logs": {
         "task": "audit.tasks.cleanup_old_logs",
