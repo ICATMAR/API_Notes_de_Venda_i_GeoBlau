@@ -39,6 +39,11 @@ DEBUG = env("DJANGO_DEBUG")
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
 ALLOWED_API_IPS = env.list("ALLOWED_API_IPS", default=[])
 
+# Orígens de confiança per a les peticions POST/PUT darrere del proxy HTTPS
+CSRF_TRUSTED_ORIGINS = env.list(
+    "CSRF_TRUSTED_ORIGINS", default=[f"https://{host}" for host in ALLOWED_HOSTS if host != "localhost"]
+)
+
 # Application definition
 INSTALLED_APPS = [
     "django.contrib.admin",
