@@ -103,13 +103,16 @@ class Command(BaseCommand):
             # 5. Clicar Download
             self.current_step = "Clicar Download"
             logger.info("Clicant botó de descàrrega...")
-            download_btn = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "button.download-btn")))
-            driver.execute_script("arguments[0].click();", download_btn)
+            download_btn = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.download-btn")))
+            try:
+                download_btn.click()
+            except Exception:
+                driver.execute_script("arguments[0].click();", download_btn)
 
             # Esperar fitxer
             self.current_step = "Esperant fitxer"
             logger.info("Esperant fitxer...")
-            timeout = 120
+            timeout = 300
             start_time = time.time()
             zip_path = None
 
@@ -135,8 +138,16 @@ class Command(BaseCommand):
 
             # Neteja: Eliminar el fitxer ZIP un cop llegit
             if os.path.exists(zip_path):
-                os.remove(zip_path)
-                logger.info(f"🗑️ Fitxer ZIP eliminat per alliberar espai: {zip_path}")
+                try:
+                    os.remove(zip_path)
+                    logger.info(f"🗑️ Fitxer ZIP eliminat per alliberar espai: {zip_path}")
+                except PermissionError:
+                    logger.warning(
+                        f"⚠️ No s'ha pogut eliminar el ZIP "
+                        f"({zip_path}) per permisos (creat per Selenium). S'ignora l'error."
+                    )
+                except Exception as e:
+                    logger.warning(f"⚠️ Error inesperat eliminant el ZIP: {e}")
 
             if csv_content:
                 self.current_step = "Carregar a Staging"
@@ -170,10 +181,16 @@ class Command(BaseCommand):
                 f"Pas fallit: {self.current_step}\nError: {str(e)}\n\n--- WARNINGS ACUMULATS ---\n{warnings_text}"
             )
 
+            recipients = (
+                [a[1] for a in settings.NOTIFICATION_EMAIL]
+                if getattr(settings, "NOTIFICATION_EMAIL", None)
+                else ["arampuig.work@gmail.com"]
+            )
+
             send_email_robust(
                 f"❌ Error Sync Fleet Selenium ({datetime.now().strftime('%Y-%m-%d')})",
                 f"{error_summary}\n\nCaptura guardada al servidor: {error_shot if 'error_shot' in locals() else 'N/A'}",
-                ["apuig@icatmar.cat"],
+                recipients,
             )
 
             raise e
