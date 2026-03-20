@@ -53,6 +53,7 @@ htmlcov/
 coverage.xml
 *.cover
 .hypothesis/
+files_enviament/
 
 # IDEs
 .vscode/
