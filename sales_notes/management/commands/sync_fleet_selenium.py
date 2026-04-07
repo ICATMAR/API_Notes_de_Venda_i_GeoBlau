@@ -213,7 +213,7 @@ class Command(BaseCommand):
     def process_csv(self, csv_content):
         logger.info("Processant CSV i comparant amb BBDD...")
         try:
-            df = pd.read_csv(io.BytesIO(csv_content), sep=";", encoding="latin1", dtype=str)
+            df = pd.read_csv(io.BytesIO(csv_content), sep=";", encoding="utf-8", dtype=str)
 
             column_mapping = {
                 "CFR": "Code",
