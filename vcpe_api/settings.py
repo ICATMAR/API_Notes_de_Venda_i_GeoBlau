@@ -115,7 +115,7 @@ DATABASES = {
         "PORT": env("DB_PORT"),
         "CONN_MAX_AGE": 600,
         "OPTIONS": {
-            "sslmode": "require" if not DEBUG else "prefer",
+            "sslmode": "disable",  # La comuniació amb la BD es fa dins del mateix cluster de Kubernetes, no cal SSL
             "options": "-c search_path=public",
         },
     }
