@@ -48,7 +48,7 @@ EXPOSE 8000
 
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8000/health/', timeout=5)"
+    CMD curl --fail http://localhost:8000/health/ || exit 1
 
 # Script d'inici per defecte
 CMD ["gunicorn", "vcpe_api.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "4"]

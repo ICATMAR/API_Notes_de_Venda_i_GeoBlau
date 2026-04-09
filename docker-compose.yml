@@ -56,7 +56,8 @@ services:
       - static_volume:/app/staticfiles:ro
       - media_volume:/app/mediafiles:ro
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     networks:
       - vcpe_network
     restart: unless-stopped
@@ -97,6 +98,13 @@ services:
     read_only: false
     tmpfs:
       - /tmp
+    healthcheck:
+      # Sobreescriu el possible healthcheck amb https del Dockerfile
+      # Nota: Canvia '/' per un endpoint de la teva API que retorni 200 OK
+      test: [ "CMD-SHELL", "curl -f http://localhost:8000/ || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   celery_worker:
     build:

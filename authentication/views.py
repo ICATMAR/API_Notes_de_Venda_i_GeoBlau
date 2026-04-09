@@ -201,7 +201,7 @@ class LoginView(APIView):
             )
 
 
-class LogoutView(APIView):
+class LogoutView(generics.GenericAPIView):
     """
     API endpoint for user logout.
 
@@ -216,8 +216,9 @@ class LogoutView(APIView):
     """
 
     permission_classes = [permissions.IsAuthenticated]
+    serializer_class = LogoutSerializer
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         """
         Handle logout request.
 
@@ -227,7 +228,7 @@ class LogoutView(APIView):
         Returns:
             Response: Confirmation message
         """
-        serializer = LogoutSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         user = request.user
@@ -252,7 +253,7 @@ class LogoutView(APIView):
         )
 
 
-class PasswordChangeView(APIView):
+class PasswordChangeView(generics.GenericAPIView):
     """
     API endpoint for password change.
 
@@ -269,8 +270,9 @@ class PasswordChangeView(APIView):
     """
 
     permission_classes = [permissions.IsAuthenticated]
+    serializer_class = PasswordChangeSerializer
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         """
         Handle password change request.
 
@@ -280,7 +282,7 @@ class PasswordChangeView(APIView):
         Returns:
             Response: Confirmation message
         """
-        serializer = PasswordChangeSerializer(data=request.data, context={"request": request})
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         user = request.user
