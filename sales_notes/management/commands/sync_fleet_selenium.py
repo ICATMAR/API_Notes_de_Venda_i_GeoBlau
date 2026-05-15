@@ -1,26 +1,32 @@
+import base64
 import io
+import json
 import logging
 import os
 import time
-import zipfile
+import uuid
 from datetime import datetime
 
 import pandas as pd
+import requests
+import websocket
 from django.conf import settings
 from django.core.mail import get_connection, send_mail
 from django.core.management.base import BaseCommand
 from django.db import connection
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 
 logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    help = "Descarrega les dades de la flota europea automàticament (Headless)"
+    help = "Descarrega les dades de la flota europea automàticament (via API)"
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--local-file",
+            type=str,
+            help="Ruta a un arxiu Excel local per testejar el procés sense descarregar-lo de l'API.",
+        )
 
     def handle(self, *args, **options):
         self.warnings = []
@@ -39,119 +45,169 @@ class Command(BaseCommand):
 
         logger.info("=== INICIANT SINCRONITZACIÓ DE VESSELS ===")
 
-        # --- CONFIGURACIÓ SELENIUM ---
-        self.current_step = "Configuració Selenium"
-        download_dir = "/app/downloads"
-        os.makedirs(download_dir, exist_ok=True)
+        # --- PETICIÓ API (Substitució de Selenium) ---
+        self.current_step = "Preparant petició API"
+        local_file = options.get("local_file")
 
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument("--disable-gpu")
-        chrome_options.add_argument("--window-size=1920,1080")
-
-        prefs = {
-            "download.default_directory": "/home/seluser/Downloads",
-            "download.prompt_for_download": False,
-            "download.directory_upgrade": True,
-            "safebrowsing.enabled": True,
-        }
-        chrome_options.add_experimental_option("prefs", prefs)
-
-        driver = None
         try:
-            driver = webdriver.Remote(command_executor="http://selenium:4444/wd/hub", options=chrome_options)
-            wait = WebDriverWait(driver, 20)
+            if local_file:
+                self.current_step = "Carregant Excel local"
+                logger.info(f"Opció --local-file detectada. Ometent API i llegint: {local_file}")
 
-            # 1. Accedir a la web
-            self.current_step = "Accedint a la web"
-            url = "https://webgate.ec.europa.eu/fleet-europa/search_en"
-            logger.info(f"Accedint a: {url}")
-            driver.get(url)
+                if not os.path.exists(local_file):
+                    raise FileNotFoundError(f"L'arxiu indicat no existeix: {local_file}")
 
-            # 2. Gestionar Cookies
-            self.current_step = "Gestionar Cookies"
-            try:
-                cookie_btn = WebDriverWait(driver, 5).until(
-                    EC.element_to_be_clickable((By.CSS_SELECTOR, "a.wt-cck-btn-accept"))
-                )
-                cookie_btn.click()
-                logger.info("Banner de cookies acceptat.")
-                time.sleep(1)
-            except Exception:
-                logger.info("No s'ha detectat banner de cookies o ja estava acceptat.")
+                with open(local_file, "rb") as f:
+                    file_content = f.read()
+                logger.info(f"✅ Fitxer local carregat a la memòria correctament ({len(file_content)} bytes).")
 
-            # 3. Seleccionar País [ESP] (Lògica Robusta JS)
-            self.current_step = "Seleccionar País"
-            logger.info("Seleccionant país [ESP] via JS...")
-            driver.execute_script("$('#country-sel').val('ESP').trigger('change');")
-            logger.info("País forçat via JS.")
-            time.sleep(1)
+            else:
+                self.current_step = "Fent petició a l'API de Fleet Europa"
+                api_url = "https://appsync-api-fleet-europa.ocean-store.ec.europa.eu/graphql"
+                headers = {
+                    "content-type": "application/json",
+                    "x-api-key": "da2-qi43aom7lbfezjlxndlvet3szq",
+                    "origin": "https://vessel-register.oceans-and-fisheries.ec.europa.eu",
+                    "referer": "https://vessel-register.oceans-and-fisheries.ec.europa.eu/",
+                    "user-agent": (
+                        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+                        "(KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+                    ),
+                }
 
-            # 4. Seleccionar 'All Vessels'
-            self.current_step = "Seleccionar All Vessels"
-            logger.info("Marcant opció 'All Vessels'...")
-            try:
-                radio_label_css = "label[for='period1']"
-                radio_label = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, radio_label_css)))
-                driver.execute_script("arguments[0].click();", radio_label)
-            except Exception as e:
-                logger.error("Error marcant 'All Vessels'.")
-                raise e
+                file_name_ts = datetime.now().strftime("%Y%m%d-%H%M%S")
+                file_name = f"Search_Vessels_Full_{file_name_ts}_{str(uuid.uuid4())[:4]}"
+                req_id = str(uuid.uuid4())
 
-            # 5. Clicar Download
-            self.current_step = "Clicar Download"
-            logger.info("Clicant botó de descàrrega...")
-            download_btn = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.download-btn")))
-            try:
-                download_btn.click()
-            except Exception:
-                driver.execute_script("arguments[0].click();", download_btn)
-
-            # Esperar fitxer
-            self.current_step = "Esperant fitxer"
-            logger.info("Esperant fitxer...")
-            timeout = 300
-            start_time = time.time()
-            zip_path = None
-
-            while time.time() - start_time < timeout:
-                files = os.listdir(download_dir)
-                valid_files = [
-                    f for f in files if not f.endswith(".crdownload") and not f.endswith(".tmp") and f.endswith(".zip")
-                ]
-
-                if valid_files:
-                    zip_path = os.path.join(download_dir, valid_files[0])
-                    if os.path.getsize(zip_path) > 0:
-                        logger.info(f"✅ Fitxer detectat: {zip_path}")
-                        break
-                time.sleep(1)
-
-            if not zip_path:
-                raise Exception("Timeout: No s'ha descarregat cap fitxer ZIP vàlid.")
-
-            # 6. Processar ZIP i CSV
-            self.current_step = "Processar ZIP i CSV"
-            csv_content = self.extract_zip(zip_path)
-
-            # Neteja: Eliminar el fitxer ZIP un cop llegit
-            if os.path.exists(zip_path):
-                try:
-                    os.remove(zip_path)
-                    logger.info(f"🗑️ Fitxer ZIP eliminat per alliberar espai: {zip_path}")
-                except PermissionError:
-                    logger.warning(
-                        f"⚠️ No s'ha pogut eliminar el ZIP "
-                        f"({zip_path}) per permisos (creat per Selenium). S'ignora l'error."
+                payload = {
+                    "operationName": "MyQuery",
+                    "query": (
+                        "mutation MyQuery ($filter: SearchVesselFilter,$fileName: String!)"
+                        "{SearchVesselQuery(filter: $filter,orderBy: [event_start_date_desc],"
+                        'requestId: "%s",fileName: $fileName)}'
                     )
-                except Exception as e:
-                    logger.warning(f"⚠️ Error inesperat eliminant el ZIP: {e}")
+                    % req_id,
+                    "variables": {
+                        "filter": {
+                            "flagStateOption": "other",
+                            "flagState": ["ESP"],
+                            "vesselTypeOption": "allFishingVessels",
+                            "vesselType": [],
+                            "startPeriodDate": None,
+                            "endPeriodDate": None,
+                            "periodOption": "fullHistory",
+                            "vesselIdentifier": "",
+                            "eventType": [],
+                            "loaFrom": "",
+                            "loaTo": "",
+                            "gtFrom": "",
+                            "gtTo": "",
+                            "mainPowerFrom": "",
+                            "mainPowerTo": "",
+                            "publicAid": [],
+                            "constructionYearFrom": "",
+                            "constructionYearTo": "",
+                            "nationalLicence": "all",
+                            "vms": "all",
+                            "ircs": "all",
+                            "ers": "all",
+                            "ersExemption": "all",
+                            "ais": "all",
+                            "gearMain": [],
+                            "gearAux": [],
+                            "fleetSegmentOption": "other",
+                            "fleetSegment": [],
+                            "registrationPlace": [],
+                            "maritimeFront": [],
+                            "nuts": [],
+                            "csvType": "full",
+                        },
+                        "fileName": file_name,
+                    },
+                }
 
-            if csv_content:
+                logger.info("Enviant mutació GraphQL...")
+                response = requests.post(api_url, headers=headers, json=payload, timeout=30)
+                response.raise_for_status()
+                data = response.json()
+                logger.info(f"Resposta rebuda: {data}")
+
+                # 2. CONEXIÓ WEBSOCKET (Esperar la URL d'Amazon S3)
+                self.current_step = "Connexió WebSocket per descarregar"
+                logger.info("Iniciant connexió WebSocket per obtenir la URL final...")
+
+                host = "appsync-api-fleet-europa.ocean-store.ec.europa.eu"
+                api_key = "da2-qi43aom7lbfezjlxndlvet3szq"
+
+                ws_header = {"host": host, "x-api-key": api_key}
+                b64_header = base64.b64encode(json.dumps(ws_header).encode()).decode()
+                b64_payload = base64.b64encode(json.dumps({}).encode()).decode()
+
+                wss_url = f"wss://{host}/graphql/realtime?header={b64_header}&payload={b64_payload}"
+
+                ws = websocket.create_connection(wss_url, subprotocols=["graphql-ws"], timeout=60)
+                ws.send(json.dumps({"type": "connection_init"}))
+
+                # Subscripció al Job
+                sub_msg = {
+                    "id": str(uuid.uuid4()),
+                    "type": "start",
+                    "payload": {
+                        "data": json.dumps(
+                            {
+                                "query": (
+                                    '\n subscription MySubscription($jobId: ID = "") '
+                                    "{\n onAsyncDataCompleted(jobId: $jobId) "
+                                    "{\n asyncData\n jobId\n }\n }\n "
+                                ),
+                                "variables": {"jobId": req_id},
+                            }
+                        ),
+                        "extensions": {"authorization": {"host": host, "x-api-key": api_key}},
+                    },
+                }
+                ws.send(json.dumps(sub_msg))
+
+                final_url = None
+                timeout_limit = time.time() + 600  # 10 minuts màxim d'espera
+
+                while time.time() < timeout_limit:
+                    res = ws.recv()
+                    res_data = json.loads(res)
+
+                    if res_data.get("type") == "data":
+                        async_str = (
+                            res_data.get("payload", {}).get("data", {}).get("onAsyncDataCompleted", {}).get("asyncData")
+                        )
+                        if async_str:
+                            async_info = json.loads(async_str)
+                            progress = async_info.get("progress")
+                            status = async_info.get("status")
+
+                            if progress is not None:
+                                logger.info(f"Generant arxiu remot... {progress}% ({status})")
+
+                            if status == "done" and async_info.get("csv"):
+                                final_url = async_info.get("csv")
+                                break
+
+                ws.close()
+
+                if not final_url:
+                    raise Exception("Timeout esperant que l'API de Fleet Europa generi l'arxiu (via WebSocket).")
+
+                self.current_step = "Descarregant l'Excel"
+                logger.info("Arxiu llest! Descarregant dades des de l'S3...")
+                excel_response = requests.get(final_url, timeout=300)
+                excel_response.raise_for_status()
+
+                file_content = excel_response.content
+                logger.info(f"✅ Fitxer descarregat a la memòria correctament ({len(file_content)} bytes).")
+
+            self.current_step = "Processar Excel i Dades"
+            if file_content:
                 self.current_step = "Carregar a Staging"
-                df_new = self.process_csv(csv_content)
+                df_new = self.process_excel(file_content)
                 if df_new is not None and not df_new.empty:
                     self.load_to_staging(df_new)
                 else:
@@ -169,11 +225,6 @@ class Command(BaseCommand):
 
         except Exception as e:
             logger.error(f"ERROR FATAL DURANT L'EXECUCIÓ: {e}")
-            if driver:
-                ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-                error_shot = os.path.join(download_dir, f"error_{ts}.png")
-                driver.save_screenshot(error_shot)
-                logger.info(f"Captura d'error guardada a: {error_shot}")
 
             # Enviar mail d'error
             warnings_text = "\n".join(self.warnings) if self.warnings else "Cap warning detectat."
@@ -189,56 +240,87 @@ class Command(BaseCommand):
 
             send_email_robust(
                 f"❌ Error Sync Fleet Selenium ({datetime.now().strftime('%Y-%m-%d')})",
-                f"{error_summary}\n\nCaptura guardada al servidor: {error_shot if 'error_shot' in locals() else 'N/A'}",
+                f"{error_summary}",
                 recipients,
             )
 
             raise e
 
-        finally:
-            if driver:
-                driver.quit()
-
-    def extract_zip(self, zip_path):
+    def process_excel(self, file_content):
+        logger.info("Processant Excel i comparant amb BBDD...")
         try:
-            logger.info(f"Extreient ZIP: {zip_path}")
-            with zipfile.ZipFile(zip_path, "r") as z:
-                filename = z.namelist()[0]
-                with z.open(filename) as f:
-                    return f.read()
-        except Exception as e:
-            logger.error(f"Error extreient ZIP: {e}")
-            raise e
+            df = pd.read_excel(io.BytesIO(file_content), dtype=str)
 
-    def process_csv(self, csv_content):
-        logger.info("Processant CSV i comparant amb BBDD...")
-        try:
-            df = pd.read_csv(io.BytesIO(csv_content), sep=";", encoding="utf-8", dtype=str)
+            logger.info(f"Columnes originals de l'Excel: {df.columns.tolist()}")
+            # 1. Neteja agressiva: Traiem espais innecessaris i posem TOT en minúscules
+            original_cols = df.columns.tolist()
+            df.columns = df.columns.str.strip().str.lower()
+            logger.info(f"Columnes originals de l'Excel: {original_cols}")
+            logger.info(f"Columnes normalitzades (minúscules): {df.columns.tolist()}")
 
-            column_mapping = {
-                "CFR": "Code",
-                "Event": "EventCode",
-                "Event Start Date": "EventStartDate",
-                "Event End Date": "EventEndDate",
-                "Licence indicator": "LicenceInd",
-                "Registration Number": "RegistrationNum",
-                "Name of vessel": "Name",
-                "Place of registration": "TempPortVal",
-                "IRCS": "IRCS",
-                "VMS": "VMS",
-                "Main fishing gear": "GearMainCode",
-                "Subsidiary fishing gear 1": "GearSecCode",
-                "LOA": "LOA_m",
-                "LBP": "LBP_m",
-                "Other tonnage": "TRB",
-                "Tonnage GT": "GT",
-                "Power of main engine": "PowerMain_kW",
-                "Power of auxiliary engine": "PowerAux_kW",
-                "AIS Indicator": "AIS",
-                "Hull material": "HullMaterial",
-                "Date of entry into service": "ServiceStartingDate",
+            # Mapping robust: l'Excel de la nova API té noms lleugerament diferents al CSV antic
+            # 2. Diccionari unificat amb totes les variants en minúscules sense claus duplicades
+            column_mapping_robust = {
+                "Code": ["cfr", "vessel number", "code", "vessel cfr"],
+                "EventCode": ["event", "event code", "event type", "event type code"],
+                "EventStartDate": ["event start date", "start date", "event date"],
+                "EventEndDate": ["event end date", "end date"],
+                "LicenceInd": ["licence indicator", "license indicator", "national licence"],
+                "RegistrationNum": ["registration number", "external marking", "fleet register number"],
+                "Name": ["name of vessel", "vessel name", "vessel's name", "name"],
+                "TempPortVal": [
+                    "place of registration code",
+                    "place of registration",
+                    "port of registration",
+                    "registration port",
+                    "port base",
+                    "base port",
+                    "port",
+                    "place of registration name",
+                ],
+                "IRCS": ["ircs", "international radio call sign", "call sign", "ircs indicator"],
+                "VMS": ["vms indicator", "vms"],
+                "GearMainCode": ["main fishing gear", "main gear", "gear main", "fishing gear"],
+                "GearSecCode": ["subsidiary fishing gear 1", "subsidiary gear 1", "subsidiary gear", "gear subsidiary"],
+                "LOA_m": ["loa (m)", "loa", "length overall", "length overall (loa)", "length"],
+                "LBP_m": ["lbp (m)", "lbp", "length between perpendiculars", "length between perpendiculars (lbp)"],
+                "TRB": ["other tonnage", "other_tonnage"],
+                "GT": ["tonnage gt", "gross tonnage", "gross tonnage (gt)", "gt", "tonnage", "tonnage gts"],
+                "PowerMain_kW": [
+                    "power of main engine",
+                    "main engine power",
+                    "power of main engine (kw)",
+                    "main power",
+                ],
+                "PowerAux_kW": [
+                    "power of auxiliary engine",
+                    "auxiliary engine power",
+                    "power of auxiliary engine (kw)",
+                ],
+                "AIS": ["ais indicator", "ais"],
+                "HullMaterial": ["hull material", "hull"],
+                "ServiceStartingDate": ["date of entry into service", "entry into service date", "construction year"],
+                "MMSI": ["mmsi"],
             }
-            df = df.rename(columns=column_mapping)
+
+            rename_dict = {}
+            for final_col, possible_names in column_mapping_robust.items():
+                for possible_name in possible_names:
+                    if possible_name in df.columns:
+                        rename_dict[possible_name] = final_col
+                        break
+
+            df = df.rename(columns=rename_dict)
+            logger.info(f"Columnes mapejades amb èxit: {list(rename_dict.values())}")
+
+            missing_cols = set(column_mapping_robust.keys()) - set(rename_dict.values())
+            if missing_cols:
+                logger.warning(f"⚠️ Atenció: No s'han mapejat aquestes columnes: {missing_cols}")
+                logger.warning(f"⚠️ ATENCIÓ: Les següents columnes NO s'han trobat a l'Excel: {missing_cols}")
+                logger.warning(
+                    "   => Revisa el log 'Columnes normalitzades (minúscules)' "
+                    "de dalt per identificar quin nom tenen ara."
+                )
 
             date_cols = ["EventStartDate", "EventEndDate", "ServiceStartingDate"]
             for col in date_cols:
@@ -254,7 +336,7 @@ class Command(BaseCommand):
                         self.warnings.append(msg)
 
             # Transformació de booleans (Y/N -> true/false)
-            for col in ["LicenceInd", "AIS"]:
+            for col in ["LicenceInd", "AIS", "VMS"]:
                 if col in df.columns:
                     df[col] = df[col].map({"Y": "true", "N": "false", "y": "true", "n": "false"})
 
@@ -390,6 +472,7 @@ class Command(BaseCommand):
             "AIS",
             "HullMaterial",
             "ServiceStartingDate",
+            "MMSI",
         ]
         cols_to_insert = [c for c in df.columns if c in valid_columns]
 
