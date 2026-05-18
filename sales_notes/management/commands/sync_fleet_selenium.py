@@ -27,6 +27,11 @@ class Command(BaseCommand):
             type=str,
             help="Ruta a un arxiu Excel local per testejar el procés sense descarregar-lo de l'API.",
         )
+        parser.add_argument(
+            "--debug-insert",
+            action="store_true",
+            help="Executa la inserció fila a fila per a debuggar errors de dades.",
+        )
 
     def handle(self, *args, **options):
         self.warnings = []
@@ -48,6 +53,7 @@ class Command(BaseCommand):
         # --- PETICIÓ API (Substitució de Selenium) ---
         self.current_step = "Preparant petició API"
         local_file = options.get("local_file")
+        debug_mode = options.get("debug_insert", False)
 
         try:
             if local_file:
@@ -169,7 +175,7 @@ class Command(BaseCommand):
                 ws.send(json.dumps(sub_msg))
 
                 final_url = None
-                timeout_limit = time.time() + 600  # 10 minuts màxim d'espera
+                timeout_limit = time.time() + 1800  # 30 minuts màxim d'espera
 
                 while time.time() < timeout_limit:
                     res = ws.recv()
@@ -209,7 +215,7 @@ class Command(BaseCommand):
                 self.current_step = "Carregar a Staging"
                 df_new = self.process_excel(file_content)
                 if df_new is not None and not df_new.empty:
-                    self.load_to_staging(df_new)
+                    self.load_to_staging(df_new, debug_mode=debug_mode)
                 else:
                     logger.info("✅ Cap registre nou per processar.")
 
@@ -300,7 +306,6 @@ class Command(BaseCommand):
                 "AIS": ["ais indicator", "ais"],
                 "HullMaterial": ["hull material", "hull"],
                 "ServiceStartingDate": ["date of entry into service", "entry into service date", "construction year"],
-                "MMSI": ["mmsi"],
             }
 
             rename_dict = {}
@@ -341,8 +346,8 @@ class Command(BaseCommand):
                     df[col] = df[col].map({"Y": "true", "N": "false", "y": "true", "n": "false"})
 
             # --- FIX: Normalització per comparació ---
-            # Convertim NaT i NaN a None perquè coincideixi amb el que retorna la BBDD (None)
-            df = df.replace({pd.NaT: None})
+            # Convertim NaT, cadenes buides i NaN a None perquè coincideixi amb BBDD
+            df = df.replace({pd.NaT: None, "": None, "nan": None})
             df = df.where(pd.notnull(df), None)
 
             # Assegurar que la connexió a la BBDD està viva després de l'espera de Selenium
@@ -429,7 +434,7 @@ class Command(BaseCommand):
             logger.error(f"Error processant CSV: {str(e)}")
             raise e
 
-    def load_to_staging(self, df):
+    def load_to_staging(self, df, debug_mode=False):
         logger.info("Inserint a vessel_auto_download...")
 
         # Assegurar connexió viva abans d'inserir
@@ -439,6 +444,8 @@ class Command(BaseCommand):
             # Ampliar columna BasePortName a 50 caràcters si cal
             try:
                 cursor.execute('ALTER TABLE public.vessel_auto_download ALTER COLUMN "BasePortName" TYPE varchar(50)')
+                cursor.execute('ALTER TABLE public.vessel_auto_download ALTER COLUMN "BasePortCode" TYPE varchar(50)')
+                cursor.execute('ALTER TABLE public.vessel_auto_download ALTER COLUMN "BasePortId" TYPE integer')
             except Exception as e:
                 msg = f"No s'ha pogut alterar la taula (potser ja està modificada): {e}"
                 logger.warning(msg)
@@ -472,21 +479,44 @@ class Command(BaseCommand):
             "AIS",
             "HullMaterial",
             "ServiceStartingDate",
-            "MMSI",
         ]
         cols_to_insert = [c for c in df.columns if c in valid_columns]
 
         if not cols_to_insert:
             return
 
+        # Neteja final de NaNs que hagin pogut aparèixer en l'expansió de noves columnes (ex: BasePortId)
+        df_insert = df[cols_to_insert].copy()
+        # Converteix a object per evitar que pandas re-converteixi els None a NaN a les columnes numèriques
+        df_insert = df_insert.astype(object).where(pd.notnull(df_insert), None)
+
         columns_sql = ", ".join([f'"{c}"' for c in cols_to_insert])
         placeholders = ", ".join(["%s"] * len(cols_to_insert))
         query = f"INSERT INTO public.vessel_auto_download ({columns_sql}) VALUES ({placeholders})"  # nosec
 
-        data = [tuple(x) for x in df[cols_to_insert].to_numpy()]
+        data = [tuple(x) for x in df_insert.to_numpy()]
 
         with connection.cursor() as cursor:
-            cursor.executemany(query, data)
+            if not debug_mode:
+                cursor.executemany(query, data)
+            else:
+                logger.warning("⚠️ Mode de debug activat: Inserint fila a fila. Aquest procés serà lent.")
+                for i, row_data in enumerate(data):
+                    try:
+                        cursor.execute(query, row_data)
+                    except Exception as e:
+                        problematic_row_df = df.iloc[i]
+                        inserted_row_df = df_insert.iloc[i]
+                        logger.error(
+                            f"❌ Error inserint la fila {i} del DataFrame filtrat "
+                            f"(index original: {problematic_row_df.name})"
+                        )
+                        logger.error(f"   - Error: {e}")
+                        logger.error("   - Dades de la fila problemàtica:")
+                        for col in cols_to_insert:
+                            val = inserted_row_df.get(col)
+                            logger.error(f"     - {col}: {val} (Tipus: {type(val)})")
+                        raise e
         logger.info("✅ Càrrega a staging completada.")
 
 

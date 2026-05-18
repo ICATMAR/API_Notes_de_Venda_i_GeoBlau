@@ -14,17 +14,17 @@ logger = logging.getLogger("sales_notes")
 @shared_task
 def check_daily_activity_and_report_anomalies():
     """
-    Verifica l'activitat diària. Si no hi ha hagut enviaments en 24h,
+    Verifica l'activitat diària. Si no hi ha hagut enviaments en 72h,
     o si hi ha enviaments encallats (no processats pel trigger),
     envia un correu d'alerta als administradors definits a settings.py.
     """
 
     from sales_notes.models import Envio
 
-    one_day_ago = timezone.now() - timedelta(days=1)
+    three_days_ago = timezone.now() - timedelta(days=3)
 
-    envios_count = Envio.objects.filter(fecha_recepcion__gte=one_day_ago).count()
-    failed_envios = Envio.objects.filter(fecha_recepcion__gte=one_day_ago, procesado_en_db=False).count()
+    envios_count = Envio.objects.filter(fecha_recepcion__gte=three_days_ago).count()
+    failed_envios = Envio.objects.filter(fecha_recepcion__gte=three_days_ago, procesado_en_db=False).count()
 
     alerts = []
 
@@ -80,6 +80,6 @@ def check_daily_activity_and_report_anomalies():
 
         return f"Alertes enviades: {len(alerts)} incidències detectades."
     else:
-        log_message = f"Activitat diària normal: {envios_count} enviaments rebuts i processats en les últimes 24h."
+        log_message = f"Activitat diària normal: {envios_count} enviaments rebuts i processats en les últimes 72h."
         logger.info(log_message)
         return log_message
