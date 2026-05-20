@@ -31,10 +31,10 @@ def check_daily_activity_and_report_anomalies():
     if envios_count == 0:
         alerts.append(
             {
-                "subject": "[VCPE API ALERTA] Cap enviament rebut en les últimes 24 hores",
+                "subject": "[VCPE API ALERTA] Cap enviament rebut en les últimes 72 hores",
                 "message": (
                     "El sistema de monitorització automàtica ha detectat que no s'ha rebut cap enviament "
-                    "de notes de venda en les últimes 24 hores.\n\n"
+                    "de notes de venda en les últimes 72 hores.\n\n"
                     "Això podria indicar un problema amb el client d'enviament (DARP) o la connectivitat.\n\n"
                     "Si us plau, verifiqueu l'estat del servei."
                 ),
@@ -45,7 +45,7 @@ def check_daily_activity_and_report_anomalies():
             {
                 "subject": f"[VCPE API ALERTA] {failed_envios} enviaments NO processats",
                 "message": (
-                    f"El sistema ha detectat que hi ha {failed_envios} enviament(s) rebut(s) en les últimes 24 hores "
+                    f"El sistema ha detectat que hi ha {failed_envios} enviament(s) rebut(s) en les últimes 72 hores "
                     "que no s'han processat correctament a la base de dades (procesado_en_db=False).\n\n"
                     "Això indica que el trigger de PostgreSQL pot haver fallat o trobat dades anòmales.\n"
                     "Consulteu la taula 'db_trigger_log' de la base de dades per a més detalls."
