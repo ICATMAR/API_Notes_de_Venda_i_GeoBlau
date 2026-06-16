@@ -41,6 +41,14 @@ class VcpeAutoDownload(models.Model):
     metiercat = models.CharField(db_column="MetierCAT", max_length=30, blank=True, null=True)
     metierdcf = models.CharField(db_column="MetierDCF", max_length=10, blank=True, null=True)
     trackcode = models.CharField(db_column="TrackCode", blank=True, null=True)
+    envioid = models.ForeignKey(
+        "sales_notes.Envio",
+        models.DO_NOTHING,
+        db_column="EnvioId",
+        blank=True,
+        null=True,
+        related_name="sales_notes_processed",
+    )
 
     class Meta:
         managed = False
