@@ -7,6 +7,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+# pyrefly: ignore [missing-import]
 import environ
 
 # Inicialització d'environ per gestionar variables d'entorn
@@ -130,6 +131,11 @@ CACHES = {
         "LOCATION": env("REDIS_URL", default="redis://redis:6379/0"),
     }
 }
+
+# Silence false positive django_ratelimit warning for Django's native RedisCache
+SILENCED_SYSTEM_CHECKS = [
+    "django_ratelimit.W001",
+]
 
 # Password hashing amb PBKDF2 (Estàndard Django)
 PASSWORD_HASHERS = [
