@@ -52,7 +52,7 @@ class VcpeAutoDownload(models.Model):
 
     class Meta:
         managed = False
-        db_table = "vcpe_auto_download"
+        db_table = 'landings"."vcpe_auto_download'
         verbose_name = "VCPE Auto Download"
 
     def __str__(self):
